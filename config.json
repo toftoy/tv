@@ -1,0 +1,16 @@
+{
+  "filter": {"min_size": 32, "max_size": 58, "min_offers": 1},
+  "site_url": "https://toftoy.github.io/tv/",
+  "watch": [
+    {"contains": "OLED B6", "sizes": [55, 48], "on_low60": true},
+    {"contains": "OLED C6", "sizes": [55, 48, 42], "on_low60": true},
+    {"contains": "OLED C5", "sizes": [55, 48, 42], "on_low60": true},
+    {"contains": "S90", "sizes": [55, 48], "on_low60": true},
+    {"contains": "S85", "sizes": [55], "on_low60": true},
+    {"contains": "TCL C7", "sizes": [55, 50], "on_low60": true},
+    {"contains": "TCL C6", "sizes": [55, 50], "on_low60": true},
+    {"contains": "Hisense U7", "sizes": [55, 50], "on_low60": true},
+    {"contains": "Bravia 8", "sizes": [55], "on_low60": true},
+    {"contains": "OLED81", "sizes": [55, 48, 42], "on_low60": true}
+  ]
+}

@@ -1,0 +1,67 @@
+name: Oppdater TV-priser
+
+on:
+  schedule:
+    - cron: "17 5 * * *"   # 06:17 norsk tid
+    - cron: "17 15 * * *"  # 16:17 norsk tid
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths: ["site/**", "config.json"]
+
+permissions:
+  contents: write
+  issues: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Sørg for etiketten «prisvarsel»
+        if: github.event_name != 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh label create prisvarsel --color d93f0b --description "Automatisk prisvarsel" 2>/dev/null || true
+      - name: Hent priser og lag varsler
+        if: github.event_name != 'push'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python scraper/run.py
+      - name: Lagre data
+        if: github.event_name != 'push'
+        run: |
+          git config user.name "tv-prisvakt"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          git diff --cached --quiet || git commit -m "Priser $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push
+      - name: Bygg nettside
+        run: |
+          mkdir -p _site
+          cp -r site/* _site/
+          cp -r data _site/data
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: update
+    runs-on: ubuntu-latest
+    continue-on-error: true   # feiler bare til GitHub Pages er slått på (Settings → Pages → GitHub Actions)
+    environment:
+      name: github-pages
+      url: ${{ steps.d.outputs.page_url }}
+    steps:
+      - id: d
+        uses: actions/deploy-pages@v4
