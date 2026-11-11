@@ -128,6 +128,8 @@ def main():
         merge_shops(products, history)
     for p in products:
         p["quality"], p["quality_basis"] = quality.score(p)
+    save("quality_tiers.json", {"tiers": [{"pattern": pt, "score": sc, "label": lb} for pt, sc, lb in quality.TIERS],
+                                "adjust": quality.ADJUST})
     save("history.json", history)
     save("products.json", {"updated": NOW.isoformat(timespec="seconds"), "products": products})
     print(f"Lagret {len(products)} produkter", flush=True)

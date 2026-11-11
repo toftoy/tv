@@ -73,6 +73,15 @@ TIERS = [
 ]
 
 
+ADJUST = [
+    "42\" OLED: −4 (mangler lysforsterker, svakere lysstyrke enn 48\"+)",
+    "50\" LCD: −4 (bruker ofte svakere panel enn 55\" i samme serie)",
+    "43\" og mindre LCD: −6 (enklere panel, færre dimmesoner, ofte 60 Hz)",
+    "Hotell-/bedrifts-TV: −6 (forenklet programvare og bilde)",
+    "Ukjent serie: grunnverdi etter paneltype (OLED 72, Mini-LED 58, QLED 42, LED 30), +6 for 100 Hz+, −8 for HD/Full HD",
+]
+
+
 def _fallback(p):
     s = ((p.get("panel") or "") + " " + p["name"]).upper()
     if "OLED" in s and "QNED" not in s:

@@ -42,7 +42,20 @@ s{color:var(--muted)}
 svg.chart{width:100%;height:220px;background:var(--card);border:1px solid var(--line);border-radius:10px}
 .legend span{margin-right:12px;font-size:12px}
 .guide{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 20px;max-width:900px}
-.guide h2{font-size:18px;margin-top:22px}
+.guide h2{font-size:18px;margin-top:26px}
+.guide h3{font-size:15px;margin:18px 0 6px}
+.guide{max-width:980px;line-height:1.55}
+.picks{display:grid;gap:12px;margin:10px 0 4px}
+.pick{display:grid;grid-template-columns:120px 1fr;gap:14px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px}
+.pick>div{min-width:0}
+.pick img{width:120px;aspect-ratio:4/3;object-fit:contain;background:#fff;border-radius:8px}
+.pick h4{margin:0 0 4px;font-size:15px}
+.pick .live{display:flex;flex-wrap:wrap;gap:6px 14px;margin:6px 0;font-variant-numeric:tabular-nums}
+.pick .links{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:13px}
+.qt{border-collapse:collapse;width:100%;min-width:0;font-size:13px}
+.qt td,.qt th{padding:4px 8px;border-bottom:1px solid var(--line)}
+.qtwrap{max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+@media (max-width:600px){.pick{grid-template-columns:80px 1fr}.pick img{width:80px}}
 a{color:var(--accent)}
 .small{font-size:12px}
 td.imgc{width:64px;padding:6px}
@@ -290,11 +303,38 @@ function drawPlots(gs){
   s2+=off.map((o,i)=>{const x=X2(o.x).toFixed(1),y=Y2(o.y).toFixed(1);return `<circle cx="${x}" cy="${y}" r="5" fill="var(--s1)" stroke="var(--card)" stroke-width="2"/><circle data-i="${i}" cx="${x}" cy="${y}" r="11" fill="transparent" style="cursor:pointer"/>`}).join("");
   el2.innerHTML=s2+"</svg>";bindPts(el2.querySelector("svg"),map2);
 }
+
+// ---------- Kjøpeguide med levende data ----------
+function pickHTML(el){
+  const m=(el.dataset.match||"").toLowerCase(),sizes=(el.dataset.sizes||"").split(",").filter(Boolean).map(Number);
+  const gs=flag(groups()).filter(g=>(g.label+" "+g.items.map(p=>p.name).join(" ")).toLowerCase().includes(m)&&(!sizes.length||sizes.includes(Math.round(g.size))));
+  gs.sort((a,b)=>(b.year-a.year)||((a.best??1e9)-(b.best??1e9)));
+  const head=`<h4>${esc(el.dataset.title||el.dataset.match)}</h4><div>${el.innerHTML}</div>`;
+  const rev=(el.dataset.reviews||"").split("|").filter(Boolean).map(x=>{const [t,u]=x.split("@@");return `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a>`}).join("");
+  if(!gs.length)return `<div class="pick"><div></div><div>${head}<div class="muted small">Ikke funnet i dagens data hos Elkjøp/Power/Komplett.</div><div class="links">${rev}</div></div></div>`;
+  const g=gs[0];
+  const shops=SHOPS.filter(s=>g[s]).map(s=>{const o=g[s],out=/OutOfStock/.test(o.stock||"");return `<span>${s}: ${out?`<s>${fmt(o.price)}</s> <span class="chip small">utsolgt</span>`:`<b>${fmt(o.price)}</b>`}</span>`}).join("");
+  const urls=[];for(const p of g.items)for(const s of SHOPS){const o=p.shops[s];if(o&&o.url&&!urls.some(u=>u[0]===s))urls.push([s,o.url])}
+  const pj=g.items.find(p=>typeof p.id==="number");
+  return `<div class="pick"><img loading="lazy" alt="" src="${g.img_url||IMG(g.img)}" onerror="this.style.visibility='hidden'"><div>${head}
+    <div class="live">${shops}<span class="muted">Lav 60 d: ${g.low60?fmt(g.low60.price):"–"}</span>${verdict(g)}<span class="q" title="${esc(g.qbasis)}">${g.quality}</span></div>
+    <div class="links"><a href="#" data-goto="${esc(g.key)}">Vis i tabellen</a>${pj?`<a href="${pj.url}" target="_blank" rel="noopener">Prisjakt</a>`:""}${urls.map(([s,u])=>`<a href="${esc(u)}" target="_blank" rel="noopener">Kjøp hos ${s}</a>`).join("")}${rev}</div>
+    <div class="muted small">${esc(g.label)}${g.items.length>1?` · ${g.items.length} varianter`:""}${gs.length>1?` · også: ${gs.slice(1,3).map(x=>esc(x.label)).join(", ")}`:""}</div></div></div>`;
+}
+let QT=null;
+async function renderGuide(){
+  const root=document.getElementById("guide");if(!root||!DATA.length)return;
+  root.querySelectorAll(".pick-src").forEach(el=>{el.hidden=true;let out=el.nextElementSibling;if(!out||!out.classList.contains("pick-out")){out=document.createElement("div");out.className="pick-out";el.after(out)}out.innerHTML=pickHTML(el)});
+  root.querySelectorAll("[data-goto]").forEach(a=>a.onclick=e=>{e.preventDefault();gotoRow(a.dataset.goto)});
+  const qt=root.querySelector("#qtable");
+  if(qt){if(!QT){try{QT=await (await fetch("data/quality_tiers.json")).json()}catch(e){QT={tiers:[],adjust:[]}}}
+    qt.innerHTML=`<div class="qtwrap"><table class="qt"><thead><tr><th>Serie</th><th class="num">Poeng (55")</th></tr></thead><tbody>${QT.tiers.map(t=>`<tr><td>${esc(t.label)}</td><td class="num">${t.score}</td></tr>`).join("")}</tbody></table></div><h3>Justeringer</h3><ul>${QT.adjust.map(a=>`<li>${esc(a)}</li>`).join("")}</ul>`}
+}
 async function loadHist(){try{HIST=await (await fetch("data/history.json")).json()}catch(e){HIST={}}render()}
-document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll("nav.tabs button").forEach(x=>x.classList.toggle("on",x===b));for(const t of["list","plots","guide","finn","help"])document.getElementById("tab-"+t).hidden=t!==b.dataset.tab;document.getElementById("filters").hidden=!["list","plots"].includes(b.dataset.tab);if(b.dataset.tab==="plots")render()});
+document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll("nav.tabs button").forEach(x=>x.classList.toggle("on",x===b));for(const t of["list","plots","guide","finn","help"])document.getElementById("tab-"+t).hidden=t!==b.dataset.tab;document.getElementById("filters").hidden=!["list","plots"].includes(b.dataset.tab);if(b.dataset.tab==="plots")render();if(b.dataset.tab==="guide")renderGuide()});
 (async()=>{
   const d=await (await fetch("data/products.json")).json();DATA=d.products;window.UPDATED=d.updated;for(const p of DATA)if(p.img_url)IMGURL[p.id]=p.img_url;build();render();
-  try{document.getElementById("guide").innerHTML=await (await fetch("guide.html")).text()}catch(e){}
+  try{document.getElementById("guide").innerHTML=await (await fetch("guide.html")).text();renderGuide()}catch(e){}
 })();
 </script>
 </body>
