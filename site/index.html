@@ -8,6 +8,7 @@
 :root{--s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--bg:#f6f7f9;--card:#fff;--fg:#1a1d21;--muted:#6b7280;--line:#e5e7eb;--accent:#2563eb;--good:#15803d;--goodbg:#dcfce7;--warn:#a16207;--warnbg:#fef9c3;--bad:#b91c1c;--badbg:#fee2e2;--chip:#eef2ff}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f1115;--card:#171a20;--fg:#e8eaed;--muted:#9aa3af;--line:#2a2f37;--accent:#60a5fa;--good:#4ade80;--goodbg:#13361f;--warn:#facc15;--warnbg:#3a3112;--bad:#f87171;--badbg:#3b1616;--chip:#1e2533;--s1:#3987e5;--s2:#d95926;--s3:#199e70}}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
 header{padding:16px;max-width:1300px;margin:auto}
 h1{font-size:22px;margin:0 0 4px}
@@ -110,7 +111,7 @@ td,th{font-variant-numeric:tabular-nums}
 <section id="tab-plots" hidden><div class="plots">
 <div class="plot"><h2>Pris mot kvalitet</h2><div class="muted small">Dagens laveste pris hos Elkjøp/Power/Komplett (logaritmisk akse) mot kvalitetsscore. Linjen viser «mest for pengene»: ingen annen TV er både billigere og bedre. Klikk et punkt for å se modellen i tabellen.</div><div class="legend" id="lg1"></div><div id="p1"></div></div>
 <div class="plot"><h2>Ekte rabatt?</h2><div class="muted small">Butikkens oppgitte rabatt (fra førpris) mot hvor dagens pris ligger sammenlignet med laveste pris siste 60 dager. Punkter over midtlinjen er dyrere enn det TV-en har kostet før – rabatten er regnet fra en oppblåst førpris.</div><div id="p2"></div></div>
-<p class="muted small">Kvalitetsscoren (0–100) er et skjønn basert på tester (RTINGS, What Hi-Fi, Tek.no, Lyd &amp; Bilde m.fl.) per modellserie, justert for størrelse. Den er ment som grov sortering – les tester av akkurat modellen før du kjøper. Grunnlaget vises når du holder over et punkt.</p>
+<p class="muted small">Kvalitetsscoren (0–100) er et skjønn basert på tester (RTINGS, What Hi-Fi, Tek.no, Lyd &amp; Bilde m.fl.) per modellserie, justert for størrelse. Den er ment som grov sortering – les tester av akkurat modellen før du kjøper. Grunnlaget vises når du holder over et punkt. <a href="#" data-qlink>Les hvordan scoren regnes ut</a>.</p>
 </div></section>
 <section id="tab-guide" hidden><div class="guide" id="guide"></div></section>
 <section id="tab-finn" hidden><div class="guide">
@@ -135,6 +136,7 @@ td,th{font-variant-numeric:tabular-nums}
 <li><b>Én rad = én TV-familie</b>: samme serie, størrelse og årsmodell. Butikkvarianter med litt ulik kode (f.eks. LG OLED55C54LA / C55LA / C56LA, TCL C69K = C6K = MQLED75K) er slått sammen. Klikk på raden for å se hver butikks produktnavn og varenummer.</li>
 <li><b>Butikkprisene</b> er dagens pris hos Elkjøp, Power og Komplett. <s>Overstrøket</s> = butikkens oppgitte førpris. «M» = medlemspris (gratis kundeklubb).</li>
 <li><b>Nå vs 60 d</b>: <span class="badge b-good">Lavpris</span> dagens beste pris hos de tre er lik/under laveste pris i hele markedet siste 60 dager. <span class="badge b-warn">+x %</span> under 10 % over. <span class="badge b-bad">+x %</span> mer enn 10 % over – da er «tilbudet» trolig ikke reelt.</li>
+<li><b>Kvalitet</b> er en skjønnsmessig score 0–100 per modellserie, justert for størrelse. <a href="#" data-qlink>Se forklaring og hele tabellen</a>.</li>
 <li><b>Varsler</b> kommer på e-post (via GitHub-issue) når en TV på overvåkingslisten (<code>config.json</code>) når laveste 60-dagerspris eller din maksgrense.</li>
 </ul>
 <p class="muted">Data: offentlige produktsider på prisjakt.no, oppdatert to ganger daglig.</p>
@@ -330,6 +332,7 @@ async function renderGuide(){
   if(qt){if(!QT){try{QT=await (await fetch("data/quality_tiers.json")).json()}catch(e){QT={tiers:[],adjust:[]}}}
     qt.innerHTML=`<div class="qtwrap"><table class="qt"><thead><tr><th>Serie</th><th class="num">Poeng (55")</th></tr></thead><tbody>${QT.tiers.map(t=>`<tr><td>${esc(t.label)}</td><td class="num">${t.score}</td></tr>`).join("")}</tbody></table></div><h3>Justeringer</h3><ul>${QT.adjust.map(a=>`<li>${esc(a)}</li>`).join("")}</ul>`}
 }
+document.addEventListener("click",e=>{const a=e.target.closest("[data-qlink]");if(!a)return;e.preventDefault();document.querySelector("[data-tab=guide]").click();setTimeout(()=>{const q=document.getElementById("kvalitet");q&&q.scrollIntoView()},300)});
 async function loadHist(){try{HIST=await (await fetch("data/history.json")).json()}catch(e){HIST={}}render()}
 document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll("nav.tabs button").forEach(x=>x.classList.toggle("on",x===b));for(const t of["list","plots","guide","finn","help"])document.getElementById("tab-"+t).hidden=t!==b.dataset.tab;document.getElementById("filters").hidden=!["list","plots"].includes(b.dataset.tab);if(b.dataset.tab==="plots")render();if(b.dataset.tab==="guide")renderGuide()});
 (async()=>{
