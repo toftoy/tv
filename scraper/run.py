@@ -131,6 +131,18 @@ def main():
         v = p.get("vesa")
         if v and (p.get("size") or 99) <= 50 and max(int(x) for x in v.split("x")) > 400:
             p["vesa"], p["vesa_note"] = None, f"Prisjakt oppgir {v}, trolig feil"
+    # Manuelt undersøkte VESA-mål (vesa.json): overstyrer manglende/feil verdier
+    vp = os.path.join(ROOT, "vesa.json")
+    manual = json.load(open(vp, encoding="utf-8")) if os.path.exists(vp) else []
+    by_fam = {m["family"].upper(): m for m in manual if m.get("vesa")}
+    by_code = {_norm(m["code"]): m for m in manual if m.get("vesa") and len(_norm(m.get("code"))) >= 6}
+    for p in products:
+        m = by_fam.get(p["family"])
+        if not m:
+            codes = [_norm(p["name"].rsplit(" - ", 1)[-1])] + [_norm(o.get("title")) for o in p["shops"].values()]
+            m = next((by_code[c] for c in by_code if any(x.startswith(c) or (len(x) >= 6 and c.startswith(x)) for x in codes if x)), None)
+        if m and (not p.get("vesa") or p.get("vesa_note")):
+            p["vesa"], p["vesa_note"] = m["vesa"], f"undersøkt: {m.get('source', '')}"
     fam_vesa = {}
     for p in products:
         if p.get("vesa"):
