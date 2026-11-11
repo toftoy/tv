@@ -1,6 +1,6 @@
 # TV-prisvakt
 
-Følger TV-priser hos **Elkjøp, Power og Komplett** (32–58") via offentlige produktsider på Prisjakt.no,
+Følger TV-priser hos **Elkjøp, Power, Komplett, NetOnNet, Multicom og Samsung** (32–58") via offentlige produktsider på Prisjakt.no,
 og viser laveste pris siste 30/60/90/365 dager – slik at «Black Week-tilbud» med oppblåste førpriser avsløres.
 
 - **Dashboard:** https://toftoy.github.io/tv/

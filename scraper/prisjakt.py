@@ -10,7 +10,7 @@ import urllib.request
 BASE = "https://www.prisjakt.no"
 UA = ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) "
       "Chrome/130.0 Safari/537.36 tv-prisvakt (privat bruk)")
-SHOPS = {324: "Elkjøp", 30366: "Power", 9782: "Komplett"}
+SHOPS = {324: "Elkjøp", 30366: "Power", 9782: "Komplett", 10626: "NetOnNet", 10982: "Multicom", 29990: "Samsung"}
 DELAY = 1.0
 _last = 0.0
 
