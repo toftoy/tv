@@ -12,6 +12,7 @@ import urllib.request
 sys.path.insert(0, os.path.dirname(__file__))
 import families  # noqa: E402
 import prisjakt  # noqa: E402
+import quality  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
@@ -121,6 +122,8 @@ def main():
             "url": f"https://www.prisjakt.no/product.php?p={r['id']}",
         })
 
+    for p in products:
+        p["quality"], p["quality_basis"] = quality.score(p)
     save("history.json", history)
     save("products.json", {"updated": NOW.isoformat(timespec="seconds"), "products": products})
     print(f"Lagret {len(products)} produkter", flush=True)

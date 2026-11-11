@@ -126,6 +126,8 @@ def _name_family(brand, name, size):
     rest = name[len(brand):].strip() if name.lower().startswith(brand.lower()) else name
     m = re.match(r"(.*?)\s*\d{2,3}(?:[.,]\d)?\s*[\"”'″]", rest)
     series = re.sub(r"\s+", " ", (m.group(1) if m else "").strip()) or "?"
+    if brand.upper() == "LG" and re.fullmatch(r"[ABCGMZ]\d[A-Z]?", series):
+        series = "OLED " + series  # «LG C5» -> «LG OLED C5», samme nøkkel som kodebasert
     sz = int(round(size)) if size else ""
     return f"{brand} {series} {sz}\"" + (f" {year}" if year else "")
 

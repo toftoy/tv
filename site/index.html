@@ -5,14 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TV-prisvakt</title>
 <style>
-:root{--bg:#f6f7f9;--card:#fff;--fg:#1a1d21;--muted:#6b7280;--line:#e5e7eb;--accent:#2563eb;--good:#15803d;--goodbg:#dcfce7;--warn:#a16207;--warnbg:#fef9c3;--bad:#b91c1c;--badbg:#fee2e2;--chip:#eef2ff}
-@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f1115;--card:#171a20;--fg:#e8eaed;--muted:#9aa3af;--line:#2a2f37;--accent:#60a5fa;--good:#4ade80;--goodbg:#13361f;--warn:#facc15;--warnbg:#3a3112;--bad:#f87171;--badbg:#3b1616;--chip:#1e2533}}
+:root{--s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--bg:#f6f7f9;--card:#fff;--fg:#1a1d21;--muted:#6b7280;--line:#e5e7eb;--accent:#2563eb;--good:#15803d;--goodbg:#dcfce7;--warn:#a16207;--warnbg:#fef9c3;--bad:#b91c1c;--badbg:#fee2e2;--chip:#eef2ff}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f1115;--card:#171a20;--fg:#e8eaed;--muted:#9aa3af;--line:#2a2f37;--accent:#60a5fa;--good:#4ade80;--goodbg:#13361f;--warn:#facc15;--warnbg:#3a3112;--bad:#f87171;--badbg:#3b1616;--chip:#1e2533;--s1:#3987e5;--s2:#d95926;--s3:#199e70}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
 header{padding:16px;max-width:1300px;margin:auto}
 h1{font-size:22px;margin:0 0 4px}
 .muted{color:var(--muted)}
-nav.tabs{display:flex;gap:6px;margin-top:12px}
+nav.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+nav.tabs button{white-space:nowrap}
 nav.tabs button{border:1px solid var(--line);background:var(--card);color:var(--fg);padding:6px 12px;border-radius:999px;cursor:pointer}
 nav.tabs button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
 main{max-width:1300px;margin:auto;padding:0 16px 40px}
@@ -44,6 +45,21 @@ svg.chart{width:100%;height:220px;background:var(--card);border:1px solid var(--
 .guide h2{font-size:18px;margin-top:22px}
 a{color:var(--accent)}
 .small{font-size:12px}
+td.imgc{width:64px;padding:6px}
+.thumb{width:56px;height:42px;object-fit:contain;background:#fff;border-radius:6px;display:block}
+.bigimg{width:220px;max-width:100%;aspect-ratio:4/3;object-fit:contain;background:#fff;border-radius:10px;border:1px solid var(--line)}
+.v{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
+.v>div{min-width:0}
+@media (max-width:600px){.bigimg{width:140px}}
+.q{display:inline-block;min-width:34px;text-align:center;padding:2px 6px;border-radius:6px;background:var(--chip);font-weight:600;font-variant-numeric:tabular-nums}
+.plots{display:grid;gap:16px}
+.plot{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;min-width:0}
+.plot h2{font-size:16px;margin:0 0 2px}
+.plot svg{width:100%;height:auto;display:block;overflow:visible}
+.plot .legend{display:flex;flex-wrap:wrap;gap:4px 14px;margin:6px 0}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+#tip{position:fixed;pointer-events:none;z-index:50;background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12px;box-shadow:0 4px 16px rgba(0,0,0,.18);max-width:280px}
+td,th{font-variant-numeric:tabular-nums}
 @media (max-width:600px){header,main{padding-left:16px;padding-right:16px}}
 </style>
 </head>
@@ -51,11 +67,10 @@ a{color:var(--accent)}
 <header>
   <h1>TV-prisvakt</h1>
   <div class="muted" id="meta">Laster …</div>
-  <nav class="tabs"><button data-tab="list" class="on">Priser</button><button data-tab="guide">Kjøpeguide</button><button data-tab="finn">Brukt (FINN)</button><button data-tab="help">Slik leser du tabellen</button></nav>
+  <nav class="tabs"><button data-tab="list" class="on">Priser</button><button data-tab="plots">Plott</button><button data-tab="guide">Kjøpeguide</button><button data-tab="finn">Brukt (FINN)</button><button data-tab="help">Slik leser du tabellen</button></nav>
 </header>
 <main>
-<section id="tab-list">
-  <div class="filters">
+  <div class="filters" id="filters">
     <div class="group"><b>Størrelse</b><span id="f-size"></span></div>
     <div class="group"><b>Butikk</b><span id="f-shop"></span></div>
     <div class="group"><b>Panel</b><select id="f-panel"><option value="">Alle</option><option>OLED</option><option>Mini-LED</option><option>QLED</option><option>LED</option></select></div>
@@ -64,9 +79,10 @@ a{color:var(--accent)}
     <div class="group"><label><input type="checkbox" id="f-100"> Bare 100 Hz+</label></div>
     <div class="group"><input type="search" id="f-q" placeholder="Søk modell, f.eks. C5, B6, S90"></div>
   </div>
+<section id="tab-list">
   <div class="tablewrap"><table>
     <thead><tr>
-      <th data-k="family">Modell</th><th data-k="size" class="num">Tommer</th><th data-k="panel">Panel</th>
+      <th></th><th data-k="family">Modell</th><th data-k="quality" class="num" title="Kvalitetsscore 0–100 (skjønn basert på tester)">Kvalitet</th><th data-k="size" class="num">Tommer</th><th data-k="panel">Panel</th>
       <th data-k="Elkjøp" class="num">Elkjøp</th><th data-k="Power" class="num">Power</th><th data-k="Komplett" class="num">Komplett</th>
       <th data-k="low30" class="num" title="Laveste pris før i dag">Lav 30 d</th><th data-k="low60" class="num">Lav 60 d</th><th data-k="low90" class="num">Lav 90 d</th><th data-k="low365" class="num">Lav 365 d</th>
       <th data-k="verdict" class="num">Nå vs 60 d</th>
@@ -75,6 +91,11 @@ a{color:var(--accent)}
   </table></div>
   <p class="muted small">«Lav x d» = laveste pris <em>før i dag</em> hos <em>noen</em> butikk på Prisjakt (også små nettbutikker/markedsplasser – butikken vises når du holder over). Egen historikk per butikk bygges opp fra 11.11.2026; 365-dagerstallet blir fullstendig etter hvert.</p>
 </section>
+<section id="tab-plots" hidden><div class="plots">
+<div class="plot"><h2>Pris mot kvalitet</h2><div class="muted small">Dagens laveste pris hos Elkjøp/Power/Komplett (logaritmisk akse) mot kvalitetsscore. Linjen viser «mest for pengene»: ingen annen TV er både billigere og bedre. Klikk et punkt for å se modellen i tabellen.</div><div class="legend" id="lg1"></div><div id="p1"></div></div>
+<div class="plot"><h2>Ekte rabatt?</h2><div class="muted small">Butikkens oppgitte rabatt (fra førpris) mot hvor dagens pris ligger sammenlignet med laveste pris siste 60 dager. Punkter over midtlinjen er dyrere enn det TV-en har kostet før – rabatten er regnet fra en oppblåst førpris.</div><div id="p2"></div></div>
+<p class="muted small">Kvalitetsscoren (0–100) er et skjønn basert på tester (RTINGS, What Hi-Fi, Tek.no, Lyd &amp; Bilde m.fl.) per modellserie, justert for størrelse. Den er ment som grov sortering – les tester av akkurat modellen før du kjøper. Grunnlaget vises når du holder over et punkt.</p>
+</div></section>
 <section id="tab-guide" hidden><div class="guide" id="guide"></div></section>
 <section id="tab-finn" hidden><div class="guide">
 <h2>Nyere brukt premium-TV på FINN</h2>
@@ -103,8 +124,10 @@ a{color:var(--accent)}
 <p class="muted">Data: offentlige produktsider på prisjakt.no, oppdatert to ganger daglig.</p>
 </div></section>
 </main>
+<div id="tip" hidden></div>
 <script>
 const SHOPS=["Elkjøp","Power","Komplett"];
+const IMG=(id,big)=>window.IMG_BASE?`${window.IMG_BASE}/${id}.jpg`:`https://pricespy-75b8.kxcdn.com/product/standard/${big?800:140}/${id}.jpg`;
 const fmt=n=>n==null?"–":Math.round(n).toLocaleString("nb-NO")+"";
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 let DATA=[],HIST=null,sortK="verdict",sortDir=1,open=new Set();
@@ -120,6 +143,8 @@ function groups(){
     const mn=(f)=>{let b=null;for(const p of ps){const v=p[f];if(v&&(!b||v.price<b.price))b=v}return b};
     g.low30=mn("low30");g.low60=mn("low60");g.low90=mn("low90");g.low365=mn("low365");
     const prices=SHOPS.map(s=>g[s]&&g[s].price).filter(x=>x!=null);g.best=prices.length?Math.min(...prices):null;
+    const qi=ps.reduce((a,p)=>(p.quality||0)>(a.quality||0)?p:a,ps[0]);g.quality=qi.quality;g.qbasis=qi.quality_basis;g.img=ps[0].id;
+    g.bestShop=SHOPS.filter(s=>g[s]).sort((a,b)=>g[a].price-g[b].price)[0];
     g.verdict=g.best!=null&&g.low60?(g.best-g.low60.price)/g.low60.price:9;
     return g})
 }
@@ -151,18 +176,19 @@ function render(){
     &&(!q||(g.label+" "+g.items.map(p=>p.name+" "+Object.values(p.shops).map(o=>o.title+" "+o.sku).join(" ")).join(" ")).toLowerCase().includes(q))
     &&st.shops.some(s=>g[s])&&(!st.low||g.verdict<=0.001)&&(!st.hz100||/1[0-9]{2}\s*Hz/.test(g.hz||"")));
   gs.sort((a,b)=>{const x=val(a,sortK),y=val(b,sortK);return (x<y?-1:x>y?1:0)*sortDir});
+  window.FILTERED=gs;if(!document.getElementById("tab-plots").hidden)drawPlots(gs);
   const tb=document.getElementById("tb");
-  tb.innerHTML=gs.map(g=>`<tr class="row" data-k="${esc(g.key)}"><td><b>${esc(g.label)}</b>${g.items.length>1?` <span class="chip">${g.items.length} varianter</span>`:""}<br><span class="muted small">${esc(g.hz||"")}</span></td>
-   <td class="num">${Math.round(g.size)}</td><td>${g.panel}</td>${SHOPS.map(s=>`<td class="num">${shopCell(g,s)}</td>`).join("")}
+  tb.innerHTML=gs.map(g=>`<tr class="row" data-k="${esc(g.key)}" id="r-${esc(g.key).replace(/[^A-Za-z0-9]/g,"_")}"><td class="imgc"><img class="thumb" loading="lazy" alt="" src="${IMG(g.img)}" onerror="this.style.visibility='hidden'"></td><td><b>${esc(g.label)}</b>${g.items.length>1?` <span class="chip">${g.items.length} varianter</span>`:""}<br><span class="muted small">${esc(g.hz||"")}</span></td>
+   <td class="num"><span class="q" title="${esc(g.qbasis)}">${g.quality??"–"}</span></td><td class="num">${Math.round(g.size)}</td><td>${g.panel}</td>${SHOPS.map(s=>`<td class="num">${shopCell(g,s)}</td>`).join("")}
    <td class="num">${lowCell(g.low30)}</td><td class="num">${lowCell(g.low60)}</td><td class="num">${lowCell(g.low90)}</td><td class="num">${lowCell(g.low365)}</td><td class="num">${verdict(g)}</td></tr>
-   ${open.has(g.key)?`<tr class="detail"><td colspan="11">${detail(g)}</td></tr>`:""}`).join("")||'<tr><td colspan="11" class="muted">Ingen treff med disse filtrene.</td></tr>';
+   ${open.has(g.key)?`<tr class="detail"><td colspan="13">${detail(g)}</td></tr>`:""}`).join("")||'<tr><td colspan="13" class="muted">Ingen treff med disse filtrene.</td></tr>';
   tb.querySelectorAll("tr.row").forEach(tr=>tr.onclick=()=>{const k=tr.dataset.k;open.has(k)?open.delete(k):open.add(k);if(!HIST)loadHist();render()});
   document.getElementById("meta").textContent=`${gs.length} TV-modeller vises · oppdatert ${new Date(window.UPDATED).toLocaleString("nb-NO")}`;
 }
 function detail(g){
-  const vs=g.items.map(p=>`<div class="v"><h4><a href="${p.url}" target="_blank" rel="noopener">${esc(p.name)}</a></h4>
+  const vs=g.items.map(p=>`<div class="v"><a href="${IMG(p.id,1)}" target="_blank" rel="noopener"><img class="bigimg" loading="lazy" alt="${esc(p.name)}" src="${IMG(p.id,1)}" onerror="this.style.display='none'"></a><div><h4><a href="${p.url}" target="_blank" rel="noopener">${esc(p.name)}</a></h4>
     ${SHOPS.filter(s=>p.shops[s]).map(s=>{const o=p.shops[s];return `<div><b>${s}</b>: ${fmt(o.price)} kr${o.member?" (medlem)":""}${o.before?` <s>${fmt(o.before)}</s>`:""}<br><span class="muted small">${esc(o.title)} · varenr ${esc(o.sku)}</span></div>`}).join("")}
-    <div class="muted small">Laveste marked: 60 d ${fmt(p.low60&&p.low60.price)} · 90 d ${fmt(p.low90&&p.low90.price)} · data fra ${esc(p.history_since)}</div></div>`).join("");
+    <div class="muted small">Laveste marked: 60 d ${fmt(p.low60&&p.low60.price)} · 90 d ${fmt(p.low90&&p.low90.price)} · data fra ${esc(p.history_since)}</div><div class="muted small">Kvalitet ${p.quality} – ${esc(p.quality_basis)}</div></div></div>`).join("");
   return `<div class="variants">${vs}</div>${HIST?chart(g):'<p class="muted">Laster prisgraf …</p>'}`;
 }
 function chart(g){
@@ -191,8 +217,68 @@ const FINN=[["LG OLED C4 55","OLED55C4"],["LG OLED C3 55","OLED55C3"],["LG OLED 
 ["Samsung S90D 55","S90D 55"],["Samsung S90C 55","S90C 55"],["Samsung S95D 55","S95D 55"],["Samsung S95C 55","S95C 55"],["Samsung QN90D 55","QN90D 55"],
 ["Philips OLED809 55","OLED809"],["Philips OLED808 55","OLED808"]];
 document.getElementById("finnlinks").innerHTML="<div class='group'>"+FINN.map(([n,q])=>`<a class="chip" target="_blank" rel="noopener" href="https://www.finn.no/recommerce/forsale/search?q=${encodeURIComponent(q)}">${esc(n)}</a>`).join("")+"</div>";
+// ---------- Plott ----------
+const CAT=[["OLED","OLED","var(--s1)"],["Mini-LED","Mini-LED","var(--s2)"],["LCD","QLED/LED","var(--s3)"]];
+const catOf=g=>g.panel==="OLED"?0:g.panel==="Mini-LED"?1:2;
+const tip=()=>document.getElementById("tip");
+function showTip(e,html){const t=tip();t.innerHTML=html;t.hidden=false;const r=t.getBoundingClientRect();let x=e.clientX+14,y=e.clientY+14;if(x+r.width>innerWidth-8)x=e.clientX-r.width-14;if(y+r.height>innerHeight-8)y=e.clientY-r.height-14;t.style.left=Math.max(8,x)+"px";t.style.top=Math.max(8,y)+"px"}
+function hideTip(){tip().hidden=true}
+function gotoRow(key){open.add(key);document.querySelector('[data-tab=list]').click();render();if(!HIST)loadHist();const el=document.getElementById("r-"+key.replace(/[^A-Za-z0-9]/g,"_"));if(el)el.scrollIntoView({block:"center"})}
+function bindPts(svg,map){svg.querySelectorAll("[data-i]").forEach(c=>{const d=map[+c.dataset.i];
+  c.onmouseenter=c.onmousemove=e=>showTip(e,d.tip);c.onmouseleave=hideTip;c.onclick=()=>{hideTip();d.key&&gotoRow(d.key)}})}
+const shortLabel=g=>g.label.replace(/\s+20\d\d$/,"");
+function drawPlots(gs){
+  // --- 1: pris mot kvalitet ---
+  const pts=gs.filter(g=>g.best!=null&&g.quality!=null);
+  const W=900,H=440,L=46,Rm=20,T=14,B=40,el=document.getElementById("p1");
+  document.getElementById("lg1").innerHTML=CAT.map(([,n,c],i)=>`<span><span class="dot" style="background:${c}"></span>${n} (${pts.filter(g=>catOf(g)===i).length})</span>`).join("")+`<span class="muted" style="white-space:nowrap"><svg width="22" height="10" style="display:inline-block;width:22px;vertical-align:0;margin-right:5px"><path d="M1,8H11V2H21" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 3"/></svg>mest for pengene</span>`;
+  if(!pts.length){el.innerHTML='<p class="muted">Ingen TV-er med disse filtrene.</p>';}else{
+  const px=pts.map(g=>g.best),lo=Math.min(...px)*0.88,hi=Math.max(...px)*1.12;
+  const qs=pts.map(g=>g.quality),qlo=Math.max(0,Math.floor((Math.min(...qs)-6)/10)*10),qhi=100;
+  const X=v=>L+(Math.log(v)-Math.log(lo))/(Math.log(hi)-Math.log(lo))*(W-L-Rm),Y=v=>T+(qhi-v)/(qhi-qlo)*(H-T-B);
+  const xt=[1000,2000,3000,5000,7500,10000,15000,20000,30000,50000,75000].filter(v=>v>=lo&&v<=hi);
+  const yt=[];for(let v=qlo;v<=qhi;v+=10)yt.push(v);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Pris mot kvalitet">`;
+  s+=yt.map(v=>`<line x1="${L}" x2="${W-Rm}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${L-6}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="var(--muted)">${v}</text>`).join("");
+  s+=xt.map(v=>`<line x1="${X(v)}" x2="${X(v)}" y1="${T}" y2="${H-B}" stroke="var(--line)" opacity=".6"/><text x="${X(v)}" y="${H-B+16}" text-anchor="middle" font-size="11" fill="var(--muted)">${fmt(v)}</text>`).join("");
+  s+=`<text x="${(L+W-Rm)/2}" y="${H-4}" text-anchor="middle" font-size="12" fill="var(--muted)">Dagens laveste pris (kr)</text><text transform="translate(12 ${(T+H-B)/2}) rotate(-90)" text-anchor="middle" font-size="12" fill="var(--muted)">Kvalitet (0–100)</text>`;
+  // frontier
+  const sorted=[...pts].sort((a,b)=>a.best-b.best||b.quality-a.quality);const fr=[];let mq=-1;for(const g of sorted)if(g.quality>mq){fr.push(g);mq=g.quality}
+  const frSet=new Set(fr);
+  let d="";fr.forEach((g,i)=>{d+=(i?`H${X(g.best).toFixed(1)}V`:`M${X(g.best).toFixed(1)},`)+Y(g.quality).toFixed(1)});
+  s+=`<path d="${d}" fill="none" stroke="var(--fg)" stroke-width="1.5" stroke-dasharray="4 4" opacity=".55"/>`;
+  const map=[];
+  const order=[...pts].sort((a,b)=>frSet.has(a)-frSet.has(b));
+  s+=order.map(g=>{const i=map.length,c=CAT[catOf(g)][2],o=g[g.bestShop];
+    map.push({key:g.key,tip:`<b>${esc(g.label)}</b><br>${esc(g.panel)} · ${esc(g.hz||"")}<br><b>${fmt(g.best)} kr</b> hos ${esc(g.bestShop)}${o&&o.before?` (førpris ${fmt(o.before)})`:""}<br>Laveste 60 d: ${g.low60?fmt(g.low60.price)+" kr":"–"}<br>Kvalitet <b>${g.quality}</b> – ${esc(g.qbasis)}${frSet.has(g)?"<br><i>På «mest for pengene»-linjen</i>":""}`});
+    const x=X(g.best).toFixed(1),y=Y(g.quality).toFixed(1),r=frSet.has(g)?6:4.5;
+    return `<circle cx="${x}" cy="${y}" r="${r}" fill="${c}" stroke="var(--card)" stroke-width="2"/><circle data-i="${i}" cx="${x}" cy="${y}" r="11" fill="transparent" style="cursor:pointer"/>`}).join("");
+  // labels for frontier points, skip collisions
+  const placed=[];
+  for(const g of fr){const x=X(g.best)+8,y=Y(g.quality)-8;if(placed.some(p=>Math.abs(p[1]-y)<14&&Math.abs(p[0]-x)<150))continue;if(x>W-150)continue;placed.push([x,y]);
+    s+=`<text x="${x}" y="${y}" font-size="11" fill="var(--fg)" stroke="var(--card)" stroke-width="3" paint-order="stroke" pointer-events="none">${esc(shortLabel(g))}</text>`}
+  el.innerHTML=s+"</svg>";bindPts(el.querySelector("svg"),map);}
+  // --- 2: ekte rabatt? ---
+  const el2=document.getElementById("p2"),off=[];
+  for(const g of gs)for(const sh of SHOPS){const o=g[sh];if(!o||!o.before||!g.low60||!st.shops.includes(sh))continue;
+    off.push({g,sh,o,x:(o.before-o.price)/o.before*100,y:(o.price-g.low60.price)/g.low60.price*100})}
+  if(!off.length){el2.innerHTML='<p class="muted">Ingen tilbud med oppgitt førpris med disse filtrene.</p>';return}
+  const L2=62,H2=380,xmax=Math.max(10,Math.ceil(Math.max(...off.map(o=>o.x))/10)*10);
+  const ymin=Math.min(-10,Math.floor(Math.min(...off.map(o=>o.y))/10)*10),ymax=Math.max(20,Math.ceil(Math.min(150,Math.max(...off.map(o=>o.y)))/10)*10);
+  const X2=v=>L2+v/xmax*(W-L2-Rm),Y2=v=>T+(ymax-Math.min(v,ymax))/(ymax-ymin)*(H2-T-B);
+  let s2=`<svg viewBox="0 0 ${W} ${H2}" role="img" aria-label="Oppgitt rabatt mot pris sammenlignet med laveste 60 dager">`;
+  s2+=`<rect x="${L2}" y="${T}" width="${W-L2-Rm}" height="${Y2(0)-T}" fill="var(--badbg)" opacity=".55"/><rect x="${L2}" y="${Y2(0)}" width="${W-L2-Rm}" height="${H2-B-Y2(0)}" fill="var(--goodbg)" opacity=".55"/>`;
+  for(let v=ymin;v<=ymax;v+=10)s2+=`<line x1="${L2}" x2="${W-Rm}" y1="${Y2(v)}" y2="${Y2(v)}" stroke="var(--line)"/><text x="${L2-6}" y="${Y2(v)+4}" text-anchor="end" font-size="11" fill="var(--muted)">${v>0?"+":""}${v} %</text>`;
+  for(let v=0;v<=xmax;v+=10)s2+=`<text x="${X2(v)}" y="${H2-B+16}" text-anchor="middle" font-size="11" fill="var(--muted)">${v} %</text>`;
+  s2+=`<line x1="${L2}" x2="${W-Rm}" y1="${Y2(0)}" y2="${Y2(0)}" stroke="var(--fg)" stroke-width="1.5" opacity=".6"/>`;
+  s2+=`<text x="${W-Rm-6}" y="${T+16}" text-anchor="end" font-size="12" font-weight="600" fill="var(--bad)">Dyrere enn før – rabatten er pynt</text><text x="${W-Rm-6}" y="${H2-B-8}" text-anchor="end" font-size="12" font-weight="600" fill="var(--good)">Ekte lavpris (≤ laveste 60 d)</text>`;
+  s2+=`<text x="${(L2+W-Rm)/2}" y="${H2-4}" text-anchor="middle" font-size="12" fill="var(--muted)">Butikkens oppgitte rabatt fra førpris</text><text transform="translate(12 ${(T+H2-B)/2}) rotate(-90)" text-anchor="middle" font-size="12" fill="var(--muted)">Dagens pris vs laveste 60 d</text>`;
+  const map2=off.map(o=>({key:o.g.key,tip:`<b>${esc(o.g.label)}</b> – ${esc(o.sh)}<br>Nå <b>${fmt(o.o.price)} kr</b>, førpris ${fmt(o.o.before)} (−${o.x.toFixed(0)} %)<br>Laveste 60 d: ${fmt(o.g.low60.price)} kr hos ${esc(o.g.low60.shop)}<br>${o.y<=0.05?'<span class="good">Ekte lavpris</span>':`<span class="bad">${o.y.toFixed(0)} % over laveste 60 d</span>`}`}));
+  s2+=off.map((o,i)=>{const x=X2(o.x).toFixed(1),y=Y2(o.y).toFixed(1);return `<circle cx="${x}" cy="${y}" r="5" fill="var(--s1)" stroke="var(--card)" stroke-width="2"/><circle data-i="${i}" cx="${x}" cy="${y}" r="11" fill="transparent" style="cursor:pointer"/>`}).join("");
+  el2.innerHTML=s2+"</svg>";bindPts(el2.querySelector("svg"),map2);
+}
 async function loadHist(){try{HIST=await (await fetch("data/history.json")).json()}catch(e){HIST={}}render()}
-document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll("nav.tabs button").forEach(x=>x.classList.toggle("on",x===b));for(const t of["list","guide","finn","help"])document.getElementById("tab-"+t).hidden=t!==b.dataset.tab});
+document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll("nav.tabs button").forEach(x=>x.classList.toggle("on",x===b));for(const t of["list","plots","guide","finn","help"])document.getElementById("tab-"+t).hidden=t!==b.dataset.tab;document.getElementById("filters").hidden=!["list","plots"].includes(b.dataset.tab);if(b.dataset.tab==="plots")render()});
 (async()=>{
   const d=await (await fetch("data/products.json")).json();DATA=d.products;window.UPDATED=d.updated;build();render();
   try{document.getElementById("guide").innerHTML=await (await fetch("guide.html")).text()}catch(e){}
