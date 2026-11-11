@@ -136,8 +136,17 @@ def category(slug="tv"):
 
 
 # ---------- Produktside ----------
+def vesa(html):
+    m = re.search(r"VESA-feste \(størrelse\)</p>.*?>([^<]{3,40})</", html, re.S)
+    if not m:
+        return None
+    d = re.findall(r"\d{2,4}", m.group(1))
+    return f"{d[0]}x{d[1]}" if len(d) >= 2 else None
+
+
 def product(pid):
-    t = flight(fetch(f"/product.php?p={pid}"))
+    html = fetch(f"/product.php?p={pid}")
+    t = flight(html)
     ph = find_obj(t, "priceHistory")
     ph = ph[0] if ph and isinstance(ph[0], dict) else {}
     history = [
@@ -164,4 +173,4 @@ def product(pid):
                                member=r.get("priceType") == "MemberPrice",
                                title=r.get("name"), sku=r.get("shopOfferId"),
                                stock=r.get("stockStatus"))
-    return dict(history=history, shops=shops, market_now=market_now)
+    return dict(history=history, shops=shops, market_now=market_now, vesa=vesa(html))

@@ -113,7 +113,7 @@ def main():
         earliest = min((x[0] for x in series), default=None)
         products.append({
             "id": r["id"], "name": r["name"], "brand": r["brand"], "size": r["size"],
-            "panel": r["panel"], "hz": r["hz"], "res": r["res"], "img": r["img"],
+            "panel": r["panel"], "hz": r["hz"], "res": r["res"], "img": r["img"], "vesa": d.get("vesa"),
             "rating": r["rating"], "expert": r["expert"],
             "family": fkey, "family_label": flabel, "family_src": fsrc,
             "shops": d["shops"], "market_now": d["market_now"],
@@ -126,14 +126,42 @@ def main():
 
     if CFG.get("shops", {}).get("enabled", True) and not os.environ.get("SKIP_SHOPS"):
         merge_shops(products, history)
+    # VESA: forkast urimelige verdier, arv fra andre varianter av samme TV
+    for p in products:
+        v = p.get("vesa")
+        if v and (p.get("size") or 99) <= 50 and max(int(x) for x in v.split("x")) > 400:
+            p["vesa"], p["vesa_note"] = None, f"Prisjakt oppgir {v}, trolig feil"
+    fam_vesa = {}
+    for p in products:
+        if p.get("vesa"):
+            fam_vesa.setdefault(p["family"], p["vesa"])
+    for p in products:
+        if not p.get("vesa") and p["family"] in fam_vesa:
+            p["vesa"], p["vesa_note"] = fam_vesa[p["family"]], "fra annen variant av samme TV"
     for p in products:
         p["quality"], p["quality_basis"] = quality.score(p)
+        p["stand"] = stand_fit(p)
     save("quality_tiers.json", {"tiers": [{"pattern": pt, "score": sc, "label": lb} for pt, sc, lb in quality.TIERS],
                                 "adjust": quality.ADJUST})
     save("history.json", history)
     save("products.json", {"updated": NOW.isoformat(timespec="seconds"), "products": products})
     print(f"Lagret {len(products)} produkter", flush=True)
     alerts(products, prev)
+
+
+def stand_fit(p):
+    """Passer TV-en på TV-stativet i config.json? 'ja', 'nei' eller None (ukjent)."""
+    st = CFG.get("stand")
+    if not st:
+        return None
+    size = p.get("size") or 0
+    if size and not (st.get("min_size", 0) <= round(size) <= st.get("max_size", 999)):
+        return "nei"
+    v = p.get("vesa")
+    if not v:
+        return None
+    w, h = (int(x) for x in v.split("x"))
+    return "ja" if w in st["vesa_dims"] and h in st["vesa_dims"] else "nei"
 
 
 # ---------------- Butikkenes egne sider (Power, Elkjøp) ----------------
@@ -189,7 +217,7 @@ def merge_shops(products, history):
             name = it["name"] + (f" - {it['mpn']}" if it.get("mpn") else "")
             fkey, flabel, fsrc = families.family(brand, name, it["size"], [it.get("mpn") or ""])
             p = {"id": f"{shop[0]}{it['sku']}", "name": name, "brand": brand, "size": it["size"],
-                 "panel": None, "hz": None, "res": None, "img": None, "img_url": it.get("img"),
+                 "panel": None, "hz": None, "res": None, "img": None, "vesa": None, "img_url": it.get("img"),
                  "rating": None, "expert": None, "family": fkey, "family_label": flabel, "family_src": fsrc,
                  "shops": {shop: entry}, "market_now": None, "low30": None, "low60": None, "low90": None,
                  "low365": None, "history_since": None, "url": it["url"], "store_only": True}

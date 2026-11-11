@@ -149,5 +149,17 @@
     "min_size": 40,
     "max_size": 58,
     "min_year": 2024
+  },
+  "stand": {
+    "name": "Eva Solo Carry",
+    "vesa_dims": [
+      100,
+      200,
+      300
+    ],
+    "min_size": 40,
+    "max_size": 65,
+    "max_kg": 60,
+    "note": "VESA-mål etter brukerens opplysning (100/200/300). Eva Solo oppgir 40–65\" og maks 60 kg."
   }
 }
