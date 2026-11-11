@@ -1,0 +1,426 @@
+[
+ {
+  "family": "SAMSUNG QN72 43\" 2026",
+  "code": "TQ43QN72HBU",
+  "vesa": "200x200",
+  "confidence": "high",
+  "source": "https://www.easylounge.com/pdf/Produits/fe571b22-2193-4a34-8889-bd04881b6694/fiche%20constructeur%20TQ43QN72H.pdf",
+  "note": "fra søkeresultat: fabrikkdatablad TQ43QN72H sier VESA 200x200; tvsfaq/Prisjakt 600x400 er feil (søsken QN70H/QN73H 43 = 200x200)"
+ },
+ {
+  "family": "PHILIPS ? 43\" 2026",
+  "code": "43PUS7201/12",
+  "vesa": "200x100",
+  "confidence": "high",
+  "source": "https://www.documents.philips.com/assets/20260709/841daaa0a7c74892acabb48200adbbe4.pdf",
+  "note": "fra søkeresultat: Philips-datablad + elgiganten-PDF + lcd-compare sier 200x100"
+ },
+ {
+  "family": "CEPTER CR40TF5002A 40\"",
+  "code": "CR40TF5002A",
+  "vesa": null,
+  "confidence": "low",
+  "source": "",
+  "note": "ikke funnet"
+ },
+ {
+  "family": "SAMSUNG BE43FX-H 43\"",
+  "code": "BE43FX-H",
+  "vesa": "200x200",
+  "confidence": "high",
+  "source": "https://www.connection.com/product/samsung-43-befx-h-4k-ultra-hd-led-lcd-commercial-tv/be43fx-h/42010227",
+  "note": "fra søkeresultat: Connection, office-partner og Samsung installasjonsguide (M8)"
+ },
+ {
+  "family": "SAMSUNG F6005F 40\" 2025",
+  "code": "TU40F6005F",
+  "vesa": "200x200",
+  "confidence": "medium",
+  "source": "https://www.kitele.com/en/tv-samsung-ue40f6000",
+  "note": "fra søkeresultat: F6000F 40 = 200x200 (kitele, B&H, Samsung svar BestBuy); godpris.no nevner F6005F 200x200"
+ },
+ {
+  "family": "SHARP ? 40\"",
+  "code": "40JF2255E",
+  "vesa": null,
+  "confidence": "low",
+  "source": "https://www.planeo.cz/sharp-40jf2255e",
+  "note": "ikke funnet (32JF2255E er 100x100, ikke brukt)"
+ },
+ {
+  "family": "SHARP ? 43\" 2025",
+  "code": "43HP5765E",
+  "vesa": "300x300",
+  "confidence": "high",
+  "source": "https://www.sharpconsumer.com/tv/43hp5765e/",
+  "note": "fra søkeresultat: Sharps egen produktside"
+ },
+ {
+  "family": "IFFALCON ? 43\" 2025",
+  "code": "43U65",
+  "vesa": "200x200",
+  "confidence": "medium",
+  "source": "https://www.jbhifi.co.nz/products/ffalcon-43-u65-led-google-tv-2025",
+  "note": "modell antatt å være 43U65 (Elkjøp selger iFFalcon 43\" U65 2025); The Good Guys/JB Hi-Fi 200x200"
+ },
+ {
+  "family": "SAMSUNG M1E 43\" 2026",
+  "code": "TU43M1EHBUXNA",
+  "vesa": "200x200",
+  "confidence": "medium",
+  "source": "https://ao.com/product/ue43m1eh-samsung-tv-black-112004-108.aspx",
+  "note": "fra søkeresultat: AO (UE43M1EH) + tvsfaq 200x200; kitele sier 400x400 (trolig feil)"
+ },
+ {
+  "family": "HISENSE DM66D 43\" 2024",
+  "code": "43DM66D",
+  "vesa": "300x300",
+  "confidence": "medium",
+  "source": "https://www.ballicom.co.uk/hisense-43dm66d-dm-series.p1602030.html",
+  "note": "fra søkeresultat: Ballicom, SHI, toppc.ee 300x300 (signage-skjerm)"
+ },
+ {
+  "family": "SHARP 40HF2465E 40\"",
+  "code": "40HF2465E",
+  "vesa": "200x100",
+  "confidence": "low",
+  "source": "https://www.sharpconsumer.com/tv/40gf2465e/",
+  "note": "kun søsken 40GF2465E (forrige års modell, samme design) = 200x100; 40HF2265E = 200x200. Ikke bekreftet for HF2465E"
+ },
+ {
+  "family": "CEPTER ? 40\"",
+  "code": "CR40EQ6002A",
+  "vesa": null,
+  "confidence": "low",
+  "source": "",
+  "note": "ikke funnet"
+ },
+ {
+  "family": "LG ? 43\"",
+  "code": "",
+  "vesa": null,
+  "confidence": "low",
+  "source": "",
+  "note": "ingen modellkode i input"
+ },
+ {
+  "family": "CEPTER ? 43\"",
+  "code": "CR43XM8502TG",
+  "vesa": null,
+  "confidence": "low",
+  "source": "",
+  "note": "ikke funnet"
+ },
+ {
+  "family": "CEPTER CR43EU6002A 43\"",
+  "code": "CR43EU6002A",
+  "vesa": null,
+  "confidence": "low",
+  "source": "",
+  "note": "ikke funnet"
+ },
+ {
+  "family": "HISENSE A7 43\" 2023",
+  "code": "43A7KQ",
+  "vesa": "200x200",
+  "confidence": "high",
+  "source": "https://hisense.fr/download/ean/6942147492420/6942147492420_produit.pdf",
+  "note": "fra søkeresultat: Hisense FR produktark + tvsfaq"
+ },
+ {
+  "family": "THOMSON ? 40\"",
+  "code": "40FD2S13",
+  "vesa": "200x200",
+  "confidence": "high",
+  "source": "https://www.kitele.com/en/tv-thomson-40fd2s13",
+  "note": "fra søkeresultat: kitele, rueducommerce, galador, pricespy"
+ },
+ {
+  "family": "THOMSON ? 43\"",
+  "code": "43UA5S13",
+  "vesa": "200x200",
+  "confidence": "high",
+  "source": "https://tv.mythomson.com/Thomson-Android-TV-43-UHD/43UA5S13",
+  "note": "fra søkeresultat: Thomson egen side + kitele"
+ },
+ {
+  "family": "CEPTER ? 42\"",
+  "code": "CR42EF6002A",
+  "vesa": null,
+  "confidence": "low",
+  "source": "",
+  "note": "ikke funnet"
+ },
+ {
+  "family": "SAMSUNG CRYSTAL U71 43\" 2024",
+  "code": "TU43DU7105KXXC",
+  "vesa": "200x200",
+  "confidence": "medium",
+  "source": "https://www.thebrick.com/products/samsung-43-du7100-crystal-uhd-4k-tizen-os-smart-tv",
+  "note": "samme serie DU7100 43 (UN43DU7100) = 200x200; DU7105 ikke eksplisitt"
+ },
+ {
+  "family": "PHILIPS PUS80X 43\" 2024",
+  "code": "43PUS8079/12",
+  "vesa": "100x200",
+  "confidence": "medium",
+  "source": "https://www.coolblue.nl/en/product/948240/philips-43pus8079-ambilight-2024.html",
+  "note": "fra søkeresultat: Coolblue + kitele 100x200 (= 200x100 BxH-rekkefølge usikker)"
+ },
+ {
+  "family": "SHARP ? 43\"",
+  "code": "4T-C43GL4460EB",
+  "vesa": "300x300",
+  "confidence": "high",
+  "source": "https://www.sharpconsumer.com/tv/43gl4460e/",
+  "note": "fra søkeresultat: Sharps produktside 43GL4460E + kitele"
+ },
+ {
+  "family": "HISENSE A6 43\" 2024",
+  "code": "43A6N",
+  "vesa": "200x300",
+  "confidence": "high",
+  "source": "https://uk.hisense.com/products/tv/uhd-tv/TV-SET-43A6N-HSN/p/000000000020014042",
+  "note": "fra søkeresultat: Hisense UK + digitec + tvsfaq oppgir '200x300' (Hisense-notasjon; trolig 300 bred x 200 høy)"
+ },
+ {
+  "family": "HISENSE A4 40\" 2024",
+  "code": "40A4N",
+  "vesa": "200x200",
+  "confidence": "medium",
+  "source": "https://uk.hisense.com/products/tv/fhd-hd-tv/TV-SET-40A4NTUK-HSN/p/000000000020013380",
+  "note": "Hisense UK 40A4NTUK 200x200; NB 40A4NF-varianten oppgis 100x200"
+ },
+ {
+  "family": "SAMSUNG Q74 43\" 2025",
+  "code": "TQ43Q7F4BUXXC",
+  "vesa": "200x200",
+  "confidence": "high",
+  "source": "https://www.bestbuy.com/site/questions/samsung-43-class-q7f-series-qled-4k-uhd-samsungvision-ai-smart-tizen-tv-2025/6619443?page=4",
+  "note": "samme serie Q7F 43 (Samsung-svar BestBuy, The Brick) = 200x200"
+ },
+ {
+  "family": "SAMSUNG Q8 43\" 2025",
+  "code": "TQ43Q8FAAUXXC",
+  "vesa": "200x200",
+  "confidence": "high",
+  "source": "https://www.bestbuy.com/site/questions/samsung-43-class-q8f-series-qled-4k-uhd-samsungvision-ai-smart-tizen-tv-2025/6617420?page=2",
+  "note": "Q8F 43: Samsung-svar BestBuy + e-catalog 200x200, M8"
+ },
+ {
+  "family": "SAMSUNG CRYSTAL U80 43\" 2025",
+  "code": "TU43U8075FUXXC",
+  "vesa": "200x200",
+  "confidence": "medium",
+  "source": "https://www.bestbuy.com/site/questions/samsung-43-class-u8000f-series-crystal-uhd-4k-smart-tizen-tv-2025/6619439?page=6",
+  "note": "samme serie U8000F 43 = 200x200 (Samsung-svar BestBuy, Abt)"
+ },
+ {
+  "family": "LG OLED C5 42\" 2025",
+  "code": "OLED42C54LA.AEU",
+  "vesa": "300x200",
+  "confidence": "high",
+  "source": "https://euronics.ie/products/lg-oled-ai-42-4k-hdr-smart-tv-oled42c54la-aek",
+  "note": "fra søkeresultat: Euronics IE, Alza, Komplett.no 300x200"
+ },
+ {
+  "family": "PHILIPS OLED81X 42\" 2025",
+  "code": "42OLED810/12",
+  "vesa": "300x300",
+  "confidence": "medium",
+  "source": "https://shop.vb.net/en/PHS42OLED81012/tvs/philips-42oled810-12",
+  "note": "fra søkeresultat: vb.net 300x300; 42OLED820 også 300x300"
+ },
+ {
+  "family": "LG UHD UA74 43\" 2025",
+  "code": "43UA74006LB.AEU",
+  "vesa": "200x200",
+  "confidence": "high",
+  "source": "https://www.lg.com/uk/tvs-soundbars/4k-uhd-tvs/43ua74006lb/buy",
+  "note": "fra søkeresultat: LG UK produktside + Teqex/icecat"
+ },
+ {
+  "family": "SAMSUNG S90 WOLED 42\" 2025",
+  "code": "TQ42S90FAEXXC",
+  "vesa": "200x200",
+  "confidence": "medium",
+  "source": "https://www.easylounge.com/pdf/Produits/3b866f53-d2f6-43f5-8d41-b38829d45739/42S90F%20V1.pdf",
+  "note": "fra søkeresultat: fransk datablad for TQ42S90FAEXXC + The Good Guys/Smart Home Sounds/Staples 200x200; én fransk forhandler sier 300x200"
+ },
+ {
+  "family": "SENZ ? 40\"",
+  "code": "SZREADY40FHD",
+  "vesa": null,
+  "confidence": "low",
+  "source": "",
+  "note": "ikke funnet"
+ },
+ {
+  "family": "SENZ ? 43\"",
+  "code": "SZREADY43UHD",
+  "vesa": null,
+  "confidence": "low",
+  "source": "",
+  "note": "ikke funnet"
+ },
+ {
+  "family": "LG QNED81 43\" 2026",
+  "code": "43QNED81B6C",
+  "vesa": null,
+  "confidence": "low",
+  "source": "https://www.tvsfaq.com/en/specifications/lg-43qned81b6c",
+  "note": "ikke funnet for 2026-modellen; 2025 43QNED81A6A og 43QNED80T = 200x200 (ikke brukt pga. ny årsmodell)"
+ },
+ {
+  "family": "SAMSUNG QN73 43\" 2026",
+  "code": "TQ43QN73HBUXNA",
+  "vesa": "200x200",
+  "confidence": "high",
+  "source": "https://www.smarthomesounds.co.uk/samsung-qn73h-43",
+  "note": "fra søkeresultat: Smart Home Sounds + tvsfaq (QE43QN73HAUXXN) 200x200"
+ },
+ {
+  "family": "SAMSUNG M73 43\" 2026",
+  "code": "TU43M73HBUXNA",
+  "vesa": "200x200",
+  "confidence": "high",
+  "source": "https://www.coolblue.nl/product/978767/samsung-mini-led-43-m73h-2026.html",
+  "note": "fra søkeresultat: Coolblue UE43M73H + tvsfaq TU43M73HAU 200x200"
+ },
+ {
+  "family": "TCL ? 40\"",
+  "code": "40ES565",
+  "vesa": "100x100",
+  "confidence": "low",
+  "source": "https://www.tvsfaq.com/en/specifications/tcl-40es565",
+  "note": "kun tvsfaq; søsken 40ES560/561 også 100x100"
+ },
+ {
+  "family": "SAMSUNG LS03 43\" 2024",
+  "code": "TQ43LS03DAUXXC",
+  "vesa": "200x200",
+  "confidence": "high",
+  "source": "https://ao.com/product/qe43ls03d-samsung-ls03d-tv-black-101035-108.aspx",
+  "note": "fra søkeresultat: AO QE43LS03D 200x200; NB The Frame bruker helst Samsungs Slim/No-Gap-feste"
+ },
+ {
+  "family": "PHILIPS PUS83X 43\" 2024",
+  "code": "43PUS8349/12",
+  "vesa": "300x300",
+  "confidence": "low",
+  "source": "https://www.vandenborre.be/lcd-led-oled-tv/ambilight-led-uhd-4k-43-inch-43pus8349-12",
+  "note": "kun Vanden Borre (300x300); søsken 43PUS8309 er 100x200 ifølge Philips – mulig avvik, verifiser"
+ },
+ {
+  "family": "PHILIPS PUS89X 43\" 2024",
+  "code": "43PUS8909/12",
+  "vesa": "100x200",
+  "confidence": "medium",
+  "source": "https://ao.com/product/43pus8909-philips-pus8909-tv-black-101135-108.aspx",
+  "note": "fra søkeresultat: AO (200x100), Galaxus/kitele 100x200"
+ },
+ {
+  "family": "THOMSON GOOGLE 43\"",
+  "code": "43QG4S14",
+  "vesa": "200x200",
+  "confidence": "high",
+  "source": "https://www.kitele.com/de/tv-thomson-43qg4s14",
+  "note": "fra søkeresultat: kitele, dateks.lv, alza"
+ },
+ {
+  "family": "SAMSUNG Q73 43\" 2025",
+  "code": "TQ43Q7F3BUXXC",
+  "vesa": "200x200",
+  "confidence": "high",
+  "source": "https://csr.thebrick.com/products/samsung-43-q7f-qled-4k-smart-tv-with-vision-ai",
+  "note": "samme serie Q7F 43 = 200x200"
+ },
+ {
+  "family": "SAMSUNG CRYSTAL U70 43\" 2025",
+  "code": "TU43U7005FKXXC",
+  "vesa": "200x200",
+  "confidence": "medium",
+  "source": "https://ao.com/product/ue43u7000f-samsung-tv-black-106849-108.aspx",
+  "note": "samme serie U7000F 43 (AO, kitele) = 200x200"
+ },
+ {
+  "family": "SONY BRAVIA 3 43\" 2025",
+  "code": "K43S35BP.CEI",
+  "vesa": "200x200",
+  "confidence": "medium",
+  "source": "https://www.sony.co.th/en/electronics/support/articles/00352792",
+  "note": "Sonys 2025-kompatibilitetstabell: K-43S30 = 200x200 (S35B = nordisk variant av S30, antatt samme)"
+ },
+ {
+  "family": "LG QNED80 43\" 2025",
+  "code": "43QNED80A6A.AEU",
+  "vesa": "200x200",
+  "confidence": "medium",
+  "source": "https://www.tvsfaq.com/en/specifications/lg-43qned81a6a",
+  "note": "samme generasjon 43QNED81A6A 200x200; 43QNED80T (2024) LG SG 200x200"
+ },
+ {
+  "family": "PHILIPS PUS70X 43\" 2025",
+  "code": "43PUS7000/12",
+  "vesa": "200x100",
+  "confidence": "high",
+  "source": "https://www.kitele.com/en/tv-philips-43pus700012",
+  "note": "fra søkeresultat: Philips DE-datablad + kitele 200x100"
+ },
+ {
+  "family": "PHILIPS PUS78X 43\" 2025",
+  "code": "43PUS7800/12",
+  "vesa": null,
+  "confidence": "low",
+  "source": "https://www.tvsfaq.com/en/specifications/philips-43pus780012",
+  "note": "ikke funnet (gammel 43PUS7805 fra 2020 er 200x200, ikke brukt)"
+ },
+ {
+  "family": "LG ? 43\" 2025",
+  "code": "43NANO82A6B.AEU",
+  "vesa": "200x200",
+  "confidence": "medium",
+  "source": "https://www.lg.com/pl/telewizory-i-soundbary/nanocell/43nano82t6b/",
+  "note": "samme serie 43NANO82T6B (2024) og 43NANO83A6A (2025) = 200x200"
+ },
+ {
+  "family": "HISENSE ? 40\" 2025",
+  "code": "40A4Q (20016099)",
+  "vesa": "200x200",
+  "confidence": "high",
+  "source": "https://www.hisense.es/wp-content/uploads/2025/03/Ficha-Tecnica_A4Q_ES.pdf",
+  "note": "Hisense ES datablad A4Q: 40\" 200x200 (AU-varianten 40A4QAU 100x200)"
+ },
+ {
+  "family": "TCL ? 43\" 2026",
+  "code": "43A400 PRO",
+  "vesa": "100x100",
+  "confidence": "medium",
+  "source": "https://www.ldlc.com/en/product/PB00747987.html",
+  "note": "LDLC, Currys, Markselectrical 100x100; kitele sier 200x200"
+ },
+ {
+  "family": "IFFALCON ? 43\" 2026",
+  "code": "43U65A",
+  "vesa": "200x200",
+  "confidence": "medium",
+  "source": "https://www.jbhifi.co.nz/products/ffalcon-43-u65a-4k-led-google-tv-2026",
+  "note": "JB Hi-Fi 200x200; seriedatablad nevner 200x200/300x300 for 43–75"
+ },
+ {
+  "family": "SHARP ? 40\" 2025",
+  "code": "40HA1705E",
+  "vesa": "200x200",
+  "confidence": "medium",
+  "source": "https://www.sharpconsumer.com/tv/40ha1705e/",
+  "note": "Sharp-side for 40HA-familien (1205/1305/1705) 200x200"
+ },
+ {
+  "family": "SHARP ? 43\" 2026",
+  "code": "43JF2255",
+  "vesa": "200x200",
+  "confidence": "medium",
+  "source": "https://www.planeo.cz/sharp-43jf2255e",
+  "note": "kun planeo.cz (43JF2255E) 200x200"
+ }
+]

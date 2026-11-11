@@ -142,7 +142,8 @@ def main():
             codes = [_norm(p["name"].rsplit(" - ", 1)[-1])] + [_norm(o.get("title")) for o in p["shops"].values()]
             m = next((by_code[c] for c in by_code if any(x.startswith(c) or (len(x) >= 6 and c.startswith(x)) for x in codes if x)), None)
         if m and (not p.get("vesa") or p.get("vesa_note")):
-            p["vesa"], p["vesa_note"] = m["vesa"], f"undersøkt: {m.get('source', '')}"
+            p["vesa"], p["vesa_note"] = m["vesa"], f"undersøkt ({m.get('confidence') or '?'} sikkerhet): {m.get('source', '')}"
+            p["vesa_conf"] = m.get("confidence")
     fam_vesa = {}
     for p in products:
         if p.get("vesa"):

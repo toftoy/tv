@@ -198,7 +198,8 @@ function verdict(g){
   const d=g.verdict;if(d<=0.001)return'<span class="badge b-good">Lavpris</span>';
   const t=`+${(d*100).toFixed(0)} %`;return d<0.1?`<span class="badge b-warn">${t}</span>`:`<span class="badge b-bad">${t}</span>`}
 function standCell(g){const vn=(g.items.find(p=>p.vesa_note)||{}).vesa_note;const t=(g.vesa?`VESA ${g.vesa}`:"VESA-mål ukjent")+(vn?` (${vn})`:"");
-  if(g.stand==="ja")return `<span class="badge b-good" title="${t} – passer">✓ passer</span>`;
+  const low=g.items.some(p=>p.vesa_conf==="low")&&!g.items.some(p=>p.vesa&&!p.vesa_conf);
+  if(g.stand==="ja")return low?`<span class="badge b-warn" title="${t} – usikker kilde, sjekk før kjøp">✓? trolig</span>`:`<span class="badge b-good" title="${t} – passer">✓ passer</span>`;
   if(g.stand==="nei")return `<span class="badge b-bad" title="${t}${g.vesa?"":" / utenfor 40–65\""}">✗ passer ikke</span>`;
   return `<span class="badge" style="background:var(--chip)" title="Sjekk VESA-mål hos butikken">? ukjent</span>`}
 function shopCell(g,s){const o=g[s];if(!o)return'<span class="muted">–</span>';
