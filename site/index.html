@@ -150,7 +150,7 @@ function groups(){
 }
 function build(){
   const sizes=[...new Set(DATA.map(p=>Math.round(p.size)))].sort((a,b)=>a-b);
-  if(!st.sizes)st.sizes=sizes.filter(s=>s>=48&&s<=55);
+  if(!st.sizes)st.sizes=sizes.filter(s=>s>=40&&s<=43);
   document.getElementById("f-size").innerHTML=sizes.map(s=>`<label class="chip"><input type="checkbox" value="${s}" ${st.sizes.includes(s)?"checked":""}> ${s}"</label>`).join("");
   if(!st.shops)st.shops=[...SHOPS];
   document.getElementById("f-shop").innerHTML=SHOPS.map(s=>`<label class="chip"><input type="checkbox" value="${s}" ${st.shops.includes(s)?"checked":""}> ${s}</label>`).join("");
