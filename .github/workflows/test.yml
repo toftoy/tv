@@ -1,0 +1,10 @@
+name: Test runner
+on:
+  push:
+    paths: [".github/workflows/test.yml"]
+  workflow_dispatch: {}
+jobs:
+  hei:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo hei
