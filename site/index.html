@@ -51,7 +51,7 @@ a{color:var(--accent)}
 <header>
   <h1>TV-prisvakt</h1>
   <div class="muted" id="meta">Laster …</div>
-  <nav class="tabs"><button data-tab="list" class="on">Priser</button><button data-tab="guide">Kjøpeguide</button><button data-tab="help">Slik leser du tabellen</button></nav>
+  <nav class="tabs"><button data-tab="list" class="on">Priser</button><button data-tab="guide">Kjøpeguide</button><button data-tab="finn">Brukt (FINN)</button><button data-tab="help">Slik leser du tabellen</button></nav>
 </header>
 <main>
 <section id="tab-list">
@@ -76,6 +76,22 @@ a{color:var(--accent)}
   <p class="muted small">«Lav x d» = laveste pris <em>før i dag</em> hos <em>noen</em> butikk på Prisjakt (også små nettbutikker/markedsplasser – butikken vises når du holder over). Egen historikk per butikk bygges opp fra 11.11.2026; 365-dagerstallet blir fullstendig etter hvert.</p>
 </section>
 <section id="tab-guide" hidden><div class="guide" id="guide"></div></section>
+<section id="tab-finn" hidden><div class="guide">
+<h2>Nyere brukt premium-TV på FINN</h2>
+<p>Klikk et søk, sjekk at det ser riktig ut, og trykk <b>«Lagre søk»</b> på FINN for å få varsel om nye annonser. (FINN tillater ikke automatisk innhenting, så dette gjøres via FINNs egen varsling.)</p>
+<div id="finnlinks"></div>
+<h2>Prisreferanse</h2>
+<p>En brukt TV bør koste <b>godt under</b> det en tilsvarende ny TV koster i dag. Sammenlign med f.eks. LG B6/C5/C6 og Samsung S90 i <a href="#" onclick="document.querySelector('[data-tab=list]').click();return false">pristabellen</a>.</p>
+<h2>Sjekkliste ved visning</h2>
+<ol>
+<li><b>Innbrenning (OLED):</b> vis helgrå, rød, grønn og blå testbilder i fullskjerm (søk «OLED burn-in test» på YouTube). Se etter skygger av logoer, nyhetsbånd eller spill-HUD. Spør hva TV-en er brukt til.</li>
+<li><b>Døde piksler / striper</b> i jevne gråtoner.</li>
+<li><b>Mini-LED/LCD:</b> lyse flekker eller ujevnt bakgrunnslys på svart/mørkegrått bilde.</li>
+<li><b>Kvittering:</b> få den med – reklamasjonsretten mot butikken (inntil 5 år for TV) kan følge med når du overtar kvitteringen. Sjekk med Forbrukerrådet.</li>
+<li><b>Modellkode</b> bak på TV-en/i menyen: bekreft modell og årsmodell (C54 = C55 = C56 osv., se kjøpeguiden).</li>
+<li>Fjernkontroll, stativ, original emballasje (viktig for frakt). Kjøp helst med FINN «Fiks ferdig» for kjøperbeskyttelse ved sending.</li>
+</ol>
+</div></section>
 <section id="tab-help" hidden><div class="guide">
 <h2>Slik leser du tabellen</h2>
 <ul>
@@ -169,8 +185,14 @@ function chart(g){
   return `<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${ticks}${mt}${ser.map(([n,pts,c])=>`<path d="${path(pts)}" fill="none" stroke="${c}" stroke-width="${n==="Laveste marked"?1.5:2.2}" ${n==="Laveste marked"?'stroke-dasharray="4 3"':""}/>`+(n!=="Laveste marked"&&pts.length?`<circle cx="${X(pts[pts.length-1][0])-4}" cy="${Y(pts[pts.length-1][1])}" r="4" fill="${c}"/>`:"")).join("")}</svg>
   <div class="legend">${ser.map(([n,,c])=>`<span><span style="color:${c}">■</span> ${n}</span>`).join("")}<span class="muted">Siste 3 mnd. Butikklinjer bygges opp fra 11.11.2026.</span></div>`;
 }
+
+const FINN=[["LG OLED C4 55","OLED55C4"],["LG OLED C3 55","OLED55C3"],["LG OLED G4 55","OLED55G4"],["LG OLED G3 55","OLED55G3"],["LG OLED C4 48","OLED48C4"],
+["Sony Bravia 8 55","Bravia 8 55"],["Sony A80L 55","A80L 55"],["Sony A95K 55","A95K"],["Sony X95L 55","X95L 55"],
+["Samsung S90D 55","S90D 55"],["Samsung S90C 55","S90C 55"],["Samsung S95D 55","S95D 55"],["Samsung S95C 55","S95C 55"],["Samsung QN90D 55","QN90D 55"],
+["Philips OLED809 55","OLED809"],["Philips OLED808 55","OLED808"]];
+document.getElementById("finnlinks").innerHTML="<div class='group'>"+FINN.map(([n,q])=>`<a class="chip" target="_blank" rel="noopener" href="https://www.finn.no/recommerce/forsale/search?q=${encodeURIComponent(q)}">${esc(n)}</a>`).join("")+"</div>";
 async function loadHist(){try{HIST=await (await fetch("data/history.json")).json()}catch(e){HIST={}}render()}
-document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll("nav.tabs button").forEach(x=>x.classList.toggle("on",x===b));for(const t of["list","guide","help"])document.getElementById("tab-"+t).hidden=t!==b.dataset.tab});
+document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll("nav.tabs button").forEach(x=>x.classList.toggle("on",x===b));for(const t of["list","guide","finn","help"])document.getElementById("tab-"+t).hidden=t!==b.dataset.tab});
 (async()=>{
   const d=await (await fetch("data/products.json")).json();DATA=d.products;window.UPDATED=d.updated;build();render();
   try{document.getElementById("guide").innerHTML=await (await fetch("guide.html")).text()}catch(e){}
