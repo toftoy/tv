@@ -84,6 +84,10 @@ def main():
             print(f"  {i}/{len(cand)}", flush=True)
         if not d["shops"] and r["id"] not in prev:
             continue
+        # TV-er som bare selges hos «sekundære» butikker (f.eks. Multicom) tas ikke med
+        sec = set(CFG.get("secondary_shops", []))
+        if d["shops"] and set(d["shops"]) <= sec:
+            continue
         pid = str(r["id"])
         h = history.setdefault(pid, {"market": [], "shops": {}})
         # Slå sammen Prisjakts markedslaveste-serie (bygger historikk utover 3 mnd over tid)
