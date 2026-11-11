@@ -143,5 +143,11 @@
       ],
       "on_low60": true
     }
-  ]
+  ],
+  "shops": {
+    "enabled": true,
+    "min_size": 40,
+    "max_size": 58,
+    "min_year": 2024
+  }
 }

@@ -142,8 +142,13 @@ def family(brand, name, size, extra=()):
             except Exception:
                 r = None
             if r and re.search(r"\d{2,3}\"", r):
-                y = re.search(r"\((20\d\d)\)", name)  # Prisjakts årstall er mest konsekvent
-                r = re.sub(r"\s*(None|20\d\d)?$", "", r) + (f" {y.group(1)}" if y else "")
+                y = re.search(r"\((20\d\d)\)", name)
+                cy = re.search(r"(20\d\d)$", r)
+                # Årstall fra koden når merket koder det sikkert; Sony og manglende kode-år: Prisjakts årstall
+                if y and (not cy or (brand or "").upper() == "SONY"):
+                    r = re.sub(r"\s*(None|20\d\d)?$", "", r) + f" {y.group(1)}"
+                else:
+                    r = re.sub(r"\s*None$", "", r)
                 return r.upper(), r, "kode"
     r = _name_family(brand, name, size)
     return r.upper(), r, "navn"

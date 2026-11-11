@@ -13,6 +13,8 @@ sys.path.insert(0, os.path.dirname(__file__))
 import families  # noqa: E402
 import prisjakt  # noqa: E402
 import quality  # noqa: E402
+import re  # noqa: E402
+import shops as shopsrc  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
@@ -122,6 +124,8 @@ def main():
             "url": f"https://www.prisjakt.no/product.php?p={r['id']}",
         })
 
+    if CFG.get("shops", {}).get("enabled", True) and not os.environ.get("SKIP_SHOPS"):
+        merge_shops(products, history)
     for p in products:
         p["quality"], p["quality_basis"] = quality.score(p)
     save("history.json", history)
@@ -130,9 +134,87 @@ def main():
     alerts(products, prev)
 
 
+# ---------------- Butikkenes egne sider (Power, Elkjøp) ----------------
+def _norm(c):
+    return re.sub(r"[^A-Z0-9]", "", (c or "").upper())
+
+
+def merge_shops(products, history):
+    sc = CFG.get("shops", {})
+    cache = os.environ.get("SHOPS_CACHE")
+    if cache and os.path.exists(cache):
+        items = json.load(open(cache, encoding="utf-8"))
+    else:
+        items = shopsrc.collect({"min_size": sc.get("min_size", CFG["filter"]["min_size"]),
+                                 "max_size": sc.get("max_size", CFG["filter"]["max_size"]),
+                                 "min_year": sc.get("min_year", 2024)})
+    by_sku, codes = {}, []
+    for p in products:
+        for shop, o in p["shops"].items():
+            if o.get("sku"):
+                by_sku[(shop, str(o["sku"]))] = p
+        toks = set()
+        if " - " in p["name"]:
+            toks.add(_norm(p["name"].rsplit(" - ", 1)[-1]))
+        for o in p["shops"].values():
+            toks.update(_norm(t) for t in re.findall(r"\b[A-Z]{0,4}\d{2}[A-Z0-9]{3,}\b", o.get("title") or ""))
+        codes.append((p, {t for t in toks if len(t) >= 7}))
+    added = matched = 0
+    stamp = NOW.isoformat(timespec="seconds")
+    today0 = NOW.replace(hour=0, minute=0, second=0, microsecond=0)
+    for it in items:
+        shop, mpn = it["shop"], _norm(it.get("mpn"))
+        p = by_sku.get((shop, it["sku"]))
+        if not p and mpn:
+            for cand, toks in codes:
+                if any(mpn.startswith(t) or t.startswith(mpn) for t in toks):
+                    p = cand
+                    break
+        entry = {"price": it["price"], "before": None, "member": it["member"], "title": it["name"],
+                 "sku": it["sku"], "stock": it["stock"], "url": it["url"], "source": "butikk"}
+        if p:
+            matched += 1
+            o = p["shops"].get(shop)
+            if o:
+                o["stock"], o["url"] = it["stock"], it["url"]
+                if o["price"] != it["price"] and it["stock"] != "OutOfStock":
+                    o["price"] = it["price"]  # butikkens egen side er ferskest
+            else:
+                p["shops"][shop] = entry
+        else:
+            added += 1
+            brand = it.get("brand") or it["name"].split()[0]
+            name = it["name"] + (f" - {it['mpn']}" if it.get("mpn") else "")
+            fkey, flabel, fsrc = families.family(brand, name, it["size"], [it.get("mpn") or ""])
+            p = {"id": f"{shop[0]}{it['sku']}", "name": name, "brand": brand, "size": it["size"],
+                 "panel": None, "hz": None, "res": None, "img": None, "img_url": it.get("img"),
+                 "rating": None, "expert": None, "family": fkey, "family_label": flabel, "family_src": fsrc,
+                 "shops": {shop: entry}, "market_now": None, "low30": None, "low60": None, "low90": None,
+                 "low365": None, "history_since": None, "url": it["url"], "store_only": True}
+            products.append(p)
+            codes.append((p, {mpn} if len(mpn) >= 7 else set()))
+            by_sku[(shop, it["sku"])] = p
+        # historikk per butikk
+        h = history.setdefault(str(p["id"]), {"market": [], "shops": {}})
+        lst = h["shops"].setdefault(shop, [])
+        price = p["shops"][shop]["price"] if it["stock"] != "OutOfStock" else None
+        if not lst or lst[-1][1] != price:
+            lst.append([stamp, price, None, it["member"]])
+        if p.get("store_only"):
+            series = [[x[0], x[1], s] for s, l in h["shops"].items() for x in l
+                      if x[1] is not None and parse_dt(x[0]) < today0]
+            p["low30"], p["low60"] = lowest(series, 30), lowest(series, 60)
+            p["low90"], p["low365"] = lowest(series, 92), lowest(series, 365)
+    for p in products:
+        live = {s: o for s, o in p["shops"].items() if o.get("stock") != "OutOfStock"}
+        b = min(live.items(), key=lambda kv: kv[1]["price"]) if live else None
+        p["best"] = {"shop": b[0], "price": b[1]["price"]} if b else None
+    print(f"Butikksider: {len(items)} lest, {matched} koblet til Prisjakt, {added} nye", flush=True)
+
+
 # ---------------- Varsling ----------------
 def matches(p, w):
-    if "id" in w and int(w["id"]) != p["id"]:
+    if "id" in w and str(w["id"]) != str(p["id"]):
         return False
     if "family" in w and w["family"].upper() != p["family"]:
         return False
@@ -152,13 +234,17 @@ def alerts(products, prev):
         for shop, o in p["shops"].items():
             k = f"{p['id']}|{shop}"
             price = o["price"]
+            if o.get("stock") == "OutOfStock":
+                continue
+            po = ((prev.get(p["id"]) or {}).get("shops") or {}).get(shop) or {}
+            back = po.get("stock") == "OutOfStock"
             last = state.get(k)
-            if last is not None and price >= last:
+            if last is not None and price >= last and not back:
                 continue  # allerede varslet om denne prisen eller lavere
             for w in rules:
                 if not matches(p, w):
                     continue
-                why = []
+                why = ["tilbake på lager"] if back else []
                 if "max_price" in w and price <= w["max_price"]:
                     why.append(f"under din grense {w['max_price']:,} kr".replace(",", " "))
                 l60 = p["low60"]["price"] if p["low60"] else None
@@ -181,7 +267,7 @@ def alerts(products, prev):
         mem = " – medlemspris" if o.get("member") else ""
         l90 = p["low90"]["price"] if p["low90"] else None
         body.append(f"- **{p['family_label']}** – {shop}: **{o['price']:,} kr**{before}{mem}".replace(",", " ")
-                    + f"  \n  {'; '.join(why)}. Laveste 90 d: {l90:,.0f} kr. [{p['name']}]({p['url']})".replace(",", " "))
+                    + f"  \n  {'; '.join(why)}. Laveste 90 d: {fmt_kr(l90)}. [{p['name']}]({o.get('url') or p['url']})")
     site = CFG.get("site_url")
     if site:
         body.append(f"\nDashboard: {site}")
@@ -189,6 +275,10 @@ def alerts(products, prev):
     print(text)
     title = f"Prisvarsel {TODAY}: {len(lines)} TV-er"
     create_issue(title, text)
+
+
+def fmt_kr(v):
+    return f"{v:,.0f} kr".replace(",", " ") if v is not None else "ukjent"
 
 
 def create_issue(title, body):
