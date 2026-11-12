@@ -13,6 +13,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import families  # noqa: E402
 import prisjakt  # noqa: E402
 import quality  # noqa: E402
+import bf_model  # noqa: E402
 import re  # noqa: E402
 import shops as shopsrc  # noqa: E402
 
@@ -95,6 +96,23 @@ def main():
         for x in d["history"]:
             if x["date"] not in seen:
                 h["market"].append([x["date"], x["price"], x["shop"]])
+        # To års historikk fra Prisjakts API, én gang per produkt
+        if not h.get("long"):
+            lc = os.environ.get("LONG_CACHE")
+            try:
+                if lc:
+                    f = os.path.join(lc, f"{r['id']}.json")
+                    long = json.load(open(f)) if os.path.exists(f) else None
+                else:
+                    long = prisjakt.price_history(r["id"])
+                if long is not None:
+                    seen = {x[0] for x in h["market"]}
+                    for x in long:
+                        if x["date"] not in seen:
+                            h["market"].append([x["date"], x["price"], x["shop"]])
+                    h["long"] = TODAY
+            except Exception as e:
+                print("Historikk-API feilet", r["id"], e, flush=True)
         h["market"].sort(key=lambda x: x[0])
         # Egen historikk per butikk: lagre når prisen endres
         for shop, o in d["shops"].items():
@@ -158,6 +176,15 @@ def main():
     for p in products:
         p["quality"], p["quality_basis"] = quality.score(p)
         p["stand"] = stand_fit(p)
+    # Sannsynlig Black Week-pris: kalibrert på fjorårets Black Week
+    cal = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bw_calibration.json")
+    model = json.load(open(cal, encoding="utf-8")) if os.path.exists(cal) else bf_model.fit(history, products, NOW.year - 1)
+    save("bf_model.json", model, indent=1)
+    for p in products:
+        h = history.get(str(p["id"]), {})
+        ser = list(h.get("market", [])) + [[x[0], x[1], s] for s, l in h.get("shops", {}).items() for x in l]
+        p["bw"] = bf_model.predict(model, p, ser, NOW.year)
+    print(f"Black Week-modell: {model['n']} TV-er fra {model['year']}", flush=True)
     save("quality_tiers.json", {"tiers": [{"pattern": pt, "score": sc, "label": lb} for pt, sc, lb in quality.TIERS],
                                 "adjust": quality.ADJUST})
     save("history.json", history)
@@ -294,6 +321,9 @@ def alerts(products, prev):
                 why = ["tilbake på lager"] if back else []
                 if "max_price" in w and price <= w["max_price"]:
                     why.append(f"under din grense {w['max_price']:,} kr".replace(",", " "))
+                bw = p.get("bw")
+                if w.get("on_bw", True) and bw and price <= bw["mid"]:
+                    why.append(f"i forventet Black Week-nivå ({bw['low']:,}–{bw['high']:,} kr)".replace(",", " "))
                 l60 = p["low60"]["price"] if p["low60"] else None
                 if w.get("on_low60", True) and l60 and price <= l60:
                     why.append(f"laveste pris siste 60 d (var {l60:,.0f} kr)".replace(",", " "))

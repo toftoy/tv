@@ -136,6 +136,22 @@ def category(slug="tv"):
 
 
 # ---------- Produktside ----------
+def price_history(pid, time_range="TWO_YEARS"):
+    """Prisjakts prishistorikk (laveste i markedet over tid) via nettsidens eget API."""
+    global _last
+    wait = DELAY - (time.time() - _last)
+    if wait > 0:
+        time.sleep(wait)
+    _last = time.time()
+    body = json.dumps({"productId": int(pid), "timeRange": time_range, "shopIds": [], "variantIds": []}).encode()
+    req = urllib.request.Request(BASE + "/api/price-history", data=body, method="POST",
+                                 headers={"User-Agent": UA, "Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=60) as r:
+        d = json.load(r)
+    return [dict(date=x["date"], price=x["price"] / 100, shop=x["shopName"], member=x.get("isMembershipPrice", False))
+            for x in (d.get("priceHistory") or {}).get("historyItems", [])]
+
+
 def vesa(html):
     m = re.search(r"VESA-feste \(størrelse\)</p>.*?>([^<]{3,40})</", html, re.S)
     if not m:
