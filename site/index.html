@@ -111,7 +111,12 @@ td,th{font-variant-numeric:tabular-nums}
   <p class="muted small">«Lav x d» = laveste pris <em>før i dag</em> hos <em>noen</em> butikk på Prisjakt (også små nettbutikker/markedsplasser – butikken vises når du holder over). Egen historikk per butikk bygges opp fra 11.11.2026; 365-dagerstallet blir fullstendig etter hvert.</p>
 </section>
 <section id="tab-plots" hidden><div class="plots">
-<div class="plot"><h2>Pris mot kvalitet</h2><div class="muted small">Dagens laveste pris hos de valgte butikkene (logaritmisk akse) mot kvalitetsscore. Linjen viser «mest for pengene»: ingen annen TV er både billigere og bedre. Klikk et punkt for å se modellen i tabellen.</div><div class="legend" id="lg1"></div><div id="p1"></div></div>
+<div class="plot"><h2>Pris mot kvalitet</h2><div class="muted small">Dagens laveste pris hos de valgte butikkene (logaritmisk akse) mot kvalitetsscore. Linjen viser «mest for pengene»: ingen annen TV er både billigere og bedre. Klikk et punkt for å se modellen i tabellen.</div>
+<div class="group" style="margin:8px 0" role="radiogroup" aria-label="Pris i plottet"><b>Pris:</b>
+<label class="chip"><input type="radio" name="pmode" value="now" id="pm-now"> Dagens pris</label>
+<label class="chip"><input type="radio" name="pmode" value="bw" id="pm-bw"> Sannsynlig BW-pris</label>
+<label class="chip"><input type="radio" name="pmode" value="arrow" id="pm-arrow"> Dagens → sannsynlig (pil)</label></div>
+<div class="legend" id="lg1"></div><div id="p1"></div></div>
 <div class="plot"><h2>Ekte rabatt?</h2><div class="muted small">Butikkens oppgitte rabatt (fra førpris) mot hvor dagens pris ligger sammenlignet med laveste pris siste 60 dager. Punkter over midtlinjen er dyrere enn det TV-en har kostet før – rabatten er regnet fra en oppblåst førpris.</div><div id="p2"></div></div>
 <p class="muted small">Kvalitetsscoren (0–100) er et skjønn basert på tester (RTINGS, What Hi-Fi, Tek.no, Lyd &amp; Bilde m.fl.) per modellserie, justert for størrelse. Den er ment som grov sortering – les tester av akkurat modellen før du kjøper. Grunnlaget vises når du holder over et punkt. <a href="#" data-qlink>Les hvordan scoren regnes ut</a>.</p>
 </div></section>
@@ -272,11 +277,14 @@ function bindPts(svg,map){svg.querySelectorAll("[data-i]").forEach(c=>{const d=m
 const shortLabel=g=>g.label.replace(/\s+20\d\d$/,"");
 function drawPlots(gs){
   // --- 1: pris mot kvalitet ---
-  const pts=gs.filter(g=>g.best!=null&&g.quality!=null);
+  const mode=st.pmode||"now";
+  document.querySelectorAll('input[name=pmode]').forEach(r=>{r.checked=r.value===mode;r.onchange=()=>{st.pmode=r.value;save();drawPlots(window.FILTERED||gs)}});
+  const PX=g=>mode==="bw"?(g.bw?g.bw.mid:null):g.best;
+  const pts=gs.filter(g=>PX(g)!=null&&g.quality!=null);
   const W=900,H=440,L=46,Rm=20,T=14,B=40,el=document.getElementById("p1");
   document.getElementById("lg1").innerHTML=CAT.map(([,n,c],i)=>`<span><span class="dot" style="background:${c}"></span>${n} (${pts.filter(g=>catOf(g)===i).length})</span>`).join("")+`<span class="muted" style="white-space:nowrap"><svg width="22" height="10" style="display:inline-block;width:22px;vertical-align:0;margin-right:5px"><path d="M1,8H11V2H21" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 3"/></svg>mest for pengene</span>`;
   if(!pts.length){el.innerHTML='<p class="muted">Ingen TV-er med disse filtrene.</p>';}else{
-  const px=pts.map(g=>g.best),lo=Math.min(...px)*0.88,hi=Math.max(...px)*1.12;
+  const px=pts.map(PX).concat(mode==="arrow"?pts.filter(g=>g.bw).map(g=>g.bw.mid):[]),lo=Math.min(...px)*0.88,hi=Math.max(...px)*1.12;
   const qs=pts.map(g=>g.quality),qlo=Math.max(0,Math.floor((Math.min(...qs)-6)/10)*10),qhi=100;
   const X=v=>L+(Math.log(v)-Math.log(lo))/(Math.log(hi)-Math.log(lo))*(W-L-Rm),Y=v=>T+(qhi-v)/(qhi-qlo)*(H-T-B);
   const xt=[1000,2000,3000,5000,7500,10000,15000,20000,30000,50000,75000].filter(v=>v>=lo&&v<=hi);
@@ -284,21 +292,25 @@ function drawPlots(gs){
   let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Pris mot kvalitet">`;
   s+=yt.map(v=>`<line x1="${L}" x2="${W-Rm}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${L-6}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="var(--muted)">${v}</text>`).join("");
   s+=xt.map(v=>`<line x1="${X(v)}" x2="${X(v)}" y1="${T}" y2="${H-B}" stroke="var(--line)" opacity=".6"/><text x="${X(v)}" y="${H-B+16}" text-anchor="middle" font-size="11" fill="var(--muted)">${fmt(v)}</text>`).join("");
-  s+=`<text x="${(L+W-Rm)/2}" y="${H-4}" text-anchor="middle" font-size="12" fill="var(--muted)">Dagens laveste pris (kr)</text><text transform="translate(12 ${(T+H-B)/2}) rotate(-90)" text-anchor="middle" font-size="12" fill="var(--muted)">Kvalitet (0–100)</text>`;
+  s+=`<text x="${(L+W-Rm)/2}" y="${H-4}" text-anchor="middle" font-size="12" fill="var(--muted)">${mode==="bw"?"Sannsynlig Black Week-pris, midtestimat (kr)":"Dagens laveste pris (kr)"}</text><text transform="translate(12 ${(T+H-B)/2}) rotate(-90)" text-anchor="middle" font-size="12" fill="var(--muted)">Kvalitet (0–100)</text>`;
+  // piler fra dagens pris til sannsynlig BW-pris
+  if(mode==="arrow"){s+=`<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="var(--muted)"/></marker></defs>`;
+    for(const g of pts){if(!g.bw||Math.abs(g.bw.mid-g.best)/g.best<0.02)continue;const y=Y(g.quality).toFixed(1),x1=X(g.best),x2=X(g.bw.mid),dx=x2>x1?-6:6;
+      s+=`<line x1="${(x1+(x2>x1?6:-6)).toFixed(1)}" y1="${y}" x2="${(x2+dx*0).toFixed(1)}" y2="${y}" stroke="var(--muted)" stroke-width="1.3" stroke-dasharray="3 3" marker-end="url(#ah)" opacity=".85"/>`}}
   // frontier
-  const sorted=[...pts].sort((a,b)=>a.best-b.best||b.quality-a.quality);const fr=[];let mq=-1;for(const g of sorted)if(g.quality>mq){fr.push(g);mq=g.quality}
+  const sorted=[...pts].sort((a,b)=>PX(a)-PX(b)||b.quality-a.quality);const fr=[];let mq=-1;for(const g of sorted)if(g.quality>mq){fr.push(g);mq=g.quality}
   const frSet=new Set(fr);
-  let d="";fr.forEach((g,i)=>{d+=(i?`H${X(g.best).toFixed(1)}V`:`M${X(g.best).toFixed(1)},`)+Y(g.quality).toFixed(1)});
+  let d="";fr.forEach((g,i)=>{d+=(i?`H${X(PX(g)).toFixed(1)}V`:`M${X(PX(g)).toFixed(1)},`)+Y(g.quality).toFixed(1)});
   s+=`<path d="${d}" fill="none" stroke="var(--fg)" stroke-width="1.5" stroke-dasharray="4 4" opacity=".55"/>`;
   const map=[];
   const order=[...pts].sort((a,b)=>frSet.has(a)-frSet.has(b));
   s+=order.map(g=>{const i=map.length,c=CAT[catOf(g)][2],o=g[g.bestShop];
-    map.push({key:g.key,tip:`<b>${esc(g.label)}</b><br>${esc(g.panel)} · ${esc(g.hz||"")}<br><b>${fmt(g.best)} kr</b> hos ${esc(g.bestShop)}${o&&o.before?` (førpris ${fmt(o.before)})`:""}<br>Laveste 60 d: ${g.low60?fmt(g.low60.price)+" kr":"–"}<br>Kvalitet <b>${g.quality}</b> – ${esc(g.qbasis)}${frSet.has(g)?"<br><i>På «mest for pengene»-linjen</i>":""}`});
-    const x=X(g.best).toFixed(1),y=Y(g.quality).toFixed(1),r=frSet.has(g)?6:4.5;
+    map.push({key:g.key,tip:`<b>${esc(g.label)}</b><br>${esc(g.panel)} · ${esc(g.hz||"")}<br><b>${fmt(g.best)} kr</b> hos ${esc(g.bestShop)}${o&&o.before?` (førpris ${fmt(o.before)})`:""}<br>Laveste 60 d: ${g.low60?fmt(g.low60.price)+" kr":"–"}<br>Sannsynlig BW-pris: ${g.bw?`<b>${fmt(g.bw.low)}–${fmt(g.bw.high)} kr</b> (midt ${fmt(g.bw.mid)})`:"–"}<br>Kvalitet <b>${g.quality}</b> – ${esc(g.qbasis)}${frSet.has(g)?"<br><i>På «mest for pengene»-linjen</i>":""}`});
+    const x=X(PX(g)).toFixed(1),y=Y(g.quality).toFixed(1),r=frSet.has(g)?6:4.5;
     return `<circle cx="${x}" cy="${y}" r="${r}" fill="${c}" stroke="var(--card)" stroke-width="2"/><circle data-i="${i}" cx="${x}" cy="${y}" r="11" fill="transparent" style="cursor:pointer"/>`}).join("");
   // labels for frontier points, skip collisions
   const placed=[];
-  for(const g of fr){const x=X(g.best)+8,y=Y(g.quality)-8;if(placed.some(p=>Math.abs(p[1]-y)<14&&Math.abs(p[0]-x)<150))continue;if(x>W-150)continue;placed.push([x,y]);
+  for(const g of fr){const x=X(PX(g))+8,y=Y(g.quality)-8;if(placed.some(p=>Math.abs(p[1]-y)<14&&Math.abs(p[0]-x)<150))continue;if(x>W-150)continue;placed.push([x,y]);
     s+=`<text x="${x}" y="${y}" font-size="11" fill="var(--fg)" stroke="var(--card)" stroke-width="3" paint-order="stroke" pointer-events="none">${esc(shortLabel(g))}</text>`}
   el.innerHTML=s+"</svg>";bindPts(el.querySelector("svg"),map);}
   // --- 2: ekte rabatt? ---
