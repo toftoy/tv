@@ -66,7 +66,8 @@ def main():
             and r["stock"] == "in_stock" and r["offers"] >= f["min_offers"]]
     # Ta alltid med produkter som tidligere har vært hos Elkjøp/Power/Komplett
     ids = {r["id"] for r in cand}
-    cand += [r for r in cat if r["id"] in prev and r["id"] not in ids]
+    cand += [r for r in cat if r["id"] in prev and r["id"] not in ids
+             and r["size"] and f["min_size"] <= r["size"] <= f["max_size"]]
     print(f"Kategori: {len(cat)} produkter, {len(cand)} kandidater", flush=True)
 
     products = []
