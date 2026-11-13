@@ -41,7 +41,7 @@ def parse_dt(s):
 def lowest(series, days):
     """series: [[iso-dato, pris, butikk], ...] trinnvis (pris gjelder fra dato). Laveste i vinduet."""
     start = NOW - dt.timedelta(days=days)
-    s = sorted(series, key=lambda x: x[0])
+    s = sorted(bf_model.clean(series), key=lambda x: x[0])
     before = [x for x in s if parse_dt(x[0]) < start]
     inside = [x for x in s if parse_dt(x[0]) >= start]
     vals = ([before[-1]] if before else []) + inside
@@ -177,15 +177,15 @@ def main():
     for p in products:
         p["quality"], p["quality_basis"] = quality.score(p)
         p["stand"] = stand_fit(p)
-    # Sannsynlig Black Week-pris: kalibrert på fjorårets Black Week
+    # Sannsynlig Black Month-pris (bf_model v2), kalibrert på fjorårets Black Month
     cal = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bw_calibration.json")
-    model = json.load(open(cal, encoding="utf-8")) if os.path.exists(cal) else bf_model.fit(history, products, NOW.year - 1)
-    save("bf_model.json", model, indent=1)
+    model = json.load(open(cal, encoding="utf-8")) if os.path.exists(cal) else bf_model.fit(
+        {k: v.get("market", []) for k, v in history.items()}, NOW.year - 1)
     for p in products:
         h = history.get(str(p["id"]), {})
-        ser = list(h.get("market", [])) + [[x[0], x[1], s] for s, l in h.get("shops", {}).items() for x in l]
-        p["bw"] = bf_model.predict(model, p, ser, NOW.year)
-    print(f"Black Week-modell: {model['n']} TV-er fra {model['year']}", flush=True)
+        ser = list(h.get("market", [])) + [[x[0], x[1]] for l in h.get("shops", {}).values() for x in l]
+        p["bw"] = bf_model.predict(model, ser, NOW, (p.get("best") or {}).get("price"))
+    print(f"Black Month-modell: kalibrert på {model.get('n')} TV-er fra {model.get('year')}", flush=True)
     save("quality_tiers.json", {"tiers": [{"pattern": pt, "score": sc, "label": lb} for pt, sc, lb in quality.TIERS],
                                 "adjust": quality.ADJUST})
     save("history.json", history)

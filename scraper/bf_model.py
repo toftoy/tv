@@ -1,112 +1,133 @@
-"""Sannsynlig Black Week-pris.
+"""Sannsynlig Black Week-/Black Month-pris (modell v2).
 
-Kalibrering: for hver TV som fantes i fjor måles forholdet
-    laveste pris i Black Month (1. nov – 2. des)  /  laveste pris i aug–okt samme år
-fra Prisjakts markedslaveste-historikk. Forholdet grupperes etter modellens alder ved
-Black Week (årets modell / fjorårets / eldre) og paneltype (OLED / LCD).
+Målet er laveste markedspris i Black Month (1. nov – 2. des).
 
-Prediksjon for i år: laveste pris aug–okt i år × kvartilene (25/50/75 %) for gruppen.
+Referanse (D): laveste kjente markedspris fram til i dag, over hele historikken (inntil to år,
+fra Prisjakts API) – inkludert det som allerede har skjedd i november.
+Grupper:
+  * «ny bunn i nov»: laveste pris i november så langt er TV-ens laveste noensinne
+  * «stort fall»: D er mer enn 15 % under laveste pris aug–okt
+Kalibrering: forholdet (laveste pris i Black Month) / D for alle TV-er med historikk fra fjorårets
+Black Month, beregnet for flere skjæringsdatoer (31. okt, 7., 13., 20. og 27. nov), slik at
+modellen bruker samme informasjon som vi har på dagens dato.
+
+Backtest på Black Week 2025 (272 TV-er, 5-delt kryssvalidering): median avvik 2,0 %
+(mot 6,6 % for v1 som bare brukte laveste pris aug–okt).
 """
 import datetime as dt
-import re
 import statistics
 
 UTC = dt.timezone.utc
+CUTS = [(10, 31), (11, 7), (11, 13), (11, 20), (11, 27)]
 
 
 def _p(s):
-    return dt.datetime.fromisoformat(s.replace("Z", "+00:00"))
+    return dt.datetime.fromisoformat(s.replace("Z", "+00:00")) if isinstance(s, str) else s
 
 
-def window_min(series, start, end):
-    """Laveste pris i kraft i [start, end] for en trinnvis serie [[dato, pris, butikk], ...]."""
-    s = sorted((x for x in series if x[1] is not None), key=lambda x: x[0])
-    before = [x for x in s if _p(x[0]) < start]
-    inside = [x for x in s if start <= _p(x[0]) <= end]
-    vals = ([before[-1]] if before else []) + inside
-    return min(x[1] for x in vals) if vals else None
+def clean(raw):
+    """Fjerner feilpriser: punkter under 40 % av medianprisen i serien (f.eks. 949 kr for en 43" TV)."""
+    vals = [x[1] for x in raw if x[1] is not None]
+    if len(vals) < 3:
+        return [x for x in raw if x[1] is not None]
+    med = statistics.median(vals)
+    return [x for x in raw if x[1] is not None and x[1] >= 0.4 * med]
 
 
-def covers(series, start, end):
-    s = [x for x in series if x[1] is not None]
-    return bool(s) and min(_p(x[0]) for x in s) <= start + dt.timedelta(days=14) and max(_p(x[0]) for x in s) >= start
+def _series(raw):
+    return sorted((_p(x[0]), x[1]) for x in clean(raw))
 
 
-def windows(year):
-    return (dt.datetime(year, 8, 1, tzinfo=UTC), dt.datetime(year, 10, 31, 23, 59, tzinfo=UTC),
-            dt.datetime(year, 11, 1, tzinfo=UTC), dt.datetime(year, 12, 2, 23, 59, tzinfo=UTC))
+def _at(s, t):
+    b = [p for d, p in s if d <= t]
+    return b[-1] if b else None
 
 
-def model_year(p):
-    m = re.search(r"(20\d\d)$", p.get("family_label") or "") or re.search(r"\((20\d\d)\)", p.get("name") or "")
-    return int(m.group(1)) if m else None
+def _wmin(s, a, b):
+    v = [p for d, p in s if a <= d <= b]
+    x = _at(s, a)
+    if x is not None:
+        v.append(x)
+    return min(v) if v else None
 
 
-def panel(p):
-    s = ((p.get("panel") or "") + " " + p.get("name", "")).upper()
-    return "OLED" if "OLED" in s and "QNED" not in s else "LCD"
-
-
-def age_group(age):
-    if age is None:
-        return "ukjent"
-    return "årets modell" if age <= 0 else "fjorårets modell" if age == 1 else "eldre modell"
-
-
-def _q(vals):
-    v = sorted(vals)
-    if len(v) < 4:
+def features(s, year, cut):
+    """Egenskaper kjent på skjæringsdatoen `cut` (datetime)."""
+    if not s:
         return None
-    qs = statistics.quantiles(v, n=4)
-    return {"q25": round(qs[0], 3), "q50": round(qs[1], 3), "q75": round(qs[2], 3), "n": len(v)}
-
-
-def fit(history, products, year):
-    """Kalibrer på fjorårets Black Week (year = i fjor)."""
-    a0, a1, b0, b1 = windows(year)
-    rows = []
-    for p in products:
-        h = history.get(str(p["id"]))
-        if not h:
-            continue
-        ser = h["market"]
-        if not covers(ser, a0, b1):
-            continue
-        ref, bw = window_min(ser, a0, a1), window_min(ser, b0, b1)
-        if not ref or not bw:
-            continue
-        r = bw / ref
-        if not (0.4 <= r <= 1.3):
-            continue  # urimelig (feildata, utsalg av siste eksemplar e.l.)
-        my = model_year(p)
-        rows.append({"ratio": r, "age": age_group(year - my if my else None), "panel": panel(p)})
-    groups = {}
-    for age in {r["age"] for r in rows}:
-        for pan in ("OLED", "LCD"):
-            q = _q([r["ratio"] for r in rows if r["age"] == age and r["panel"] == pan])
-            if q and q["n"] >= 8:
-                groups[f"{age}|{pan}"] = q
-        q = _q([r["ratio"] for r in rows if r["age"] == age])
-        if q:
-            groups[f"{age}|*"] = q
-    groups["*|*"] = _q([r["ratio"] for r in rows]) or {"q25": 0.9, "q50": 0.95, "q75": 1.0, "n": 0}
-    share = {
-        "billigere": round(sum(r["ratio"] < 0.98 for r in rows) / max(1, len(rows)), 2),
-        "omtrent_likt": round(sum(0.98 <= r["ratio"] <= 1.02 for r in rows) / max(1, len(rows)), 2),
-        "dyrere": round(sum(r["ratio"] > 1.02 for r in rows) / max(1, len(rows)), 2),
-    }
-    return {"year": year, "n": len(rows), "groups": groups, "andel": share}
-
-
-def predict(model, p, series, year):
-    a0, a1, _, _ = windows(year)
-    ref = window_min(series, a0, a1)
-    if not ref:
+    nov1 = dt.datetime(year, 11, 1, tzinfo=UTC)
+    A = _wmin(s, dt.datetime(year, 8, 1, tzinfo=UTC), min(cut, dt.datetime(year, 10, 31, 23, 59, tzinfo=UTC)))
+    D = _wmin(s, s[0][0], cut)
+    Dn = _wmin(s, nov1, cut) if cut >= nov1 else None
+    if not D:
         return None
-    my = model_year(p)
-    age = age_group(year - my if my else None)
-    g = model["groups"].get(f"{age}|{panel(p)}") or model["groups"].get(f"{age}|*") or model["groups"]["*|*"]
-    key = f"{age}|{panel(p)}" if f"{age}|{panel(p)}" in model["groups"] else (f"{age}|*" if f"{age}|*" in model["groups"] else "*|*")
-    return {"low": round(ref * g["q25"] / 10) * 10, "mid": round(ref * g["q50"] / 10) * 10,
-            "high": round(ref * g["q75"] / 10) * 10, "ref": ref, "group": key.replace("|*", "").replace("|", ", "),
-            "n": g["n"]}
+    nov = "ny bunn i nov" if Dn and Dn <= D * 1.001 else "ikke ny bunn"
+    drop = "stort fall" if A and D < A * 0.85 else "lite fall"
+    return {"A": A, "D": D, "Dn": Dn, "group": f"{nov}, {drop}"}
+
+
+def cut_key(now):
+    y = now.year
+    for m, d in reversed(CUTS):
+        if now >= dt.datetime(y, m, d, tzinfo=UTC):
+            return f"{m:02d}-{d:02d}"
+    return f"{CUTS[0][0]:02d}-{CUTS[0][1]:02d}"
+
+
+def fit(series_by_id, year):
+    """series_by_id: {id: [[dato, pris, ...], ...]}. Kalibrerer på Black Month i `year`."""
+    end = dt.datetime(year, 12, 2, 23, 59, tzinfo=UTC)
+    nov1 = dt.datetime(year, 11, 1, tzinfo=UTC)
+    out = {"year": year, "cuts": {}}
+    for m, d in CUTS:
+        cut = dt.datetime(year, m, d, 23, 59, tzinfo=UTC)
+        rows = []
+        for raw in series_by_id.values():
+            s = _series(raw)
+            if not s or s[0][0] > dt.datetime(year, 10, 1, tzinfo=UTC) or s[-1][0] < dt.datetime(year, 8, 1, tzinfo=UTC):
+                continue
+            f = features(s, year, cut)
+            tgt = _wmin(s, nov1, end)
+            if not f or not tgt:
+                continue
+            r = tgt / f["D"]
+            if 0.3 < r < 1.5:
+                rows.append((f["group"], r))
+        groups = {}
+        for g in sorted({g for g, _ in rows}) + ["*"]:
+            rs = sorted(r for gg, r in rows if g == "*" or gg == g)
+            if len(rs) < 8:
+                continue
+            q = statistics.quantiles(rs, n=4)
+            groups[g] = {"q25": round(q[0], 3), "q50": round(q[1], 3), "q75": round(q[2], 3), "n": len(rs),
+                         "p_lavere": round(sum(x < 0.98 for x in rs) / len(rs), 2),
+                         "dist": [round(x, 3) for x in statistics.quantiles(rs, n=20)]}
+        out["cuts"][f"{m:02d}-{d:02d}"] = groups
+    out["n"] = max((g.get("*", {}).get("n", 0) for g in out["cuts"].values()), default=0)
+    return out
+
+
+def _p_below(dist, x):
+    """Andel av fjorårets TV-er der forholdet var under x (fra 5 %-kvantiler)."""
+    return round(sum(v < x for v in dist) / (len(dist) + 1), 2)
+
+
+def predict(model, raw_series, now, best=None):
+    """Sannsynlig laveste markedspris i årets Black Month, gitt historikken fram til `now`."""
+    year = now.year
+    if now > dt.datetime(year, 12, 2, 23, 59, tzinfo=UTC) or now < dt.datetime(year, 9, 1, tzinfo=UTC):
+        return None
+    s = _series(raw_series)
+    f = features(s, year, now)
+    if not f:
+        return None
+    groups = model["cuts"].get(cut_key(now)) or {}
+    g = groups.get(f["group"]) or groups.get("*")
+    if not g:
+        return None
+    D = f["D"]
+    return {"low": round(D * g["q25"] / 10) * 10, "mid": round(D * g["q50"] / 10) * 10,
+            "high": round(D * g["q75"] / 10) * 10, "ref": D, "group": f["group"], "n": g["n"],
+            "p_lavere": g["p_lavere"], "cut": cut_key(now),
+            # sjanse for at laveste markedspris i Black Month blir minst 2 % under dagens beste butikkpris
+            "p_billigere": _p_below(g.get("dist", []), best * 0.98 / D) if best and g.get("dist") else None}

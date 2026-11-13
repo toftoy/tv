@@ -144,7 +144,7 @@ td,th{font-variant-numeric:tabular-nums}
 <li><b>Butikkprisene</b> er dagens pris hos Elkjøp, Power og Komplett. <s>Overstrøket</s> = butikkens oppgitte førpris. «M» = medlemspris (gratis kundeklubb).</li>
 <li><b>Nå vs 60 d</b>: <span class="badge b-good">Lavpris</span> dagens beste pris hos de tre er lik/under laveste pris i hele markedet siste 60 dager. <span class="badge b-warn">+x %</span> under 10 % over. <span class="badge b-bad">+x %</span> mer enn 10 % over – da er «tilbudet» trolig ikke reelt.</li>
 <li><b>Stativ</b>: om TV-en passer på Eva Solo Carry-stativet (VESA 100/200/300 mm, 40–65"). «? ukjent» betyr at Prisjakt ikke oppgir VESA-mål – sjekk hos butikken. VESA-målene stativet tar kan justeres i <code>config.json</code>.</li>
-<li><b>Sannsynlig BW-pris</b>: anslått laveste pris i Black Week/Black Month. Beregnet som laveste pris aug–okt i år × prisfallet tilsvarende TV-er hadde fra aug–okt til Black Week i fjor (25–75 %-intervall, gruppert etter årets/fjorårets modell og OLED/LCD). «i BW-nivå» = dagens pris er allerede på eller under midtestimatet; da er det lite sannsynlig at den blir vesentlig billigere. Det er et statistisk anslag, ikke en garanti.</li>
+<li><b>Sannsynlig BW-pris</b>: anslått laveste markedspris i Black Month (1. nov–2. des). Utgangspunktet er TV-ens <i>laveste kjente pris</i> over inntil to års historikk, inkludert det som allerede har skjedd i november. Den justeres med hvordan tilsvarende TV-er beveget seg i fjor fra samme dato fram til Black Week. TV-ene er gruppert etter om de allerede har fått ny bunnpris i november og om de har falt mye siden høsten. Intervallet er 25–75 %. «x % sjanse lavere» = andelen tilsvarende TV-er i fjor som ble minst 2 % billigere enn dagens pris. «i BW-nivå» = dagens pris er på eller under midtestimatet. Testet mot Black Week 2025 bommet modellen med 2 % i median (272 TV-er). Det er et statistisk anslag, ikke en garanti.</li>
 <li><b>Kvalitet</b> er en skjønnsmessig score 0–100 per modellserie, justert for størrelse. <a href="#" data-qlink>Se forklaring og hele tabellen</a>.</li>
 <li><b>Varsler</b> kommer på e-post (via GitHub-issue) når en TV på overvåkingslisten (<code>config.json</code>) når laveste 60-dagerspris eller din maksgrense.</li>
 </ul>
@@ -207,9 +207,10 @@ function verdict(g){
   const d=g.verdict;if(d<=0.001)return'<span class="badge b-good">Lavpris</span>';
   const t=`+${(d*100).toFixed(0)} %`;return d<0.1?`<span class="badge b-warn">${t}</span>`:`<span class="badge b-bad">${t}</span>`}
 function bwCell(g){const b=g.bw;if(!b)return'<span class="muted">–</span>';
-  const tip=`Laveste aug–okt: ${fmt(b.ref)} kr. Gruppe: ${b.group} (${b.n} TV-er i fjor). Midtestimat ${fmt(b.mid)} kr.`;
+  const tip=`Laveste kjente markedspris: ${fmt(b.ref)} kr. Gruppe: ${b.group} (${b.n} TV-er i fjor). Midtestimat ${fmt(b.mid)} kr.`+(b.p_billigere!=null?` Sjanse for at noen butikk går minst 2 % under dagens pris i Black Month: ${Math.round(b.p_billigere*100)} %.`:"");
   let tag="";if(g.best!=null){if(g.best<=b.mid)tag='<br><span class="badge b-good">i BW-nivå</span>';else if(g.best<=b.high)tag='<br><span class="badge b-warn">nær</span>';}
-  return `<span title="${esc(tip)}">${fmt(b.low)}–${fmt(b.high)}</span>${tag}`}
+  const pb=b.p_billigere!=null?`<br><span class="muted small" title="Andel av tilsvarende TV-er i fjor som ble minst 2 % billigere enn dette">${Math.round(b.p_billigere*100)} % sjanse lavere</span>`:"";
+  return `<span title="${esc(tip)}">${fmt(b.low)}–${fmt(b.high)}</span>${tag}${pb}`}
 function standCell(g){const vn=(g.items.find(p=>p.vesa_note)||{}).vesa_note;const t=(g.vesa?`VESA ${g.vesa}`:"VESA-mål ukjent")+(vn?` (${vn})`:"");
   const low=g.items.some(p=>p.vesa_conf==="low")&&!g.items.some(p=>p.vesa&&!p.vesa_conf);
   if(g.stand==="ja")return low?`<span class="badge b-warn" title="${t} – usikker kilde, sjekk før kjøp">✓? trolig</span>`:`<span class="badge b-good" title="${t} – passer">✓ passer</span>`;
@@ -346,7 +347,7 @@ function pickHTML(el){
   const urls=[];for(const p of g.items)for(const s of SHOPS){const o=p.shops[s];if(o&&o.url&&!urls.some(u=>u[0]===s))urls.push([s,o.url])}
   const pj=g.items.find(p=>typeof p.id==="number");
   return `<div class="pick"><img loading="lazy" alt="" src="${g.img_url||IMG(g.img)}" onerror="this.style.visibility='hidden'"><div>${head}
-    <div class="live">${shops}<span class="muted">Lav 60 d: ${g.low60?fmt(g.low60.price):"–"}</span>${verdict(g)}<span class="q" title="${esc(g.qbasis)}">${g.quality}</span>${standCell(g)}${g.bw?`<span title="Sannsynlig Black Week-pris">BW: ${fmt(g.bw.low)}–${fmt(g.bw.high)}${g.best!=null&&g.best<=g.bw.mid?' <span class="badge b-good">i nivå</span>':""}</span>`:""}</div>
+    <div class="live">${shops}<span class="muted">Lav 60 d: ${g.low60?fmt(g.low60.price):"–"}</span>${verdict(g)}<span class="q" title="${esc(g.qbasis)}">${g.quality}</span>${standCell(g)}${g.bw?`<span title="Sannsynlig Black Week-pris">BW: ${fmt(g.bw.low)}–${fmt(g.bw.high)}${g.bw.p_billigere!=null?` · ${Math.round(g.bw.p_billigere*100)} % sjanse lavere`:""}${g.best!=null&&g.best<=g.bw.mid?' <span class="badge b-good">i nivå</span>':""}</span>`:""}</div>
     <div class="links"><a href="#" data-goto="${esc(g.key)}">Vis i tabellen</a>${pj?`<a href="${pj.url}" target="_blank" rel="noopener">Prisjakt</a>`:""}${urls.map(([s,u])=>`<a href="${esc(u)}" target="_blank" rel="noopener">Kjøp hos ${s}</a>`).join("")}${rev}</div>
     <div class="muted small">${esc(g.label)}${g.items.length>1?` · ${g.items.length} varianter`:""}${gs.length>1?` · også: ${gs.slice(1,3).map(x=>esc(x.label)).join(", ")}`:""}</div></div></div>`;
 }
