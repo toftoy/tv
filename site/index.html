@@ -2,125 +2,415 @@
 <html lang="nb">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f5f4f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1013" media="(prefers-color-scheme: dark)">
 <title>TV-prisvakt</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ffd43b'/%3E%3Cpath d='M7 10h18v11H7zM12 25h8' fill='none' stroke='%2316181c' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<script>try{var t=localStorage.getItem("tvtheme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
 <style>
-:root{--s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--bg:#f6f7f9;--card:#fff;--fg:#1a1d21;--muted:#6b7280;--line:#e5e7eb;--accent:#2563eb;--good:#15803d;--goodbg:#dcfce7;--warn:#a16207;--warnbg:#fef9c3;--bad:#b91c1c;--badbg:#fee2e2;--chip:#eef2ff}
-@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f1115;--card:#171a20;--fg:#e8eaed;--muted:#9aa3af;--line:#2a2f37;--accent:#60a5fa;--good:#4ade80;--goodbg:#13361f;--warn:#facc15;--warnbg:#3a3112;--bad:#f87171;--badbg:#3b1616;--chip:#1e2533;--s1:#3987e5;--s2:#d95926;--s3:#199e70}}
+/* ---------- Tokens ---------- */
+:root{
+  color-scheme:light;
+  --bg:#f5f4f0;--card:#fff;--raise:#faf9f6;--fg:#16181c;--fg2:#474c55;--muted:#676d77;
+  --line:#e4e2dc;--line2:#cfccc3;--chip:#efede7;
+  --accent:#1857c9;--accent-ink:#fff;--accent-soft:#e7eefb;
+  --brand:#ffd43b;--brand-ink:#16181c;
+  --good:#0f6b37;--goodbg:#dff3e4;--warn:#8a5700;--warnbg:#fdefc6;--bad:#b3261e;--badbg:#fde4e1;
+  --c1:#2a78d6;--c2:#eb6834;--c3:#1baf7a;--c4:#eda100;--c5:#e87ba4;--c6:#008300;--mk:#898781;
+  --grid:#e9e7e1;--axis:#c3c2b7;
+  --shadow:0 1px 2px rgba(22,24,28,.05),0 4px 14px rgba(22,24,28,.05);
+  --r:14px;--tabh:62px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+  color-scheme:dark;
+  --bg:#0e1013;--card:#181b20;--raise:#1e2228;--fg:#eceef1;--fg2:#c2c7cf;--muted:#969dA9;
+  --line:#2a2f38;--line2:#3b414c;--chip:#252a33;
+  --accent:#84b3ff;--accent-ink:#0b1220;--accent-soft:#1a2842;
+  --good:#62d38d;--goodbg:#143222;--warn:#f2c14e;--warnbg:#3a2f10;--bad:#ff8f85;--badbg:#3d1a17;
+  --c1:#3987e5;--c2:#d95926;--c3:#199e70;--c4:#c98500;--c5:#d55181;--c6:#008300;--mk:#898781;
+  --grid:#262a31;--axis:#3b414c;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25);
+}}
+:root[data-theme=dark]{
+  color-scheme:dark;
+  --bg:#0e1013;--card:#181b20;--raise:#1e2228;--fg:#eceef1;--fg2:#c2c7cf;--muted:#969dA9;
+  --line:#2a2f38;--line2:#3b414c;--chip:#252a33;
+  --accent:#84b3ff;--accent-ink:#0b1220;--accent-soft:#1a2842;
+  --good:#62d38d;--goodbg:#143222;--warn:#f2c14e;--warnbg:#3a2f10;--bad:#ff8f85;--badbg:#3d1a17;
+  --c1:#3987e5;--c2:#d95926;--c3:#199e70;--c4:#c98500;--c5:#d55181;--c6:#008300;--mk:#898781;
+  --grid:#262a31;--axis:#3b414c;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25);
+}
+/* ---------- Base ---------- */
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-header{padding:16px;max-width:1300px;margin:auto}
-h1{font-size:22px;margin:0 0 4px}
-.muted{color:var(--muted)}
-nav.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
-nav.tabs button{white-space:nowrap}
-nav.tabs button{border:1px solid var(--line);background:var(--card);color:var(--fg);padding:6px 12px;border-radius:999px;cursor:pointer}
-nav.tabs button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
-main{max-width:1300px;margin:auto;padding:0 16px 40px}
-.filters{display:flex;flex-wrap:wrap;gap:10px 18px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px}
-.filters label{white-space:nowrap}
-.filters input[type=search],.filters select{padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg)}
-.group{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.group b{font-weight:600;margin-right:2px}
-.tablewrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:12px}
-table{border-collapse:collapse;width:100%;min-width:980px}
-th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-th{position:sticky;top:0;background:var(--card);font-weight:600;cursor:pointer;user-select:none;white-space:nowrap}
-td.num,th.num{text-align:right;white-space:nowrap}
-tr.row{cursor:pointer}
-tr.row:hover{background:var(--chip)}
-.chip{display:inline-block;padding:1px 7px;border-radius:999px;background:var(--chip);font-size:12px;margin:1px 2px 1px 0}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:70px}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow-x:hidden;
+  padding-bottom:calc(var(--tabh) + env(safe-area-inset-bottom,0px) + 8px)}
+a{color:var(--accent);text-underline-offset:2px}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+h1,h2,h3,h4,h5{margin:0;text-wrap:balance}
+.muted{color:var(--muted)}.small{font-size:12.5px}
 .good{color:var(--good)}.bad{color:var(--bad)}.warn{color:var(--warn)}
-.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
-.b-good{background:var(--goodbg);color:var(--good)}.b-warn{background:var(--warnbg);color:var(--warn)}.b-bad{background:var(--badbg);color:var(--bad)}
 s{color:var(--muted)}
-.best{font-weight:700}
-.detail td{background:var(--bg)}
-.variants{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;margin-bottom:10px}
-.v{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px}
-.v h4{margin:0 0 6px;font-size:13px}
-svg.chart{width:100%;height:220px;background:var(--card);border:1px solid var(--line);border-radius:10px}
-.legend span{margin-right:12px;font-size:12px}
-.guide{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 20px;max-width:900px}
-.guide h2{font-size:18px;margin-top:26px}
-.guide h3{font-size:15px;margin:18px 0 6px}
-.guide{max-width:980px;line-height:1.55}
-.picks{display:grid;gap:12px;margin:10px 0 4px}
-.pick{display:grid;grid-template-columns:120px 1fr;gap:14px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px}
-.pick>div{min-width:0}
-.pick img{width:120px;aspect-ratio:4/3;object-fit:contain;background:#fff;border-radius:8px}
-.pick h4{margin:0 0 4px;font-size:15px}
-.pick .live{display:flex;flex-wrap:wrap;gap:6px 14px;margin:6px 0;font-variant-numeric:tabular-nums}
-.pick .links{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:13px}
-.qt{border-collapse:collapse;width:100%;min-width:0;font-size:13px}
-.qt td,.qt th{padding:4px 8px;border-bottom:1px solid var(--line)}
-.qtwrap{max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:10px}
-@media (max-width:600px){.pick{grid-template-columns:80px 1fr}.pick img{width:80px}}
-a{color:var(--accent)}
-.small{font-size:12px}
-td.imgc{width:64px;padding:6px}
-.thumb{width:56px;height:42px;object-fit:contain;background:#fff;border-radius:6px;display:block}
-.bigimg{width:220px;max-width:100%;aspect-ratio:4/3;object-fit:contain;background:#fff;border-radius:10px;border:1px solid var(--line)}
-.v{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
+.num,.price,td,th{font-variant-numeric:tabular-nums}
+code{background:var(--chip);padding:1px 5px;border-radius:5px;font-size:.92em}
+/* ---------- Header ---------- */
+.top{background:var(--card);border-bottom:1px solid var(--line)}
+.top-in{max-width:1400px;margin:auto;padding:10px 16px;display:flex;align-items:center;gap:10px 16px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--fg);min-width:0}
+.logo{flex:none;width:34px;height:34px;border-radius:10px;background:var(--brand);color:var(--brand-ink);display:grid;place-items:center;transform:rotate(-6deg);box-shadow:0 1px 0 rgba(0,0,0,.12)}
+.brand h1{font-size:19px;letter-spacing:-.02em;white-space:nowrap}
+.status{margin-left:auto;display:flex;align-items:center;gap:8px;min-width:0;font-size:12.5px;color:var(--muted)}
+.status details{position:relative}
+.status summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:7px;min-height:44px;padding:0 4px;border-radius:8px;white-space:nowrap}
+.status summary::-webkit-details-marker{display:none}
+.sdot{width:8px;height:8px;border-radius:50%;background:var(--good);flex:none}
+.sdot.w{background:var(--warn)}.sdot.b{background:var(--bad)}
+.age.old{color:var(--bad);font-weight:600}
+.spop{position:absolute;right:0;top:100%;z-index:60;width:min(300px,calc(100vw - 32px));background:var(--card);border:1px solid var(--line2);border-radius:12px;box-shadow:var(--shadow);padding:12px 14px;color:var(--fg);font-size:13px}
+.spop div{display:flex;gap:8px;align-items:baseline;padding:3px 0}
+.spop .sdot{align-self:center}
+.iconbtn{flex:none;width:44px;height:44px;border-radius:12px;border:1px solid transparent;background:none;display:grid;place-items:center;color:var(--fg2)}
+.iconbtn:hover{background:var(--chip)}
+/* Tabs: bunnlinje på mobil, i toppen på desktop */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(5,1fr);
+  background:color-mix(in srgb,var(--card) 92%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  border-top:1px solid var(--line);padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px))}
+nav.tabs button{border:0;background:none;color:var(--muted);min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11.5px;font-weight:500;border-radius:12px;padding:2px;-webkit-tap-highlight-color:transparent;transition:color .15s,background .15s}
+nav.tabs button svg{width:22px;height:22px;transition:transform .2s}
+nav.tabs button.on{color:var(--accent);font-weight:650}
+nav.tabs button.on svg{transform:translateY(-1px) scale(1.08)}
+nav.tabs .l-long{display:none}
+/* ---------- Layout ---------- */
+main{max-width:1400px;margin:auto;padding:14px 16px 24px}
+/* ---------- Hero ---------- */
+.hero-h{display:flex;align-items:baseline;gap:8px;margin:2px 0 8px}
+.hero-h h2{font-size:16px;letter-spacing:-.01em}
+.hero{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px 14px;padding:2px 16px 6px;scrollbar-width:none}
+.hero::-webkit-scrollbar{display:none}
+.hc{flex:0 0 min(78vw,300px);scroll-snap-align:center;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:start;box-shadow:var(--shadow);transition:transform .15s,border-color .15s;-webkit-tap-highlight-color:transparent;min-height:118px}
+button.hc:hover{border-color:var(--line2);transform:translateY(-2px)}
+button.hc:active{transform:scale(.98)}
+.hc .k{grid-column:1/-1;font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:6px}
+.hc .k i{width:8px;height:8px;border-radius:2px;background:var(--brand);transform:rotate(45deg);flex:none}
+.hc .n{font-weight:650;font-size:15px;line-height:1.25;margin-top:4px}
+.hc .p{font-size:22px;font-weight:750;letter-spacing:-.02em;margin-top:2px}
+.hc .p small{font-size:13px;font-weight:500;color:var(--muted);letter-spacing:0}
+.hc .w{grid-column:1/-1;font-size:13px;color:var(--fg2);margin-top:2px}
+.hc img{width:68px;height:52px;object-fit:contain;background:#fff;border-radius:8px;grid-row:2/4;grid-column:2;margin-top:4px}
+.hc.cd{background:var(--brand);color:var(--brand-ink);border-color:transparent}
+.hc.cd .k{color:var(--brand-ink);opacity:.75}.hc.cd .k i{background:var(--brand-ink)}
+.hc.cd .big{font-size:44px;font-weight:800;letter-spacing:-.04em;line-height:1;margin-top:4px;grid-column:1}
+.hc.cd .n{grid-column:2;align-self:end;margin:0 0 4px}.hc.cd .w{color:var(--brand-ink);opacity:.82}
+/* ---------- Filtre ---------- */
+.chip{display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:999px;background:var(--chip);font-size:12px;white-space:nowrap}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips label,.seg label,a.chipbtn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--line2);background:var(--card);cursor:pointer;user-select:none;-webkit-user-select:none;font-weight:550;font-size:14px;transition:background .12s,color .12s,border-color .12s,transform .1s;-webkit-tap-highlight-color:transparent;text-decoration:none;color:var(--fg)}
+.chips label:active,.seg label:active{transform:scale(.96)}
+.chips input,.seg input{position:absolute;opacity:0;pointer-events:none}
+.chips label:has(input:checked),.seg label:has(input:checked){background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.chips label:has(input:focus-visible),.seg label:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.frow{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.frow>b{font-size:12.5px;color:var(--muted);font-weight:600;flex:none}
+.fsticky{position:sticky;top:0;z-index:30;margin:0 -16px 10px;padding:8px 16px;background:color-mix(in srgb,var(--bg) 90%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.fbar{display:flex;gap:8px}
+.inp,.filters select,.filters input[type=search]{min-height:44px;border:1px solid var(--line2);border-radius:12px;background:var(--card);color:var(--fg);padding:0 12px;font-size:16px;min-width:0}
+.search{flex:1;position:relative;min-width:0}
+.search input{width:100%;padding-left:38px;-webkit-appearance:none;appearance:none}
+.search svg{position:absolute;left:12px;top:50%;translate:0 -50%;color:var(--muted);pointer-events:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line2);background:var(--card);color:var(--fg);font-weight:600;font-size:14px;text-decoration:none;white-space:nowrap;transition:background .12s,transform .1s;-webkit-tap-highlight-color:transparent}
+.btn:hover{background:var(--raise)}.btn:active{transform:scale(.97)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.sm{min-height:36px;padding:0 10px;font-size:13px;border-radius:10px}
+#fbtn .cnt{background:var(--accent);color:var(--accent-ink);border-radius:999px;min-width:20px;height:20px;padding:0 6px;font-size:12px;display:inline-grid;place-items:center}
+#fbtn[aria-expanded=true]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.fpanel{display:none;margin-top:8px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;box-shadow:var(--shadow);max-height:calc(100dvh - 190px);overflow:auto;overscroll-behavior:contain}
+.fpanel.open{display:block;animation:pop .16s ease-out}
+@keyframes pop{from{opacity:0;transform:translateY(-4px)}}
+.fpanel h5{font-size:12.5px;color:var(--muted);font-weight:600;margin:0 0 6px}
+.fsel{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.fsel label{display:grid;gap:4px;font-size:12.5px;color:var(--muted);font-weight:600}
+.fsel select{width:100%}
+.tgs{display:grid;gap:2px}
+.tg{display:grid;grid-template-columns:24px 1fr;gap:1px 10px;align-items:start;padding:9px 6px;border-radius:10px;cursor:pointer;min-height:44px}
+.tg:hover{background:var(--raise)}
+.tg input{width:20px;height:20px;margin:1px 0 0;accent-color:var(--accent);grid-row:1/3}
+.tg b{font-weight:600;font-size:14.5px}
+.tg span{grid-column:2;font-size:12.5px;color:var(--muted);line-height:1.35}
+.fend{display:flex;gap:8px;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.meta{display:flex;align-items:center;gap:8px;justify-content:space-between;margin:0 0 10px;font-size:13px;color:var(--muted);min-height:36px}
+.meta select{min-height:40px;border:1px solid var(--line2);border-radius:10px;background:var(--card);padding:0 8px;font-size:16px;max-width:56vw}
+/* ---------- Merker ---------- */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:650;white-space:nowrap;background:var(--chip);color:var(--fg2);line-height:1.5}
+.b-good{background:var(--goodbg);color:var(--good)}.b-warn{background:var(--warnbg);color:var(--warn)}.b-bad{background:var(--badbg);color:var(--bad)}
+.q{display:inline-grid;place-items:center;min-width:34px;height:26px;padding:0 6px;border-radius:8px;background:var(--fg);color:var(--bg);font-weight:700;font-size:13px;font-variant-numeric:tabular-nums}
+.q.lo{background:var(--chip);color:var(--fg2)}
+.flag{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px;padding:8px 10px;border-radius:10px;font-size:13px;line-height:1.35}
+.flag.b-warn,.flag.b-bad{font-weight:500}
+.flag a{color:inherit;font-weight:700}
+/* ---------- Kort (mobil) ---------- */
+#cards{display:grid;gap:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;scroll-margin-top:70px}
+.card.open{border-color:var(--line2)}
+.c-main{display:grid;grid-template-columns:76px 1fr auto;gap:4px 12px;padding:12px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .12s}
+.c-main:active{background:var(--raise)}
+.c-img{width:76px;height:58px;object-fit:contain;background:#fff;border-radius:10px;grid-row:1/3}
+.c-title{font-weight:680;font-size:15.5px;line-height:1.25;letter-spacing:-.01em}
+.c-sub{font-size:12.5px;color:var(--muted);grid-column:2/4}
+.c-badges{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.c-price{grid-column:1/-1;display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 8px;margin-top:8px}
+.c-price .price{font-size:24px;font-weight:760;letter-spacing:-.02em}
+.c-price .price small{font-size:14px;font-weight:500;color:var(--muted)}
+.c-bw{grid-column:1/-1;font-size:13px;color:var(--fg2);display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
+.c-shops{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:4px 6px;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)}
+.sp{display:inline-flex;gap:5px;align-items:baseline;font-size:12.5px;padding:2px 8px;border-radius:8px;background:var(--raise);border:1px solid var(--line);color:var(--fg2)}
+.sp b{color:var(--fg);font-variant-numeric:tabular-nums}
+.sp.best{background:var(--accent-soft);border-color:transparent}
+.sp.out{opacity:.65}
+.c-foot{grid-column:1/-1;display:flex;justify-content:center;color:var(--muted);margin:4px 0 -6px}
+.c-foot svg{transition:transform .2s}
+.card.open .c-foot svg,tr.row.open .chev{transform:rotate(180deg)}
+.c-detail{border-top:1px solid var(--line);background:var(--raise);padding:12px}
+/* ---------- Tabell (desktop) ---------- */
+.tablewrap{display:none;background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+table.main{border-collapse:separate;border-spacing:0;width:100%;min-width:1240px;font-size:13.5px}
+table.main th,table.main td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;background:var(--card)}
+table.main th{position:sticky;top:0;z-index:3;font-weight:600;font-size:12.5px;color:var(--fg2);cursor:pointer;user-select:none;white-space:nowrap;border-bottom:1px solid var(--line2);vertical-align:bottom}
+table.main th:hover{color:var(--fg)}
+table.main th[aria-sort]{color:var(--fg)}
+table.main th[data-k]::after{content:"↕";opacity:.3;margin-left:4px;font-size:11px}
+table.main th[aria-sort=ascending]::after{content:"▲";opacity:1;color:var(--accent)}
+table.main th[aria-sort=descending]::after{content:"▼";opacity:1;color:var(--accent)}
+table.main th:first-child{border-top-left-radius:var(--r)}table.main th:last-child{border-top-right-radius:var(--r)}
+td.num,th.num{text-align:right;white-space:nowrap}
+.stk1{position:sticky;left:0;z-index:2}.stk2{position:sticky;left:72px;z-index:2;box-shadow:1px 0 0 var(--line)}
+th.stk1,th.stk2{z-index:4}
+tr.row{cursor:pointer;scroll-margin-top:60px}
+tr.row:hover td{background:var(--raise)}
+tr.row.open td{background:var(--raise);border-bottom-color:transparent}
+td.imgc{width:72px;padding:6px 8px}
+.thumb{width:56px;height:42px;object-fit:contain;background:#fff;border-radius:7px;display:block}
+td.mcol{min-width:250px;max-width:330px}
+.m-t{font-weight:650;font-size:14px;display:flex;gap:6px;align-items:baseline;justify-content:space-between}
+.m-b{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.chev{flex:none;color:var(--muted);transition:transform .2s;align-self:center}
+.bestp{font-weight:750;font-size:15px}
+.cellbest{font-weight:700;background:var(--accent-soft);padding:1px 6px;margin:-1px -6px;border-radius:6px}
+tr.detail>td{padding:0;background:var(--raise);border-bottom:1px solid var(--line2)}
+.detail-wrap{position:sticky;left:0;width:var(--ww,100%);max-width:100%;padding:6px 16px 18px}
+.flash{animation:flash 1.6s ease-out}
+@keyframes flash{0%,30%{box-shadow:0 0 0 3px var(--brand)}100%{box-shadow:0 0 0 3px transparent}}
+tr.flash td{animation:flashbg 1.6s ease-out}
+@keyframes flashbg{0%,30%{background:color-mix(in srgb,var(--brand) 35%,var(--card))}}
+/* ---------- Detalj ---------- */
+.detail-in{display:grid;gap:12px;min-width:0}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.fact,.chartcard,.v{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;min-width:0}
+.fact h5,.chart-h b,.sec-h{font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.fact h5{margin-bottom:6px}
+.fact .big{font-size:19px;font-weight:740;letter-spacing:-.01em}
+.fact p{margin:4px 0 0;font-size:13px;color:var(--fg2);overflow-wrap:anywhere}
+.mini{width:100%;border-collapse:collapse;font-size:13px}
+.mini td{padding:3px 0;border:0;background:none;vertical-align:baseline}
+.mini td:nth-child(2){text-align:right;font-weight:650;padding:3px 10px}
+.mini td:last-child{color:var(--muted);font-size:12.5px;overflow-wrap:anywhere}
+.chart-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.seg{display:inline-flex;gap:0;border:1px solid var(--line2);border-radius:10px;overflow:hidden;background:var(--card)}
+.seg button{border:0;background:none;min-height:36px;min-width:52px;padding:0 10px;font-size:13px;font-weight:600;color:var(--fg2)}
+.seg button+button{border-left:1px solid var(--line2)}
+.seg button.on{background:var(--fg);color:var(--bg)}
+.chartbox{min-height:210px;position:relative}
+.chartbox svg{display:block;width:100%;height:auto;touch-action:pan-y;overflow:visible}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;margin-top:6px;color:var(--fg2)}
+.legend>span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.legend b{color:var(--fg);font-variant-numeric:tabular-nums}
+.lk{display:inline-block;width:14px;height:3px;border-radius:2px;flex:none}
+.lk.d{background:repeating-linear-gradient(90deg,var(--mk) 0 4px,transparent 4px 7px)!important}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;flex:none}
+.variants{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px}
+.v{display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:start}
 .v>div{min-width:0}
-@media (max-width:600px){.bigimg{width:140px}}
-.q{display:inline-block;min-width:34px;text-align:center;padding:2px 6px;border-radius:6px;background:var(--chip);font-weight:600;font-variant-numeric:tabular-nums}
-.plots{display:grid;gap:16px}
-.plot{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;min-width:0}
-.plot h2{font-size:16px;margin:0 0 2px}
-.plot svg{width:100%;height:auto;display:block;overflow:visible}
-.plot .legend{display:flex;flex-wrap:wrap;gap:4px 14px;margin:6px 0}
-.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
-#tip{position:fixed;pointer-events:none;z-index:50;background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12px;box-shadow:0 4px 16px rgba(0,0,0,.18);max-width:280px}
-td,th{font-variant-numeric:tabular-nums}
-@media (max-width:600px){header,main{padding-left:16px;padding-right:16px}}
+.bigimg{width:96px;aspect-ratio:4/3;object-fit:contain;background:#fff;border-radius:8px;border:1px solid var(--line);display:block}
+.v h4{font-size:13.5px;line-height:1.3;overflow-wrap:anywhere}
+.so{padding:7px 0;border-top:1px solid var(--line);margin-top:7px}
+.so-h{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline}
+.so-h a.go{margin-left:auto;font-weight:650;font-size:13px;min-height:28px;display:inline-flex;align-items:center}
+.so .t{font-size:12.5px;color:var(--muted);overflow-wrap:anywhere}
+/* ---------- Tom tilstand ---------- */
+.empty{text-align:center;padding:36px 16px;background:var(--card);border:1px dashed var(--line2);border-radius:var(--r);color:var(--fg2)}
+.empty svg{color:var(--muted);margin-bottom:6px}
+.empty h3{font-size:17px;margin-bottom:4px}
+.empty p{margin:0 0 14px}
+/* ---------- Plott ---------- */
+.plots{display:grid;gap:14px}
+.plot{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;min-width:0;box-shadow:var(--shadow)}
+.plot h2{font-size:17px;margin:0 0 2px;letter-spacing:-.01em}
+.plot p{margin:0}
+.plot svg{width:100%;height:auto;display:block;overflow:visible;touch-action:pan-y;-webkit-tap-highlight-color:transparent}
+.plot .legend{margin:8px 0}
+.seg.radio{flex-wrap:wrap;border:0;gap:6px;overflow:visible;background:none;margin:10px 0 4px}
+.seg.radio label{min-height:40px;font-size:13.5px}
+#tip{position:fixed;pointer-events:none;z-index:70;background:var(--card);color:var(--fg);border:1px solid var(--line2);border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.45;box-shadow:0 8px 28px rgba(0,0,0,.22);max-width:min(300px,calc(100vw - 24px))}
+#tip.pinned{pointer-events:auto}
+#tip .tt{font-weight:700;font-size:14px;margin-bottom:2px}
+#tip .tr{display:flex;justify-content:space-between;gap:14px;align-items:center}
+#tip .tr span{display:inline-flex;align-items:center;gap:6px;color:var(--fg2)}
+#tip .ta{display:flex;gap:8px;margin-top:8px}
+#tip .ta .btn{flex:1}
+/* ---------- Guide / tekstsider ---------- */
+.guide{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:6px 16px 16px;max-width:980px;line-height:1.6;box-shadow:var(--shadow);overflow-wrap:break-word}
+.guide h2{font-size:19px;margin:24px 0 8px;letter-spacing:-.01em}
+.guide h3{font-size:15.5px;margin:20px 0 8px}
+.guide p{margin:8px 0}
+.guide ul,.guide ol{padding-left:20px;margin:8px 0}
+.guide li{margin:5px 0}
+.guide table{display:block;overflow-x:auto;max-width:100%}
+.picks{display:grid;gap:12px;margin:10px 0 4px}
+.pick{display:grid;grid-template-columns:72px 1fr;gap:4px 12px;background:var(--raise);border:1px solid var(--line);border-radius:var(--r);padding:12px;line-height:1.45}
+.pick>*{min-width:0}
+.pick>img{width:72px;aspect-ratio:4/3;object-fit:contain;background:#fff;border-radius:8px}
+.pick h4{font-size:15.5px;line-height:1.3;align-self:center}
+.pick-b{grid-column:1/-1;display:grid;gap:8px}
+.pick .live{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;font-variant-numeric:tabular-nums}
+.pick .price{font-size:22px;font-weight:760;letter-spacing:-.02em}
+.pick .price small{font-size:13px;font-weight:500;color:var(--muted)}
+.pick .links{display:flex;flex-wrap:wrap;gap:8px}
+.pick .revs{font-size:13px;gap:4px 12px;align-items:center}
+.pick .revs a{min-height:32px;display:inline-flex;align-items:center}
+.pick-text{font-size:14px;color:var(--fg2)}
+.qt{border-collapse:collapse;width:100%;min-width:0;font-size:13.5px}
+.qt td,.qt th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
+.qt .num{text-align:right}
+.qtwrap{max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+.qtwrap table{display:table}
+#finnlinks .group{display:flex;flex-wrap:wrap;gap:8px}
+.foot{margin-top:12px}
+/* ---------- Desktop ---------- */
+@media (min-width:700px){
+  body{padding-bottom:24px;font-size:14px}
+  .top-in{padding:10px 20px}
+  main{padding:18px 20px 40px}
+  nav.tabs{position:static;display:flex;gap:2px;background:none;border:0;padding:0;-webkit-backdrop-filter:none;backdrop-filter:none;margin-left:8px}
+  nav.tabs button{flex-direction:row;gap:7px;min-height:40px;padding:0 12px;font-size:13.5px;border-radius:10px;white-space:nowrap}
+  nav.tabs button svg{width:17px;height:17px}
+  nav.tabs button:hover{background:var(--chip);color:var(--fg)}
+  nav.tabs button.on{background:var(--accent-soft);color:var(--accent)}
+  nav.tabs .l-long{display:inline}nav.tabs .l-short{display:none}
+  .hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));overflow:visible;margin:0 0 16px;padding:0}
+  .hc{flex:none}
+  #cards{display:none}.tablewrap{display:block}
+  .filters{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin-bottom:12px;box-shadow:var(--shadow)}
+  .ftop{display:flex;gap:10px 18px;align-items:center;flex-wrap:wrap}
+  .frow{margin:0}
+  .fsticky{position:static;margin:0;padding:0;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;flex:1;min-width:240px}
+  .ftop .fsticky{order:2}
+  #fbtn,.fend .btn.pri,.msort{display:none}
+  .chips label,.seg label,a.chipbtn{min-height:34px;padding:0 12px;font-size:13.5px}
+  .inp,.filters select,.filters input[type=search]{min-height:36px;font-size:14px;border-radius:10px}
+  .fpanel{display:block!important;animation:none!important;border:0;box-shadow:none;padding:0;margin-top:12px;max-height:none;overflow:visible;background:none}
+  .fgrid{display:grid;grid-template-columns:minmax(260px,1.2fr) 2.4fr;gap:6px 24px}
+  .fsel{margin:10px 0 0}
+  .tgs{grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:0 8px}
+  .tg{padding:6px;min-height:0}.tg b{font-size:13.5px}.tg span{font-size:12px}
+  .tg input{width:17px;height:17px}
+  .fend{border:0;margin:4px 0 0;padding:0;justify-content:flex-end}
+  .meta{margin-bottom:8px}
+  .guide{padding:8px 24px 20px}
+  .pick{grid-template-columns:120px 1fr;gap:6px 16px;padding:14px}
+  .pick>img{width:120px;grid-row:1/3}
+  .pick-b{grid-column:2}
+  .plot{padding:16px 18px}
+  .v{grid-template-columns:140px 1fr}.bigimg{width:140px}
+}
+@media (min-width:700px) and (max-width:1339px){.tablewrap{overflow:auto;max-height:calc(100vh - 20px)}}
+@media (min-width:700px) and (max-width:1100px){nav.tabs .l-long{display:none}nav.tabs .l-short{display:inline}}
+@media (max-width:420px){.brand h1{font-size:17px}.status .age-pre{display:none}}
+body.no-bw .bwonly{display:none!important}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
-<header>
-  <h1>TV-prisvakt</h1>
-  <div class="muted" id="meta">Laster …</div>
-  <nav class="tabs"><button data-tab="list" class="on">Priser</button><button data-tab="plots">Plott</button><button data-tab="guide">Kjøpeguide</button><button data-tab="finn">Brukt (FINN)</button><button data-tab="help">Slik leser du tabellen</button></nav>
-</header>
+<header class="top"><div class="top-in">
+  <a class="brand" href="./" aria-label="TV-prisvakt, til forsiden">
+    <span class="logo" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8"/></svg></span>
+    <h1>TV-prisvakt</h1>
+  </a>
+  <nav class="tabs" aria-label="Faner">
+    <button data-tab="list" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.3" fill="currentColor"/></svg><span>Priser</span></button>
+    <button data-tab="plots"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4v16h16"/><circle cx="9" cy="14" r="1.6" fill="currentColor"/><circle cx="13" cy="9" r="1.6" fill="currentColor"/><circle cx="18" cy="6" r="1.6" fill="currentColor"/></svg><span>Plott</span></button>
+    <button data-tab="guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-2-1.5-5-2-8-2v14c3 0 6 .5 8 2 2-1.5 5-2 8-2V4c-3 0-6 .5-8 2zM12 6v14"/></svg><span class="l-long">Kjøpeguide</span><span class="l-short">Guide</span></button>
+    <button data-tab="finn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5"/></svg><span class="l-long">Brukt (FINN)</span><span class="l-short">Brukt</span></button>
+    <button data-tab="help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.6 2.2c-.7.4-1.1 1-1.1 1.8M12 17h.01"/></svg><span class="l-long">Slik leser du tabellen</span><span class="l-short">Hjelp</span></button>
+  </nav>
+  <div class="status" id="status"><span class="age" id="age">Laster …</span></div>
+  <button class="iconbtn" id="theme" aria-label="Bytt mellom lyst og mørkt tema" title="Lyst/mørkt tema"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 4v16a8 8 0 0 0 0-16z" fill="currentColor"/></svg></button>
+</div></header>
 <main>
+  <section id="hero-wrap" hidden><div class="hero-h"><h2>Dagens beste kjøp</h2><span class="muted small" id="hero-sub"></span></div><div class="hero" id="hero"></div></section>
   <div class="filters" id="filters">
-    <div class="group"><b>Størrelse</b><span id="f-size"></span></div>
-    <div class="group"><b>Butikk</b><span id="f-shop"></span></div>
-    <div class="group"><b>Panel</b><select id="f-panel"><option value="">Alle</option><option>OLED</option><option>Mini-LED</option><option>QLED</option><option>LED</option></select></div>
-    <div class="group"><b>Merke</b><select id="f-brand"><option value="">Alle</option></select></div>
-    <div class="group"><label><input type="checkbox" id="f-low"> Bare ekte lavpris (≤ laveste 60 d)</label></div>
-    <div class="group"><label><input type="checkbox" id="f-100"> Bare 100 Hz+</label></div>
-    <div class="group"><label title="Skjuler en modell når en nyere utgave av samme serie og størrelse koster det samme eller mindre"><input type="checkbox" id="f-old"> Skjul eldre modell som er dyrere enn nyere</label></div>
-    <div class="group"><label title="Skjuler TV-er der det finnes en annen i samme størrelse som er både billigere og minst like god (kvalitetsscore)"><input type="checkbox" id="f-dom"> Skjul åpenbart dårlige kjøp</label></div>
-    <div class="group"><label><input type="checkbox" id="f-stock"> Bare på lager</label></div>
-    <div class="group"><label title="Dagens beste pris er på eller under midtestimatet for sannsynlig Black Week-pris"><input type="checkbox" id="f-bw"> Bare i forventet BW-nivå</label></div>
-    <div class="group"><label title="Eva Solo Carry: VESA 100/200/300, 40–65&quot;. TV-er uten kjent VESA-mål vises også (merket ?)"><input type="checkbox" id="f-stand"> Passer TV-stativet</label></div>
-    <div class="group"><input type="search" id="f-q" placeholder="Søk modell, f.eks. C5, B6, S90"></div>
+    <div class="ftop">
+      <div class="frow"><b>Størrelse</b><span id="f-size" class="chips"></span></div>
+      <div class="fsticky">
+        <div class="fbar">
+          <label class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" id="f-q" placeholder="Søk modell, f.eks. C5, S90" aria-label="Søk modell" enterkeyhint="search" autocomplete="off"></label>
+          <button class="btn" id="fbtn" aria-expanded="false" aria-controls="fpanel"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg><span id="fbtn-t">Filtre</span></button>
+        </div>
+        <div class="fpanel" id="fpanel">
+          <div class="fgrid">
+            <div>
+              <h5>Butikker som regnes med</h5>
+              <span id="f-shop" class="chips"></span>
+              <div class="fsel">
+                <label>Panel<select id="f-panel"><option value="">Alle</option><option>OLED</option><option>Mini-LED</option><option>QLED</option><option>LED</option></select></label>
+                <label>Merke<select id="f-brand"><option value="">Alle</option></select></label>
+              </div>
+            </div>
+            <div>
+              <div class="tgs">
+                <label class="tg"><input type="checkbox" id="f-stock"><b>Bare på lager</b><span>Minst én valgt butikk har den på lager nå.</span></label>
+                <label class="tg"><input type="checkbox" id="f-low"><b>Bare ekte lavpris</b><span>Dagens pris er lik eller under laveste pris siste 60 dager.</span></label>
+                <label class="tg"><input type="checkbox" id="f-stand"><b>Passer TV-stativet</b><span>Eva Solo Carry: VESA 100/200/300, 40–65". Ukjent VESA vises også (merket ?).</span></label>
+                <label class="tg"><input type="checkbox" id="f-dom"><b>Skjul åpenbart dårlige kjøp</b><span>Skjuler TV-er der en annen i samme størrelse er både billigere og minst like god.</span></label>
+                <label class="tg"><input type="checkbox" id="f-old"><b>Skjul eldre modell som er dyrere enn nyere</b><span>Når nyere utgave av samme serie og størrelse koster det samme eller mindre.</span></label>
+                <label class="tg"><input type="checkbox" id="f-100"><b>Bare 100 Hz+</b><span>Jevnere sport og 4K/120 for konsoll.</span></label>
+                <label class="tg bwonly"><input type="checkbox" id="f-bw"><b>Bare i forventet BW-nivå</b><span>Dagens pris er på eller under midtestimatet for Black Week.</span></label>
+              </div>
+            </div>
+          </div>
+          <div class="fend"><button class="btn sm" id="freset">Nullstill filtre</button><button class="btn sm pri" id="fclose">Vis resultat</button></div>
+        </div>
+      </div>
+    </div>
   </div>
 <section id="tab-list">
-  <div class="tablewrap"><table>
+  <div class="meta"><span id="meta">Laster …</span>
+    <label class="msort"><span class="muted" hidden>Sorter</span><select id="sortsel" aria-label="Sortering"></select></label></div>
+  <div id="cards"></div>
+  <div class="tablewrap" id="tablewrap"><table class="main">
     <thead><tr>
-      <th></th><th data-k="family">Modell</th><th data-k="quality" class="num" title="Kvalitetsscore 0–100 (skjønn basert på tester)">Kvalitet</th><th data-k="size" class="num">Tommer</th><th data-k="stand" title="Passer på TV-stativet (Eva Solo Carry, VESA 100/200/300)">Stativ</th><th data-k="panel">Panel</th>
+      <th class="stk1"></th><th data-k="family" class="stk2">Modell</th><th data-k="quality" class="num" title="Kvalitetsscore 0–100 (skjønn basert på tester)">Kvalitet</th><th data-k="size" class="num">Tommer</th><th data-k="stand" title="Passer på TV-stativet (Eva Solo Carry, VESA 100/200/300)">Stativ</th><th data-k="panel">Panel</th>
+      <th data-k="best" class="num" title="Laveste pris hos de valgte butikkene">Beste pris</th><th data-k="verdict" title="Dagens beste pris mot laveste pris siste 60 dager">Nå vs 60 d</th><th data-k="bw" class="num bwonly" title="Sannsynlig laveste pris i Black Week/Black Month">Sannsynlig BW-pris</th>
       <th data-k="Elkjøp" class="num">Elkjøp</th><th data-k="Power" class="num">Power</th><th data-k="Komplett" class="num">Komplett</th><th data-k="NetOnNet" class="num">NetOnNet</th><th data-k="Multicom" class="num">Multicom</th><th data-k="Samsung" class="num" title="Samsungs egen nettbutikk">Samsung</th>
-      <th data-k="low30" class="num" title="Laveste pris før i dag">Lav 30 d</th><th data-k="low60" class="num">Lav 60 d</th><th data-k="low90" class="num">Lav 90 d</th><th data-k="low365" class="num">Lav 365 d</th>
-      <th data-k="verdict" class="num">Nå vs 60 d</th><th data-k="bw" class="num" title="Sannsynlig laveste pris i Black Week/Black Month, beregnet fra prisfallet for tilsvarende TV-er i fjor">Sannsynlig BW-pris</th>
     </tr></thead>
     <tbody id="tb"></tbody>
   </table></div>
-  <p class="muted small">«Lav x d» = laveste pris <em>før i dag</em> hos <em>noen</em> butikk på Prisjakt (også små nettbutikker/markedsplasser – butikken vises når du holder over). Egen historikk per butikk bygges opp fra 11.11.2026; 365-dagerstallet blir fullstendig etter hvert.</p>
+  <p class="muted small foot">Trykk på en TV for prishistorikk, laveste pris siste 30/60/90/365 dager (med butikk), VESA-mål og hver butikks varenummer. «Lav x d» er laveste pris <em>før i dag</em> hos <em>noen</em> butikk på Prisjakt, også små nettbutikker. Egen historikk per butikk bygges opp fra 11.11.2026.</p>
 </section>
 <section id="tab-plots" hidden><div class="plots">
-<div class="plot"><h2>Pris mot kvalitet</h2><div class="muted small">Dagens laveste pris hos de valgte butikkene (logaritmisk akse) mot kvalitetsscore. Linjen viser «mest for pengene»: ingen annen TV er både billigere og bedre. Klikk et punkt for å se modellen i tabellen.</div>
-<div class="group" style="margin:8px 0" role="radiogroup" aria-label="Pris i plottet"><b>Pris:</b>
-<label class="chip"><input type="radio" name="pmode" value="now" id="pm-now"> Dagens pris</label>
-<label class="chip"><input type="radio" name="pmode" value="bw" id="pm-bw"> Sannsynlig BW-pris</label>
-<label class="chip"><input type="radio" name="pmode" value="arrow" id="pm-arrow"> Dagens → sannsynlig (pil)</label></div>
+<div class="plot"><h2>Pris mot kvalitet</h2><p class="muted small">Laveste pris hos de valgte butikkene (logaritmisk akse) mot kvalitetsscore. Den stiplede linjen er «mest for pengene»: ingen annen TV er både billigere og bedre. Trykk på et punkt for detaljer.</p>
+<div class="seg radio bwonly" role="radiogroup" aria-label="Pris i plottet">
+<label><input type="radio" name="pmode" value="now" id="pm-now">Dagens pris</label>
+<label><input type="radio" name="pmode" value="bw" id="pm-bw">Sannsynlig BW-pris</label>
+<label><input type="radio" name="pmode" value="arrow" id="pm-arrow">Dagens → BW (pil)</label></div>
 <div class="legend" id="lg1"></div><div id="p1"></div></div>
-<div class="plot"><h2>Ekte rabatt?</h2><div class="muted small">Butikkens oppgitte rabatt (fra førpris) mot hvor dagens pris ligger sammenlignet med laveste pris siste 60 dager. Punkter over midtlinjen er dyrere enn det TV-en har kostet før – rabatten er regnet fra en oppblåst førpris.</div><div id="p2"></div></div>
-<p class="muted small">Kvalitetsscoren (0–100) er et skjønn basert på tester (RTINGS, What Hi-Fi, Tek.no, Lyd &amp; Bilde m.fl.) per modellserie, justert for størrelse. Den er ment som grov sortering – les tester av akkurat modellen før du kjøper. Grunnlaget vises når du holder over et punkt. <a href="#" data-qlink>Les hvordan scoren regnes ut</a>.</p>
+<div class="plot"><h2>Ekte rabatt?</h2><p class="muted small">Butikkens oppgitte rabatt (fra førpris) mot hvor dagens pris ligger sammenlignet med laveste pris siste 60 dager. Punkter i det røde feltet er dyrere enn TV-en har kostet før – rabatten er regnet fra en oppblåst førpris.</p><div id="p2"></div></div>
+<p class="muted small">Kvalitetsscoren (0–100) er et skjønn basert på tester (RTINGS, What Hi-Fi, Tek.no, Lyd &amp; Bilde m.fl.) per modellserie, justert for størrelse. Den er ment som grov sortering – les tester av akkurat modellen før du kjøper. Grunnlaget vises når du trykker på et punkt. <a href="#" data-qlink>Les hvordan scoren regnes ut</a>.</p>
 </div></section>
-<section id="tab-guide" hidden><div class="guide" id="guide"></div></section>
+<section id="tab-guide" hidden><div class="guide" id="guide"><p class="muted">Laster kjøpeguiden …</p></div></section>
 <section id="tab-finn" hidden><div class="guide">
 <h2>Nyere brukt premium-TV på FINN</h2>
 <p>Søkene er avgrenset til <b>Bergen</b> og bruker modellkoder for modeller fra 2023 og nyere, så gamle TV-er filtreres bort. Sjekk at stedet står som Bergen i FINN (juster der om nødvendig), og trykk <b>«Lagre søk»</b> for å få varsel om nye annonser. FINN tillater ikke automatisk innhenting, så varslingen går via FINN selv.</p>
@@ -140,32 +430,46 @@ td,th{font-variant-numeric:tabular-nums}
 <section id="tab-help" hidden><div class="guide">
 <h2>Slik leser du tabellen</h2>
 <ul>
-<li><b>Én rad = én TV-familie</b>: samme serie, størrelse og årsmodell. Butikkvarianter med litt ulik kode (f.eks. LG OLED55C54LA / C55LA / C56LA, TCL C69K = C6K = MQLED75K) er slått sammen. Klikk på raden for å se hver butikks produktnavn og varenummer.</li>
-<li><b>Butikkprisene</b> er dagens pris hos Elkjøp, Power, Komplett, NetOnNet, Multicom og Samsung (butikkfilteret bestemmer hvilke som regnes med i «beste pris»). <s>Overstrøket</s> = butikkens oppgitte førpris. «M» = medlemspris (gratis kundeklubb).</li>
-<li><b>Nå vs 60 d</b>: <span class="badge b-good">Lavpris</span> dagens beste pris hos de valgte butikkene er lik/under laveste pris i hele markedet siste 60 dager. <span class="badge b-warn">+x %</span> under 10 % over. <span class="badge b-bad">+x %</span> mer enn 10 % over – da er «tilbudet» trolig ikke reelt.</li>
-<li><b>Stativ</b>: om TV-en passer på Eva Solo Carry-stativet (VESA 100/200/300 mm, 40–65"). «? ukjent» betyr at Prisjakt ikke oppgir VESA-mål – sjekk hos butikken. VESA-målene stativet tar kan justeres i <code>config.json</code>.</li>
-<li><b>Sannsynlig BW-pris</b>: anslått laveste markedspris i <i>resten av</i> Black Month (fra i dag til 2. des). Utgangspunktet er TV-ens <i>laveste kjente pris</i> over inntil to års historikk, inkludert det som allerede har skjedd i november. Den justeres med hvordan tilsvarende TV-er beveget seg i fjor fra samme dato fram til Black Week. TV-ene er gruppert etter om de allerede har fått ny bunnpris i november og om de har falt mye siden høsten. Intervallet er 25–75 %. «x % sjanse lavere» = andelen tilsvarende TV-er i fjor som ble minst 2 % billigere enn dagens pris. «i BW-nivå» = dagens pris er på eller under midtestimatet. Testet mot Black Week 2025 bommet modellen med 2 % i median (272 TV-er). Det er et statistisk anslag, ikke en garanti.</li>
+<li><b>Én rad / ett kort = én TV-familie</b>: samme serie, størrelse og årsmodell. Butikkvarianter med litt ulik kode (f.eks. LG OLED55C54LA / C55LA / C56LA, TCL C69K = C6K = MQLED75K) er slått sammen. Trykk på TV-en for å se prishistorikk, hver butikks produktnavn og varenummer.</li>
+<li><b>Beste pris og butikkprisene</b> er dagens pris hos Elkjøp, Power, Komplett, NetOnNet, Multicom og Samsung (butikkfilteret bestemmer hvilke som regnes med i «beste pris»). <s>Overstrøket</s> = butikkens oppgitte førpris. <span class="chip">M</span> = medlemspris (gratis kundeklubb).</li>
+<li><b>Nå vs 60 d</b>: <span class="badge b-good">Lavpris</span> dagens beste pris hos de valgte butikkene er lik/under laveste pris i hele markedet siste 60 dager. <span class="badge b-warn">+x %</span> under 10 % over. <span class="badge b-bad">+x %</span> mer enn 10 % over – da er «tilbudet» trolig ikke reelt. <span class="badge">kort historikk</span> = under 60 dager med prisdata.</li>
+<li><b>Laveste pris 30/60/90/365 d</b> ligger i detaljvisningen, med butikk og dato.</li>
+<li><b>Stativ</b>: om TV-en passer på Eva Solo Carry-stativet (VESA 100/200/300 mm, 40–65"). «? ukjent» betyr at Prisjakt ikke oppgir VESA-mål – sjekk hos butikken. VESA-mål og kilde står i detaljvisningen. VESA-målene stativet tar kan justeres i <code>config.json</code>.</li>
+<li class="bwonly"><b>Sannsynlig BW-pris</b>: anslått laveste markedspris i <i>resten av</i> Black Month (fra i dag til 2. des). Utgangspunktet er TV-ens <i>laveste kjente pris</i> over inntil to års historikk, inkludert det som allerede har skjedd i november. Den justeres med hvordan tilsvarende TV-er beveget seg i fjor fra samme dato fram til Black Week. TV-ene er gruppert etter om de allerede har fått ny bunnpris i november og om de har falt mye siden høsten. Intervallet er 25–75 %. «x % sjanse lavere» = andelen tilsvarende TV-er i fjor som ble minst 2 % billigere enn dagens pris. «i BW-nivå» = dagens pris er på eller under midtestimatet. Testet mot Black Week 2025 bommet modellen med 2 % i median (272 TV-er). Det er et statistisk anslag, ikke en garanti.</li>
 <li><b>Kvalitet</b> er en skjønnsmessig score 0–100 per modellserie, justert for størrelse. <a href="#" data-qlink>Se forklaring og hele tabellen</a>.</li>
+<li><b>Dagens beste kjøp</b> øverst regnes ut fra valgte størrelser og butikker: beste TV som er på ekte lavpris, størst fall under laveste 60-dagerspris, og TV-en som ligger best an mot forventet Black Week-pris.</li>
 <li><b>Varsler</b> kommer på e-post (via GitHub-issue) når en TV på overvåkingslisten (<code>config.json</code>) når laveste 60-dagerspris eller din maksgrense.</li>
 </ul>
-<p class="muted">Data: offentlige produktsider på prisjakt.no, oppdatert to ganger daglig.</p>
+<p class="muted">Data: offentlige produktsider på prisjakt.no og butikkenes nettsider, oppdatert to ganger daglig. Status for siste innhenting vises øverst til høyre.</p>
 </div></section>
 </main>
 <div id="tip" hidden></div>
 <script>
 const SHOPS=["Elkjøp","Power","Komplett","NetOnNet","Multicom","Samsung"];
-let IMGURL={};
+const SHOPC={"Elkjøp":"var(--c1)","Power":"var(--c2)","Komplett":"var(--c3)","NetOnNet":"var(--c4)","Multicom":"var(--c5)","Samsung":"var(--c6)"};
+const TOGGLES=[["f-low","low"],["f-100","hz100"],["f-old","old"],["f-dom","dom"],["f-stock","stock"],["f-stand","stand"],["f-bw","bwok"]];
+const $=id=>document.getElementById(id);
+const MOBILE=matchMedia("(max-width:699px)");
+let IMGURL={},BW_ON=true,SOURCES=null,lastPtr="mouse";
 const OUT=o=>/outofstock|soldout|discontinued/i.test(o.stock||"");
 const INSTOCK=o=>!o.stock||/^(instock|unknown|limitedavailability|onlineonly)$/i.test(o.stock);
+const stockTxt=o=>OUT(o)?"utsolgt":/backorder|preorder/i.test(o.stock||"")?"bestillingsvare":/instoreonly/i.test(o.stock||"")?"kun i butikk":/^(instock|limitedavailability|onlineonly)$/i.test(o.stock||"")?"på lager":"";
+const stockChip=o=>{const t=stockTxt(o);return t?`<span class="badge ${t==="på lager"?"b-good":t==="utsolgt"?"b-bad":"b-warn"}">${t}</span>`:""};
 const rowId=k=>"r-"+String(k).replace(/[^A-Za-z0-9]/g,"_");
 const IMG=(id,big)=>IMGURL[id]||IMG0(id,big);
 const IMG0=(id,big)=>window.IMG_BASE?`${window.IMG_BASE}/${id}.jpg`:`https://pricespy-75b8.kxcdn.com/product/standard/${big?800:140}/${id}.jpg`;
 const fmt=n=>n==null?"–":Math.round(n).toLocaleString("nb-NO")+"";
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-let DATA=[],HIST=null,sortK="verdict",sortDir=1,open=new Set();
-const st=(()=>{try{return JSON.parse(localStorage.getItem("tvf")||"{}")}catch(e){return{}}})();
-function save(){try{localStorage.setItem("tvf",JSON.stringify(st))}catch(e){}}
+const dshort=s=>{const d=new Date(s);return isNaN(d)?esc(s||""):d.toLocaleDateString("nb-NO",{day:"numeric",month:"short"})+(Date.now()-d>300*864e5?" "+d.getFullYear():"")};
+const pct=x=>x<0.05?"under 5 %":`${Math.round(x*100)} %`;
+let DATA=[],HIST=null,ALL=[],open=new Set();
+const NEWUSER=(()=>{try{return localStorage.getItem("tvf")===null}catch(e){return false}})();
+const st=(()=>{try{return JSON.parse(localStorage.getItem("tvf")||"{}")||{}}catch(e){return{}}})();
+if(NEWUSER)st.stock=true;
+let [sortK,sortDir]=(()=>{const m=/^(.+):(-?1)$/.exec(st.sort||"");return m?[m[1],+m[2]]:["verdict",1]})();
+function save(){try{st.sort=sortK+":"+sortDir;localStorage.setItem("tvf",JSON.stringify(st))}catch(e){}}
 function panelType(p){const n=p.name,s=(p.panel||"")+" "+n;if(/mini.?led|micro rgb|rgb/i.test(n))return"Mini-LED";if(/QNED|QLED|Nano/i.test(n))return/mini/i.test(p.panel||"")?"Mini-LED":"QLED";if(/OLED/i.test(n))return"OLED";if(/OLED/i.test(s))return"OLED";if(/mini.?led/i.test(s))return"Mini-LED";if(/QLED|QNED|Nano/i.test(s))return"QLED";return"LED"}
+const histDays=p=>p.history_days!=null?p.history_days:p.history_since?Math.floor((Date.now()-Date.parse(p.history_since))/864e5)||0:0;
 function groups(){
   const m=new Map();
   for(const p of DATA){if(!m.has(p.family))m.set(p.family,[]);m.get(p.family).push(p)}
@@ -178,26 +482,13 @@ function groups(){
     const prices=act.map(s=>g[s]&&!OUT(g[s])&&g[s].price).filter(x=>x);g.inStock=act.some(s=>g[s]&&INSTOCK(g[s]));g.best=prices.length?Math.min(...prices):null;
     const qi=ps.reduce((a,p)=>(p.quality||0)>(a.quality||0)?p:a,ps[0]);g.quality=qi.quality;g.qbasis=qi.quality_basis;g.img=ps[0].id;
     g.bestShop=act.filter(s=>g[s]&&!OUT(g[s])).sort((a,b)=>g[a].price-g[b].price)[0];
-    g.histDays=Math.max(...ps.map(p=>p.history_days||0));
-    const bp=g.bestShop?ps.find(p=>p.id===g[g.bestShop].pid):null;g.bw=(bp&&bp.bw)||ps.map(p=>p.bw).filter(Boolean).sort((a,b)=>a.mid-b.mid)[0]||null;g.stand=ps.some(p=>p.stand==="ja")?"ja":ps.every(p=>p.stand==="nei")?"nei":null;g.vesa=(ps.find(p=>p.vesa)||{}).vesa;g.year=+((g.label.match(/(20\d\d)$/)||[])[1]||0);g.base=g.label.replace(/\s*20\d\d$/,"").replace(/ (WOLED|QD-OLED)/,"");g.img_url=(ps.find(p=>p.img_url)||{}).img_url;
+    g.histDays=Math.max(...ps.map(histDays));
+    const bp=g.bestShop?ps.find(p=>p.id===g[g.bestShop].pid):null;g.bw=BW_ON?((bp&&bp.bw)||ps.map(p=>p.bw).filter(Boolean).sort((a,b)=>a.mid-b.mid)[0]||null):null;
+    g.stand=ps.some(p=>p.stand==="ja")?"ja":ps.every(p=>p.stand==="nei")?"nei":null;g.vesa=(ps.find(p=>p.vesa)||{}).vesa;g.vesaNote=(ps.find(p=>p.vesa_note)||{}).vesa_note;
+    g.vesaLow=ps.some(p=>p.vesa_conf==="low")&&!ps.some(p=>p.vesa&&!p.vesa_conf);
+    g.year=+((g.label.match(/(20\d\d)$/)||[])[1]||0);g.base=g.label.replace(/\s*20\d\d$/,"").replace(/ (WOLED|QD-OLED)/,"");g.img_url=(ps.find(p=>p.img_url)||{}).img_url;
     g.verdict=g.best!=null&&g.low60?(g.best-g.low60.price)/g.low60.price:9;
     return g})
-}
-function build(){
-  const sizes=[...new Set(DATA.map(p=>Math.round(p.size)))].sort((a,b)=>a-b);
-  if(!st.sizes)st.sizes=sizes.filter(s=>s>=40&&s<=43);
-  document.getElementById("f-size").innerHTML=sizes.map(s=>`<label class="chip"><input type="checkbox" value="${s}" ${st.sizes.includes(s)?"checked":""}> ${s}"</label>`).join("");
-  if(!st.shops)st.shops=[...SHOPS];
-  if(!st.known)st.known=["Elkjøp","Power","Komplett"];
-  for(const s of SHOPS)if(!st.known.includes(s)){st.known.push(s);st.shops.push(s)}save();
-  document.getElementById("f-shop").innerHTML=SHOPS.map(s=>`<label class="chip"><input type="checkbox" value="${s}" ${st.shops.includes(s)?"checked":""}> ${s}</label>`).join("");
-  const brands=[...new Set(DATA.map(p=>p.brand))].sort();
-  document.getElementById("f-brand").innerHTML='<option value="">Alle</option>'+brands.map(b=>`<option>${esc(b)}</option>`).join("");
-  for(const [id,k] of [["f-panel","panel"],["f-brand","brand"],["f-q","q"]]){const el=document.getElementById(id);el.value=st[k]||"";el.oninput=()=>{st[k]=el.value;save();render()}}
-  for(const [id,k] of [["f-low","low"],["f-100","hz100"],["f-old","old"],["f-dom","dom"],["f-stock","stock"],["f-stand","stand"],["f-bw","bwok"]]){const el=document.getElementById(id);el.checked=!!st[k];el.onchange=()=>{st[k]=el.checked;save();render()}}
-  document.getElementById("f-size").onchange=e=>{st.sizes=[...document.querySelectorAll("#f-size input:checked")].map(i=>+i.value);save();render()};
-  document.getElementById("f-shop").onchange=e=>{st.shops=[...document.querySelectorAll("#f-shop input:checked")].map(i=>i.value);save();render()};
-  document.querySelectorAll("th[data-k]").forEach(th=>th.onclick=()=>{const k=th.dataset.k;sortDir=sortK===k?-sortDir:1;sortK=k;render()});
 }
 function flag(gs){
   for(const g of gs){g.olderWorse=null;g.dominatedBy=null;if(g.best==null)continue;
@@ -205,178 +496,399 @@ function flag(gs){
       if(h.base===g.base&&h.year>g.year&&h.best<=g.best&&!g.olderWorse)g.olderWorse=h;
       if(h.quality!=null&&g.quality!=null&&h.best<=g.best&&h.quality>=g.quality&&(h.best<g.best||h.quality>g.quality)&&(!g.dominatedBy||h.best<g.dominatedBy.best))g.dominatedBy=h}}
   return gs}
-function val(g,k){if(k==="bw")return g.bw?g.bw.mid:1e9;if(SHOPS.includes(k))return g[k]?g[k].price:1e9;if(k.startsWith("low"))return g[k]?g[k].price:1e9;if(k==="family")return g.label;return g[k]}
+// ---------- Filtre ----------
+function chipHTML(v,label,on){return `<label><input type="checkbox" value="${esc(v)}" ${on?"checked":""}>${esc(label)}</label>`}
+function build(){
+  const sizes=[...new Set(DATA.map(p=>Math.round(p.size)))].sort((a,b)=>a-b);
+  if(!st.sizes)st.sizes=sizes.filter(s=>s>=40&&s<=43);
+  $("f-size").innerHTML=sizes.map(s=>chipHTML(s,s+'"',st.sizes.includes(s))).join("");
+  if(!st.shops)st.shops=[...SHOPS];
+  if(!st.known)st.known=["Elkjøp","Power","Komplett"];
+  for(const s of SHOPS)if(!st.known.includes(s)){st.known.push(s);st.shops.push(s)}save();
+  $("f-shop").innerHTML=SHOPS.map(s=>chipHTML(s,s,st.shops.includes(s))).join("");
+  const brands=[...new Set(DATA.map(p=>p.brand))].sort();
+  $("f-brand").innerHTML='<option value="">Alle</option>'+brands.map(b=>`<option>${esc(b)}</option>`).join("");
+  for(const [id,k] of [["f-panel","panel"],["f-brand","brand"],["f-q","q"]]){const el=$(id);el.value=st[k]||"";el.oninput=()=>{st[k]=el.value;save();render()}}
+  for(const [id,k] of TOGGLES){const el=$(id);el.checked=!!st[k];el.onchange=()=>{st[k]=el.checked;save();render()}}
+  $("f-size").onchange=()=>{st.sizes=[...document.querySelectorAll("#f-size input:checked")].map(i=>+i.value);save();render()};
+  $("f-shop").onchange=()=>{st.shops=[...document.querySelectorAll("#f-shop input:checked")].map(i=>i.value);save();render()};
+  document.querySelectorAll("th[data-k]").forEach(th=>{th.tabIndex=0;th.onclick=()=>setSort(th.dataset.k);th.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setSort(th.dataset.k)}}});
+  const opts=[["verdict:1","Beste tilbud først"],["best:1","Pris: lav → høy"],["best:-1","Pris: høy → lav"],["quality:-1","Kvalitet: best først"]].concat(BW_ON?[["bw:1","BW-pris: lav → høy"]]:[],[["stand:1","Passer stativet først"],["size:1","Størrelse"],["family:1","Navn A–Å"]]);
+  $("sortsel").innerHTML=opts.map(([v,t])=>`<option value="${v}">${t}</option>`).join("");
+  $("sortsel").onchange=e=>{const [k,d]=e.target.value.split(":");sortK=k;sortDir=+d;save();render()};
+}
+const DESC_FIRST=new Set(["quality"]);
+function setSort(k){if(sortK===k)sortDir=-sortDir;else{sortK=k;sortDir=DESC_FIRST.has(k)?-1:1}save();render()}
+function resetFilters(){st.q="";st.brand="";st.panel="";for(const [,k] of TOGGLES)st[k]=false;st.shops=[...SHOPS];save();build()}
+function activeFilters(){let n=0;for(const [,k] of TOGGLES)if(st[k]&&(k!=="bwok"||BW_ON))n++;if(st.panel)n++;if(st.brand)n++;if(st.shops&&st.shops.length<SHOPS.length)n++;return n}
+function togglePanel(on){const p=$("fpanel"),b=$("fbtn");const o=on??!p.classList.contains("open");p.classList.toggle("open",o);b.setAttribute("aria-expanded",o)}
+$("fbtn").onclick=()=>togglePanel();
+$("fclose").onclick=()=>{togglePanel(false);$("tab-list").scrollIntoView({block:"start"})};
+$("freset").onclick=()=>{resetFilters();render()};
+// ---------- Verdier og merker ----------
+const STANDRANK=g=>g.stand==="ja"?(g.vesaLow?1:0):g.stand==="nei"?3:2;
+function val(g,k){
+  if(k==="bw")return g.bw?g.bw.mid:null;
+  if(SHOPS.includes(k))return g[k]?g[k].price:null;
+  if(k.startsWith("low"))return g[k]?g[k].price:null;
+  if(k==="family")return g.label;
+  if(k==="stand")return STANDRANK(g);
+  if(k==="verdict")return g.best==null||!g.low60?null:g.histDays<60?5+g.verdict:g.verdict;
+  return g[k]??null}
+function cmp(a,b){const x=val(a,sortK),y=val(b,sortK);
+  if(x==null||y==null)return x==null&&y==null?0:x==null?1:-1;
+  const c=typeof x==="string"?x.localeCompare(String(y),"nb"):x<y?-1:x>y?1:0;
+  return c*sortDir||((a.best??1e9)-(b.best??1e9))}
 function verdict(g){
-  if(g.best!=null&&g.histDays<60)return'<span class="badge" style="background:var(--chip)" title="Mindre enn 60 dager prishistorikk">kort historikk</span>';
+  if(g.best!=null&&g.histDays<60)return'<span class="badge">kort historikk</span>';
+  if(g.best==null||!g.low60)return'';
+  const d=g.verdict;if(d<=0.001)return'<span class="badge b-good">✓ Lavpris</span>';
+  const t=`+${(d*100).toFixed(0)} % over lav 60 d`;return d<0.1?`<span class="badge b-warn">${t}</span>`:`<span class="badge b-bad">${t}</span>`}
+function verdictShort(g){
+  if(g.best!=null&&g.histDays<60)return'<span class="badge">kort historikk</span>';
   if(g.best==null||!g.low60)return'<span class="muted">–</span>';
-  const d=g.verdict;if(d<=0.001)return'<span class="badge b-good">Lavpris</span>';
+  const d=g.verdict;if(d<=0.001)return'<span class="badge b-good">✓ Lavpris</span>';
   const t=`+${(d*100).toFixed(0)} %`;return d<0.1?`<span class="badge b-warn">${t}</span>`:`<span class="badge b-bad">${t}</span>`}
-function bwCell(g){const b=g.bw;if(!b)return'<span class="muted">–</span>';
-  const tip=`Laveste kjente markedspris: ${fmt(b.ref)} kr. Gruppe: ${b.group} (${b.n} TV-er i fjor). Midtestimat ${fmt(b.mid)} kr.`+(b.p_billigere!=null?` Sjanse for at noen butikk går minst 2 % under dagens pris i Black Month: ${Math.round(b.p_billigere*100)} %.`:"");
-  let tag="";if(g.best!=null){if(g.best<=b.mid)tag='<br><span class="badge b-good">i BW-nivå</span>';else if(g.best<=b.high)tag='<br><span class="badge b-warn">nær</span>';}
-  const pct=x=>x<0.05?"under 5 %":`${Math.round(x*100)} %`;
-  const pb=b.p_billigere!=null?`<br><span class="muted small" title="Andel av tilsvarende TV-er i fjor som ble minst 2 % billigere enn dette senere i Black Month">${pct(b.p_billigere)} sjanse lavere</span>`:"";
+function bwInfo(g){const b=g.bw;if(!b)return null;
   const rng=Math.abs(b.high-b.low)<b.mid*0.01?`ca. ${fmt(b.mid)}`:`${fmt(b.low)}–${fmt(b.high)}`;
-  return `<span title="${esc(tip)}">${rng}</span>${tag}${pb}`}
-function standCell(g){const vn=(g.items.find(p=>p.vesa_note)||{}).vesa_note;const t=(g.vesa?`VESA ${g.vesa}`:"VESA-mål ukjent")+(vn?` (${vn})`:"");
-  const low=g.items.some(p=>p.vesa_conf==="low")&&!g.items.some(p=>p.vesa&&!p.vesa_conf);
-  if(g.stand==="ja")return low?`<span class="badge b-warn" title="${t} – usikker kilde, sjekk før kjøp">✓? trolig</span>`:`<span class="badge b-good" title="${t} – passer">✓ passer</span>`;
-  if(g.stand==="nei")return `<span class="badge b-bad" title="${t}${g.vesa?"":" / utenfor 40–65\""}">✗ passer ikke</span>`;
-  return `<span class="badge" style="background:var(--chip)" title="Sjekk VESA-mål hos butikken">? ukjent</span>`}
+  let tag="";if(g.best!=null){if(g.best<=b.mid)tag='<span class="badge b-good">i BW-nivå</span>';else if(g.best<=b.high)tag='<span class="badge b-warn">nær BW-nivå</span>'}
+  return {rng,tag,pb:b.p_billigere!=null?`${pct(b.p_billigere)} sjanse lavere`:""}}
+function bwCell(g){const i=bwInfo(g);if(!i)return'<span class="muted">–</span>';
+  return `${i.rng}${i.tag?`<br>${i.tag}`:""}${i.pb?`<br><span class="muted small">${i.pb}</span>`:""}`}
+function standBadge(g,pre){const p=pre?"Stativ ":"";
+  if(g.stand==="ja")return g.vesaLow?`<span class="badge b-warn">${p}✓? trolig</span>`:`<span class="badge b-good">${p}✓ passer</span>`;
+  if(g.stand==="nei")return `<span class="badge b-bad">${p}✗ passer ikke</span>`;
+  return `<span class="badge">${p}? ukjent</span>`}
+const standCell=g=>standBadge(g,true);
+function qBadge(g){return `<span class="q${g.quality==null||g.quality<55?" lo":""}" aria-label="Kvalitet ${g.quality??"ukjent"}">${g.quality??"–"}</span>`}
 function shopCell(g,s){const o=g[s];if(!o)return'<span class="muted">–</span>';
-  if(OUT(o))return `<span class="muted"><s>${fmt(o.price)}</s></span><br><span class="chip small">utsolgt</span>`;
-  const best=o.price===g.best?" best":"";return `<span class="${best}">${fmt(o.price)}</span>${o.member?' <span class="chip" title="Medlemspris">M</span>':""}${o.before?`<br><s class="small">${fmt(o.before)}</s>`:""}${/backorder|preorder/i.test(o.stock||"")?'<br><span class="chip small">bestillingsvare</span>':/instoreonly/i.test(o.stock||"")?'<br><span class="chip small">kun i butikk</span>':""}`}
-function lowCell(l){return l?`<span title="${esc(l.shop)} ${esc(l.date)}">${fmt(l.price)}</span><br><span class="muted small">${esc(l.shop).slice(0,14)}</span>`:"–"}
-function render(){
+  if(OUT(o))return `<span class="muted"><s>${fmt(o.price)}</s></span><br><span class="chip">utsolgt</span>`;
+  const best=o.price===g.best?"cellbest":"";const t=stockTxt(o);
+  return `<span class="${best}">${fmt(o.price)}</span>${o.member?' <span class="chip" title="Medlemspris">M</span>':""}${o.before?`<br><s class="small">${fmt(o.before)}</s>`:""}${t&&t!=="på lager"?`<br><span class="chip">${t}</span>`:""}`}
+function flagsHTML(g,full){
+  if(g.olderWorse)return full?`<div class="flag b-warn"><span>Nyere modell er billigere: <b>${esc(g.olderWorse.label)}</b> koster ${fmt(g.olderWorse.best)} kr.</span><a href="#" data-goto="${esc(g.olderWorse.key)}">Vis den</a></div>`:`<span class="badge b-warn">Nyere modell er billigere</span>`;
+  if(g.dominatedBy)return full?`<div class="flag b-bad"><span>Finnes bedre og billigere: <b>${esc(g.dominatedBy.label)}</b> – ${fmt(g.dominatedBy.best)} kr, kvalitet ${g.dominatedBy.quality}.</span><a href="#" data-goto="${esc(g.dominatedBy.key)}">Vis den</a></div>`:`<span class="badge b-bad">Finnes bedre og billigere</span>`;
+  return""}
+const CHEV='<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>';
+const subline=g=>[Math.round(g.size)+'"',g.panel,g.hz,g.items.length>1?`${g.items.length} varianter`:""].filter(Boolean).map(esc).join(" · ");
+// ---------- Rendering ----------
+function filtered(){
   const q=(st.q||"").toLowerCase();
-  let gs=flag(groups()).filter(g=>(!st.old||!g.olderWorse)&&(!st.dom||!g.dominatedBy)&&(!st.stock||g.inStock)&&(!st.stand||g.stand!=="nei")&&(!st.bwok||(g.bw&&g.best!=null&&g.best<=g.bw.mid))).filter(g=>st.sizes.includes(Math.round(g.size))&&(!st.panel||g.panel===st.panel)&&(!st.brand||g.brand===st.brand)
+  return ALL.filter(g=>(!st.old||!g.olderWorse)&&(!st.dom||!g.dominatedBy)&&(!st.stock||g.inStock)&&(!st.stand||g.stand!=="nei")&&(!BW_ON||!st.bwok||(g.bw&&g.best!=null&&g.best<=g.bw.mid))).filter(g=>st.sizes.includes(Math.round(g.size))&&(!st.panel||g.panel===st.panel)&&(!st.brand||g.brand===st.brand)
     &&(!q||(g.label+" "+g.items.map(p=>p.name+" "+Object.values(p.shops).map(o=>o.title+" "+o.sku).join(" ")).join(" ")).toLowerCase().includes(q))
-    &&st.shops.some(s=>g[s])&&(!st.low||g.verdict<=0.001)&&(!st.hz100||/1[0-9]{2}\s*Hz/.test(g.hz||"")));
-  gs.sort((a,b)=>{const x=val(a,sortK),y=val(b,sortK);return (x<y?-1:x>y?1:0)*sortDir});
-  window.FILTERED=gs;if(!document.getElementById("tab-plots").hidden)drawPlots(gs);
-  const tb=document.getElementById("tb");
-  tb.innerHTML=gs.map(g=>`<tr class="row" data-k="${esc(g.key)}" id="${rowId(g.key)}"><td class="imgc"><img class="thumb" loading="lazy" alt="" src="${IMG(g.img)}" onerror="this.style.visibility='hidden'"></td><td><b>${esc(g.label)}</b>${g.items.length>1?` <span class="chip">${g.items.length} varianter</span>`:""}${g.olderWorse?` <span class="badge b-warn" title="${esc(g.olderWorse.label)} koster ${fmt(g.olderWorse.best)} kr">Nyere modell er billigere</span>`:""}${g.dominatedBy&&!g.olderWorse?` <span class="badge b-bad" title="${esc(g.dominatedBy.label)}: ${fmt(g.dominatedBy.best)} kr, kvalitet ${g.dominatedBy.quality}">Finnes bedre og billigere</span>`:""}<br><span class="muted small">${esc(g.hz||"")}</span></td>
-   <td class="num"><span class="q" title="${esc(g.qbasis)}">${g.quality??"–"}</span></td><td class="num">${Math.round(g.size)}</td><td>${standCell(g)}</td><td>${g.panel}</td>${SHOPS.map(s=>`<td class="num">${shopCell(g,s)}</td>`).join("")}
-   <td class="num">${lowCell(g.low30)}</td><td class="num">${lowCell(g.low60)}</td><td class="num">${lowCell(g.low90)}</td><td class="num">${lowCell(g.low365)}</td><td class="num">${verdict(g)}</td><td class="num">${bwCell(g)}</td></tr>
-   ${open.has(g.key)?`<tr class="detail"><td colspan="18">${detail(g)}</td></tr>`:""}`).join("")||'<tr><td colspan="18" class="muted">Ingen treff med disse filtrene.</td></tr>';
-  tb.querySelectorAll("tr.row").forEach(tr=>tr.onclick=()=>{const k=tr.dataset.k;open.has(k)?open.delete(k):open.add(k);if(!HIST)loadHist();render()});
-  document.getElementById("meta").textContent=`${gs.length} TV-modeller vises · oppdatert ${new Date(window.UPDATED).toLocaleString("nb-NO")}`;
+    &&st.shops.some(s=>g[s])&&(!st.low||g.verdict<=0.001)&&(!st.hz100||/1[0-9]{2}\s*Hz/.test(g.hz||"")))}
+function cardHTML(g){
+  const o=g.bestShop?g[g.bestShop]:null,bw=bwInfo(g),isOpen=open.has(g.key);
+  const any=SHOPS.map(s=>g[s]).filter(Boolean).sort((a,b)=>a.price-b.price)[0];
+  const price=o?`<span class="price">${fmt(o.price)} <small>kr</small></span><span class="muted">hos ${esc(g.bestShop)}</span>${o.member?'<span class="chip">medlemspris</span>':""}${o.before?`<s class="small">${fmt(o.before)}</s>`:""}${stockChip(o)}`
+    :`<span class="price muted">${any?`<s>${fmt(any.price)}</s>`:"–"} <small>kr</small></span><span class="badge b-bad">utsolgt hos valgte butikker</span>`;
+  const shops=SHOPS.filter(s=>g[s]&&st.shops.includes(s)).sort((a,b)=>OUT(g[a])-OUT(g[b])||g[a].price-g[b].price);
+  const sl=shops.length>1?`<div class="c-shops">${shops.map(s=>{const x=g[s],out=OUT(x),t=stockTxt(x);return `<span class="sp${!out&&x.price===g.best?" best":""}${out?" out":""}">${esc(s)} <b>${out?`<s>${fmt(x.price)}</s>`:fmt(x.price)}</b>${x.member?" M":""}${out?" utsolgt":t&&t!=="på lager"?" · "+t:""}</span>`}).join("")}</div>`:"";
+  return `<article class="card${isOpen?" open":""}" id="${rowId(g.key)}" data-k="${esc(g.key)}">
+  <div class="c-main" role="button" tabindex="0" aria-expanded="${isOpen}">
+    <img class="c-img" loading="lazy" alt="" src="${esc(g.img_url||IMG(g.img))}" onerror="this.style.visibility='hidden'">
+    <div class="c-title">${esc(g.label)}</div>${qBadge(g)}
+    <div class="c-sub">${subline(g)}</div>
+    <div class="c-price">${price}</div>
+    <div class="c-badges">${verdict(g)}${standBadge(g,true)}${flagsHTML(g)}</div>
+    ${bw?`<div class="c-bw"><span>Sannsynlig BW-pris <b class="num">${bw.rng}</b></span>${bw.pb?`<span class="muted">· ${bw.pb}</span>`:""}${bw.tag}</div>`:""}
+    ${sl}
+    <div class="c-foot">${CHEV}</div>
+  </div>${isOpen?`<div class="c-detail">${detail(g)}</div>`:""}</article>`}
+function rowHTML(g,cols){
+  const o=g.bestShop?g[g.bestShop]:null,isOpen=open.has(g.key);
+  return `<tr class="row${isOpen?" open":""}" data-k="${esc(g.key)}" id="${rowId(g.key)}" tabindex="0" aria-expanded="${isOpen}"><td class="imgc stk1"><img class="thumb" loading="lazy" alt="" src="${esc(g.img_url||IMG(g.img))}" onerror="this.style.visibility='hidden'"></td>
+   <td class="mcol stk2"><div class="m-t"><span>${esc(g.label)}</span>${CHEV}</div><div class="muted small">${[g.hz,g.items.length>1?`${g.items.length} varianter`:""].filter(Boolean).map(esc).join(" · ")}</div>${flagsHTML(g)?`<div class="m-b">${flagsHTML(g)}</div>`:""}</td>
+   <td class="num">${qBadge(g)}</td><td class="num">${Math.round(g.size)}"</td><td>${standBadge(g)}</td><td>${g.panel}</td>
+   <td class="num">${o?`<span class="bestp">${fmt(o.price)}</span><br><span class="muted small">${esc(g.bestShop)}${stockTxt(o)&&stockTxt(o)!=="på lager"?" · "+stockTxt(o):""}</span>`:'<span class="chip">utsolgt</span>'}</td>
+   <td>${verdictShort(g)}${g.low60&&g.best!=null?`<br><span class="muted small">lav 60 d: ${fmt(g.low60.price)}</span>`:""}</td>
+   ${BW_ON?`<td class="num">${bwCell(g)}</td>`:""}${SHOPS.map(s=>`<td class="num">${shopCell(g,s)}</td>`).join("")}</tr>
+   ${isOpen?`<tr class="detail"><td colspan="${cols}"><div class="detail-wrap">${detail(g)}</div></td></tr>`:""}`}
+const EMPTY=`<div class="empty"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8M9.5 9.5l5 3M14.5 9.5l-5 3"/></svg><h3>Ingen TV-er slapp gjennom nåløyet</h3><p>Filtrene er litt for strenge akkurat nå. Skru av ett av dem, eller start på nytt.</p><button class="btn pri" data-reset>Nullstill filtre</button></div>`;
+function render(){
+  ALL=flag(groups());
+  const gs=filtered().sort(cmp);
+  window.FILTERED=gs;
+  if(!$("tab-plots").hidden)drawPlots(gs);
+  renderHero();
+  const mob=MOBILE.matches,cols=BW_ON?15:14;
+  const cards=$("cards"),tb=$("tb");
+  if(mob){tb.innerHTML="";cards.innerHTML=gs.map(cardHTML).join("")||EMPTY}
+  else{cards.innerHTML="";tb.innerHTML=gs.map(g=>rowHTML(g,cols)).join("")||`<tr><td colspan="${cols}" style="padding:16px">${EMPTY}</td></tr>`;
+    $("tablewrap").style.setProperty("--ww",$("tablewrap").clientWidth+"px")}
+  document.querySelectorAll("th[data-k]").forEach(th=>{if(th.dataset.k===sortK)th.setAttribute("aria-sort",sortDir>0?"ascending":"descending");else th.removeAttribute("aria-sort")});
+  const ss=$("sortsel");ss.value=sortK+":"+sortDir;if(ss.selectedIndex<0){ss.selectedIndex=-1}
+  const total=ALL.filter(g=>st.sizes.includes(Math.round(g.size))).length;
+  $("meta").innerHTML=`<b style="color:var(--fg)">${gs.length}</b> ${gs.length===1?"TV-modell":"TV-modeller"}${gs.length<total?` <span class="muted">av ${total} i valgt størrelse</span>`:""}`;
+  const n=activeFilters();$("fbtn-t").innerHTML=n?`Filtre <span class="cnt">${n}</span>`:"Filtre";
+  drawCharts();
 }
+function toggleRow(k){open.has(k)?open.delete(k):open.add(k);if(!HIST)loadHist();render()}
+document.addEventListener("click",e=>{
+  if(e.target.closest("[data-reset]")){resetFilters();render();return}
+  const gt=e.target.closest("[data-goto]");if(gt){e.preventDefault();hideTip();gotoRow(gt.dataset.goto);return}
+  const rg=e.target.closest("[data-range]");if(rg){st.range=rg.dataset.range;save();document.querySelectorAll("[data-range]").forEach(b=>b.classList.toggle("on",b.dataset.range===st.range));drawCharts();return}
+  if(e.target.closest("a,button,select,input,label,.chartbox"))return;
+  const r=e.target.closest(".c-main,tr.row");if(r){toggleRow((r.closest("[data-k]")).dataset.k);return}
+  if(!e.target.closest("#tip,.plot svg"))hideTip();
+});
+document.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.matches&&e.target.matches(".c-main,tr.row")){e.preventDefault();toggleRow(e.target.closest("[data-k]").dataset.k)}if(e.key==="Escape")hideTip()});
+document.addEventListener("pointerdown",e=>{lastPtr=e.pointerType||"mouse"},true);
+// ---------- Dagens beste kjøp ----------
+function blackFriday(y){const d=new Date(y,10,1);const thu=1+((4-d.getDay()+7)%7);return new Date(y,10,thu+22)}
+function renderHero(){
+  const wrap=$("hero-wrap"),c=ALL.filter(g=>st.sizes.includes(Math.round(g.size))&&g.best!=null&&g.inStock&&g.stand!=="nei");
+  const used=new Set(),cards=[];
+  const add=(k,g,why)=>{if(!g||used.has(g.key))return;used.add(g.key);cards.push(`<button class="hc" data-goto="${esc(g.key)}"><span class="k"><i></i>${k}</span><span class="n">${esc(g.label.replace(/\s+20\d\d$/,""))}</span><img loading="lazy" alt="" src="${esc(g.img_url||IMG(g.img))}" onerror="this.style.visibility='hidden'"><span class="p num">${fmt(g.best)} <small>kr · ${esc(g.bestShop)}</small></span><span class="w">${why}</span></button>`)};
+  // 1: beste TV (på «mest for pengene»-linjen) som er på ekte lavpris
+  const fr=[];let mq=-1;for(const g of [...c].filter(g=>g.quality!=null).sort((a,b)=>a.best-b.best||b.quality-a.quality))if(g.quality>mq){fr.push(g);mq=g.quality}
+  const real=g=>g.histDays>=60&&g.low60&&g.verdict<=0.001;
+  const top=fr.filter(real).sort((a,b)=>b.quality-a.quality)[0];
+  if(top)add("Beste TV på ekte lavpris",top,`Kvalitet ${top.quality} · ingen bedre TV er billigere`);
+  // 2: størst ekte prisfall under laveste 60 d
+  const drop=c.filter(g=>g.histDays>=60&&g.low60&&g.best<g.low60.price*0.995&&!used.has(g.key)).sort((a,b)=>a.verdict-b.verdict)[0];
+  if(drop)add("Størst ekte prisfall",drop,`${Math.round(-drop.verdict*100)||1} % under laveste pris siste 60 dager (${fmt(drop.low60.price)} kr)`);
+  // 3: nærmest/tryggest mot forventet BW-pris
+  if(BW_ON){const b=c.filter(g=>g.bw&&g.best<=g.bw.high&&!used.has(g.key)&&!g.dominatedBy).sort((a,b)=>((a.bw.p_billigere??1)-(b.bw.p_billigere??1))||((a.best-a.bw.mid)/a.bw.mid-(b.best-b.bw.mid)/b.bw.mid)||b.quality-a.quality)[0];
+    if(b)add("Nærmest Black Week-pris",b,`${b.best<=b.bw.mid?"Allerede i forventet BW-nivå":"Nær forventet BW-nivå"}${b.bw.p_billigere!=null?` · ${pct(b.bw.p_billigere)} sjanse for lavere`:""}`)}
+  // reserve: mest kvalitet per krone
+  if(cards.length<3){const v=fr.filter(g=>!used.has(g.key)&&g.quality>=50).sort((a,b)=>(b.quality-40)/b.best-(a.quality-40)/a.best)[0];
+    if(v)add("Mest for pengene",v,`Kvalitet ${v.quality} · ${verdict(v).replace(/<[^>]+>/g,"")||"på «mest for pengene»-linjen"}`)}
+  // nedtelling
+  const now=new Date(),day=new Date(now.getFullYear(),now.getMonth(),now.getDate()),y=now.getFullYear(),bf=blackFriday(y),end=new Date(y,11,2);
+  const dd=d=>Math.round((d-day)/864e5),df=d=>d.toLocaleDateString("nb-NO",{weekday:"long",day:"numeric",month:"long"});
+  if(dd(end)>=0&&dd(bf)<=60){
+    if(dd(bf)>0)cards.push(`<div class="hc cd"><span class="k"><i></i>Nedtelling</span><span class="big num">${dd(bf)}</span><span class="n">${dd(bf)===1?"dag":"dager"} til<br>Black Friday</span><span class="w">${df(bf)}. Black Month varer til 2. desember.</span></div>`);
+    else if(dd(bf)===0)cards.push(`<div class="hc cd"><span class="k"><i></i>I dag</span><span class="big">Nå!</span><span class="n">Black Friday</span><span class="w">Sjekk at prisen er en ekte lavpris før du slår til.</span></div>`);
+    else cards.push(`<div class="hc cd"><span class="k"><i></i>Innspurt</span><span class="big num">${dd(end)}</span><span class="n">${dd(end)===1?"dag":"dager"} igjen av<br>Black Month</span><span class="w">Tilbudene varer til ${df(end)}.</span></div>`)}
+  const sz=[...st.sizes].sort((a,b)=>a-b);$("hero-sub").textContent=sz.length?`${sz.length>1?sz[0]+"–"+sz[sz.length-1]:sz[0]}" · på lager hos valgte butikker`:"";
+  $("hero").innerHTML=cards.join("");wrap.hidden=!used.size||$("tab-list").hidden;
+}
+// ---------- Detalj ----------
+function linkify(s){return esc(s).replace(/https?:\/\/[^\s<]+/g,u=>`<a href="${u}" target="_blank" rel="noopener">kilde</a>`)}
 function detail(g){
-  const vs=g.items.map(p=>`<div class="v"><a href="${IMG(p.id,1)}" target="_blank" rel="noopener"><img class="bigimg" loading="lazy" alt="${esc(p.name)}" src="${IMG(p.id,1)}" onerror="this.style.display='none'"></a><div><h4><a href="${p.url}" target="_blank" rel="noopener">${esc(p.name)}</a></h4>
-    ${SHOPS.filter(s=>p.shops[s]).map(s=>{const o=p.shops[s];return `<div><b>${s}</b>: ${fmt(o.price)} kr${o.member?" (medlem)":""}${o.before?` <s>${fmt(o.before)}</s>`:""}<br><span class="muted small">${esc(o.title)} · varenr ${esc(o.sku)}</span></div>`}).join("")}
-    <div class="muted small">Laveste marked: 60 d ${fmt(p.low60&&p.low60.price)} · 90 d ${fmt(p.low90&&p.low90.price)} · data fra ${esc(p.history_since)}</div><div class="muted small">Kvalitet ${p.quality} – ${esc(p.quality_basis)}</div></div></div>`).join("");
-  return `<div class="variants">${vs}</div>${HIST?chart(g):'<p class="muted">Laster prisgraf …</p>'}`;
+  const lows=[["30 d",g.low30],["60 d",g.low60],["90 d",g.low90],["365 d",g.low365]].filter(x=>x[1]);
+  const b=g.bw,bi=bwInfo(g);
+  const facts=`<div class="facts">
+    <div class="fact"><h5>Laveste pris før i dag</h5>${lows.length?`<table class="mini">${lows.map(([n,l])=>`<tr><td>${n}</td><td class="num">${fmt(l.price)} kr</td><td>${esc(l.shop||"")}${l.date?", "+dshort(l.date):""}</td></tr>`).join("")}</table>`:'<p>Ingen historikk ennå.</p>'}<p class="muted small">Hos noen butikk på Prisjakt. ${g.histDays?`Historikk: ${g.histDays>=365?"over ett år":g.histDays+" dager"}.`:""}</p></div>
+    ${b?`<div class="fact"><h5>Sannsynlig Black Week-pris</h5><div class="big num">${bi.rng} kr</div><p>${bi.tag} Midtestimat <b class="num">${fmt(b.mid)} kr</b>${g.best!=null?` (${g.best<=b.mid?"dagens pris er på eller under":`dagens pris er ${Math.round((g.best-b.mid)/b.mid*100)} % over`})`:""}.</p><p class="small">Laveste kjente pris: <b class="num">${fmt(b.ref)} kr</b>. Gruppe: ${esc(b.group)} (${b.n} tilsvarende TV-er i fjor).${b.p_billigere!=null?` ${pct(b.p_billigere)} sjanse for at noen butikk går minst 2 % under dagens pris.`:""}</p></div>`:""}
+    <div class="fact"><h5>TV-stativ (Eva Solo Carry)</h5><div>${standBadge(g)}</div><p>${g.vesa?`VESA <b>${esc(g.vesa)}</b>`:"VESA-mål ukjent"}${g.stand==="nei"&&!g.vesa?' / utenfor 40–65"':""}${g.vesaLow?" – usikker kilde, sjekk før kjøp":""}${g.stand==null?". Sjekk VESA-mål hos butikken":""}.</p><p class="small muted">${g.vesaNote?"Kilde: "+linkify(g.vesaNote):g.vesa?"Kilde: Prisjakt":""}</p></div>
+    <div class="fact"><h5>Kvalitet</h5><div class="big">${g.quality??"–"} <span class="muted small" style="font-weight:500">av 100</span></div><p>${esc(g.qbasis||"")}</p><p class="small"><a href="#" data-qlink>Slik regnes scoren</a></p></div>
+  </div>`;
+  const r=st.range||"3m";
+  const chart=`<div class="chartcard"><div class="chart-h"><b>Prishistorikk</b><div class="seg" role="group" aria-label="Periode">${[["3m","3 mnd"],["1y","1 år"],["2y","2 år"]].map(([v,t])=>`<button data-range="${v}" class="${v===r?"on":""}">${t}</button>`).join("")}</div></div><div class="chartbox" data-chart="${esc(g.key)}">${HIST?"":'<p class="muted" style="padding:20px 0">Laster prisgraf …</p>'}</div></div>`;
+  const vs=g.items.map(p=>`<div class="v"><a href="${esc(IMG(p.id,1))}" target="_blank" rel="noopener"><img class="bigimg" loading="lazy" alt="${esc(p.name)}" src="${esc(IMG(p.id,1))}" onerror="this.style.visibility='hidden'"></a><div><h4>${esc(p.name)}</h4>
+    ${SHOPS.filter(s=>p.shops[s]).map(s=>{const o=p.shops[s];return `<div class="so"><div class="so-h"><b>${s}</b><span class="num">${OUT(o)?`<s>${fmt(o.price)} kr</s>`:`<b>${fmt(o.price)} kr</b>`}</span>${o.member?'<span class="chip">medlemspris</span>':""}${o.before?`<s class="small num">${fmt(o.before)}</s>`:""}${stockChip(o)}${o.url?`<a class="go" href="${esc(o.url)}" target="_blank" rel="noopener">Til butikken →</a>`:""}</div><div class="t">${esc(o.title)} · varenr ${esc(o.sku)}</div></div>`}).join("")||'<div class="so t">Ingen av butikkene har denne varianten nå.</div>'}
+    <div class="so t">${typeof p.id==="number"&&p.url?`<a href="${esc(p.url)}" target="_blank" rel="noopener">Se alle butikker på Prisjakt</a> · `:""}Laveste marked 60 d: ${fmt(p.low60&&p.low60.price)} · 90 d: ${fmt(p.low90&&p.low90.price)}${p.history_since?` · data fra ${esc(p.history_since)}`:""}${g.items.length>1?`<br>Kvalitet ${p.quality??"–"} – ${esc(p.quality_basis||"")}`:""}</div></div></div>`).join("");
+  return `<div class="detail-in">${flagsHTML(g,true)}${facts}${chart}<div class="sec-h">${g.items.length>1?`Butikker og ${g.items.length} varianter`:"Butikker"}</div><div class="variants">${vs}</div></div>`;
 }
-function chart(g){
-  const W=900,H=220,P=40,now=Date.now(),t0=now-92*864e5;
-  const ser=[];const colors={market:"#9ca3af","Elkjøp":"#16a34a","Power":"#dc2626","Komplett":"#f59e0b","NetOnNet":"#2563eb","Multicom":"#7c3aed","Samsung":"#0f766e"};
-  const mk=[],sh={};
-  for(const p of g.items){const h=HIST[p.id];if(!h)continue;mk.push(...h.market.map(x=>[Date.parse(x[0]),x[1]]));
-    for(const [s,l] of Object.entries(h.shops||{}))(sh[s]=sh[s]||[]).push(...l.map(x=>[Date.parse(x[0]),x[1]]))}
+// ---------- Prisgraf ----------
+function mergeMin(list){ // én trinnserie per variant -> laveste gjeldende pris ved hvert endringspunkt
+  const ts=[...new Set(list.flatMap(l=>l.map(x=>x[0])))].sort((a,b)=>a-b),idx=list.map(()=>-1),out=[];
+  for(const t of ts){let m=null;list.forEach((l,i)=>{while(idx[i]+1<l.length&&l[idx[i]+1][0]<=t)idx[i]++;const v=idx[i]>=0?l[idx[i]][1]:null;if(v!=null&&(m==null||v<m))m=v});
+    if(!out.length||out[out.length-1][1]!==m)out.push([t,m])}
+  return out}
+function seriesFor(g){
   const clean=pts=>{const v=pts.map(x=>x[1]).filter(x=>x!=null).sort((a,b)=>a-b);if(v.length<3)return pts;const med=v[Math.floor(v.length/2)];return pts.filter(x=>x[1]==null||x[1]>=0.3*med)};
-  const step=(pts0)=>{const pts=clean(pts0);pts.sort((a,b)=>a[0]-b[0]);const o=[];let last=null;for(const [t,v] of pts){if(t<t0){last=v;continue}if(!o.length&&last!=null)o.push([t0,last]);o.push([t,v])}if(!o.length&&last!=null)o.push([t0,last]);if(o.length)o.push([now,o[o.length-1][1]]);return o};
-  // markedsserien er "laveste blant varianter" -> ta min per tidspunkt
-  const m=step(mk);ser.push(["Laveste marked",m,colors.market]);
-  for(const s of SHOPS)if(sh[s])ser.push([s,step(sh[s].filter(x=>x[1]!=null)),colors[s]]);
-  const all=ser.flatMap(s=>s[1].map(x=>x[1])).filter(x=>x!=null);if(!all.length)return'<p class="muted">Ingen historikk.</p>';
-  let lo=Math.min(...all),hi=Math.max(...all);if(hi===lo){hi+=500;lo-=500}const pad=(hi-lo)*.08;lo-=pad;hi+=pad;
-  const X=t=>P+(t-t0)/(now-t0)*(W-P-10),Y=v=>H-24-(v-lo)/(hi-lo)*(H-40);
-  const path=pts=>pts.map((p,i)=>(i?"H"+X(p[0]).toFixed(1)+"V":"M"+X(p[0]).toFixed(1)+",")+Y(p[1]).toFixed(1)).join("");
-  const ticks=[lo+pad,(lo+hi)/2,hi-pad].map(v=>`<text x="${P-4}" y="${Y(v)+4}" text-anchor="end" font-size="10" fill="currentColor" opacity=".6">${fmt(v)}</text><line x1="${P}" x2="${W-10}" y1="${Y(v)}" y2="${Y(v)}" stroke="currentColor" opacity=".08"/>`).join("");
-  const months=[];for(let d=new Date(t0);d<=now;d.setDate(d.getDate()+1))if(d.getDate()===1)months.push(+d);
-  const mt=months.map(t=>`<text x="${X(t)}" y="${H-6}" font-size="10" fill="currentColor" opacity=".6">${new Date(t).toLocaleDateString("nb-NO",{month:"short"})}</text>`).join("");
-  return `<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${ticks}${mt}${ser.map(([n,pts,c])=>`<path d="${path(pts)}" fill="none" stroke="${c}" stroke-width="${n==="Laveste marked"?1.5:2.2}" ${n==="Laveste marked"?'stroke-dasharray="4 3"':""}/>`+(n!=="Laveste marked"&&pts.length?`<circle cx="${X(pts[pts.length-1][0])-4}" cy="${Y(pts[pts.length-1][1])}" r="4" fill="${c}"/>`:"")).join("")}</svg>
-  <div class="legend">${ser.map(([n,,c])=>`<span><span style="color:${c}">■</span> ${n}</span>`).join("")}<span class="muted">Siste 3 mnd. Butikklinjer bygges opp fra 11.11.2026.</span></div>`;
+  const prep=arr=>clean(arr.map(x=>[Date.parse(x[0]),x[1]]).filter(x=>!isNaN(x[0])).sort((a,b)=>a[0]-b[0]));
+  const mk=[],sh={};
+  for(const p of g.items){const h=HIST[p.id];if(!h)continue;if(h.market&&h.market.length)mk.push(prep(h.market));
+    for(const [s,l] of Object.entries(h.shops||{}))if(l&&l.length)(sh[s]=sh[s]||[]).push(prep(l))}
+  const ser=[];if(mk.length)ser.push({n:"Laveste i markedet",pts:mergeMin(mk),c:"var(--mk)",dash:true});
+  for(const s of SHOPS)if(sh[s])ser.push({n:s,pts:mergeMin(sh[s]),c:SHOPC[s]});
+  return ser}
+function clip(pts,t0,now){const o=[];let last=null,seen=false;for(const [t,v] of pts){if(t<t0){last=v;seen=true;continue}if(!o.length&&seen)o.push([t0,last]);o.push([t,v])}if(!o.length&&seen)o.push([t0,last]);if(o.length)o.push([now,o[o.length-1][1]]);return o}
+function stepAt(pts,t){let v=null;for(const p of pts){if(p[0]>t)break;v=p[1]}return v}
+function niceTicks(lo,hi,n){const raw=(hi-lo)/n,p=Math.pow(10,Math.floor(Math.log10(raw))),f=raw/p,step=(f<1.5?1:f<3?2:f<7?5:10)*p,out=[];for(let v=Math.ceil(lo/step)*step;v<=hi+1e-9;v+=step)out.push(v);return out}
+function drawCharts(){if(!HIST)return;document.querySelectorAll(".chartbox[data-chart]").forEach(box=>{const g=ALL.find(x=>x.key===box.dataset.chart);if(g)drawChart(box,g)})}
+function drawChart(box,g){
+  const W=Math.max(260,Math.floor(box.clientWidth)),mob=W<520,H=mob?210:250,L=mob?46:54,R=10,T=10,B=24;
+  const days={"3m":92,"1y":365,"2y":730}[st.range||"3m"]||92,now=Date.now();let t0=now-days*864e5;
+  let ser=seriesFor(g).map(s=>({...s,pts:clip(s.pts,t0,now)})).filter(s=>s.pts.some(p=>p[1]!=null));
+  const leg=box.parentNode.querySelector(".legend");if(leg)leg.remove();
+  if(!ser.length){box.innerHTML='<p class="muted" style="padding:20px 0">Ingen prishistorikk for denne perioden ennå.</p>';return}
+  const first=Math.min(...ser.map(s=>(s.pts.find(p=>p[1]!=null)||[now])[0]));if(first>t0+(now-t0)*0.12)t0=Math.min(first-(now-first)*0.03,now-14*864e5);
+  const all=ser.flatMap(s=>s.pts.filter(p=>p[0]>=t0).map(x=>x[1])).filter(x=>x!=null);
+  let lo=Math.min(...all),hi=Math.max(...all);if(hi-lo<lo*0.04){const m=(hi+lo)/2;hi=m+lo*0.03;lo=m-lo*0.03}const pad=(hi-lo)*.1;lo-=pad;hi+=pad;
+  const X=t=>L+(Math.max(t,t0)-t0)/(now-t0)*(W-L-R),Y=v=>T+(hi-v)/(hi-lo)*(H-T-B);
+  const path=pts=>{let d="",pen=false;for(const [t,v] of pts){const x=X(t).toFixed(1);if(v==null){if(pen)d+=`H${x}`;pen=false;continue}const y=Y(v).toFixed(1);d+=pen?`H${x}V${y}`:`M${x},${y}`;pen=true}return d};
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Prishistorikk for ${esc(g.label)}">`;
+  s+=niceTicks(lo,hi,mob?3:4).map(v=>`<line x1="${L}" x2="${W-R}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}" stroke="var(--grid)"/><text x="${L-6}" y="${(Y(v)+4).toFixed(1)}" text-anchor="end" font-size="11" fill="var(--muted)">${fmt(v)}</text>`).join("");
+  // måneds-ticks: velg steg så etikettene får plass
+  const span=(now-t0)/864e5,pxm=(W-L-R)/(span/30.4),stepM=[1,2,3,6,12].find(m=>m*pxm>=46)||12;
+  const d0=new Date(t0);let d=new Date(d0.getFullYear(),d0.getMonth()+1,1),lastY=null;
+  for(;+d<=now;d=new Date(d.getFullYear(),d.getMonth()+1,1)){if(d.getMonth()%stepM)continue;const x=X(+d);if(x>W-R-18)continue;
+    const yr=d.getFullYear()!==lastY&&(lastY!==null||span>200);lastY=d.getFullYear();
+    s+=`<line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${H-B}" y2="${H-B+4}" stroke="var(--axis)"/><text x="${x.toFixed(1)}" y="${H-6}" font-size="11" fill="var(--muted)" text-anchor="middle">${d.toLocaleDateString("nb-NO",{month:"short"}).replace(".","")}${yr?" ’"+String(d.getFullYear()).slice(2):""}</text>`}
+  s+=`<line x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}" stroke="var(--axis)"/>`;
+  s+=ser.map(({pts,c,dash})=>{const lp=[...pts].reverse().find(p=>p[1]!=null),end=pts[pts.length-1];
+    return `<path d="${path(pts)}" fill="none" stroke="${c}" stroke-width="${dash?1.5:2}" stroke-linejoin="round" ${dash?'stroke-dasharray="4 3"':""}/>`+(!dash&&end&&end[1]!=null?`<circle cx="${X(end[0]).toFixed(1)}" cy="${Y(lp[1]).toFixed(1)}" r="4" fill="${c}" stroke="var(--card)" stroke-width="2"/>`:"")}).join("");
+  s+=`<line class="xh" x1="0" x2="0" y1="${T}" y2="${H-B}" stroke="var(--fg)" stroke-width="1" opacity="0"/><rect x="${L}" y="${T}" width="${W-L-R}" height="${H-T-B}" fill="transparent"/></svg>`;
+  box.innerHTML=s;
+  const lg=document.createElement("div");lg.className="legend";
+  lg.innerHTML=ser.map(({n,pts,c,dash})=>{const v=pts[pts.length-1][1];return `<span><i class="lk${dash?" d":""}" style="background:${c}"></i>${esc(n)} <b>${v==null?"–":fmt(v)}</b></span>`}).join("")+(ser.length<2?'<span class="muted">Butikklinjer bygges opp fra 11.11.2026.</span>':"");
+  box.after(lg);
+  const svg=box.querySelector("svg"),xh=svg.querySelector(".xh");
+  const move=e=>{const r=svg.getBoundingClientRect(),k=r.width/W,x=Math.min(W-R,Math.max(L,(e.clientX-r.left)/k)),t=t0+(x-L)/(W-L-R)*(now-t0);
+    xh.setAttribute("x1",x);xh.setAttribute("x2",x);xh.setAttribute("opacity",".35");
+    const rows=ser.map(s=>[s,stepAt(s.pts,t)]).filter(x=>x[1]!=null).sort((a,b)=>a[1]-b[1]);
+    showTip({clientX:r.left+x*k,clientY:r.top+T*k+20},`<div class="tt">${new Date(t).toLocaleDateString("nb-NO",{day:"numeric",month:"short",year:"numeric"})}</div>`+(rows.map(([s,v])=>`<div class="tr"><span><i class="lk${s.dash?" d":""}" style="background:${s.c}"></i>${esc(s.n)}</span><b class="num">${fmt(v)} kr</b></div>`).join("")||'<span class="muted">Ingen pris</span>'))};
+  svg.onpointermove=svg.onpointerdown=move;svg.onpointerleave=()=>{xh.setAttribute("opacity","0");hideTip()};
 }
 
 const FINN_LOC="1.22046.20220"; // Bergen
 const FINN=[["40–43\"",[["LG OLED C5 42","OLED42C5"],["LG OLED C4 42","OLED42C4"],["LG OLED C3 42","OLED42C3"],["Samsung S90F 42","42S90F"],["Samsung S90D 42","42S90D"],["Samsung S90C 42","42S90C"],["Samsung QN90F 43","43QN90F"],["Samsung QN90D 43","43QN90D"],["Samsung QN90C 43","43QN90C"],["Alle OLED 42\"","42 OLED"]]],
 ["48–55\"",[["LG OLED C4 48","OLED48C4"],["LG OLED C4 55","OLED55C4"],["LG OLED C3 55","OLED55C3"],["LG OLED G4 55","OLED55G4"],["Sony Bravia 8 55","Bravia 8 55"],["Sony A80L 55","A80L 55"],["Samsung S90D 55","S90D 55"],["Samsung S95D 55","S95D 55"],["Samsung QN90D 55","QN90D 55"],["Philips OLED809 55","OLED809"]]]];
-document.getElementById("finnlinks").innerHTML=FINN.map(([t,l])=>`<h3>${t}</h3><div class='group'>`+l.map(([n,q])=>`<a class="chip" target="_blank" rel="noopener" href="https://www.finn.no/recommerce/forsale/search?location=${FINN_LOC}&q=${encodeURIComponent(q)}">${esc(n)}</a>`).join("")+"</div>").join("");
+$("finnlinks").innerHTML=FINN.map(([t,l])=>`<h3>${t}</h3><div class='group'>`+l.map(([n,q])=>`<a class="chipbtn" target="_blank" rel="noopener" href="https://www.finn.no/recommerce/forsale/search?location=${FINN_LOC}&q=${encodeURIComponent(q)}">${esc(n)}</a>`).join("")+"</div>").join("");
 // ---------- Plott ----------
-const CAT=[["OLED","OLED","var(--s1)"],["Mini-LED","Mini-LED","var(--s2)"],["LCD","QLED/LED","var(--s3)"]];
+const CAT=[["OLED","OLED","var(--c1)"],["Mini-LED","Mini-LED","var(--c2)"],["LCD","QLED/LED","var(--c3)"]];
 const catOf=g=>g.panel==="OLED"?0:g.panel==="Mini-LED"?1:2;
-const tip=()=>document.getElementById("tip");
-function showTip(e,html){const t=tip();t.innerHTML=html;t.hidden=false;const r=t.getBoundingClientRect();let x=e.clientX+14,y=e.clientY+14;if(x+r.width>innerWidth-8)x=e.clientX-r.width-14;if(y+r.height>innerHeight-8)y=e.clientY-r.height-14;t.style.left=Math.max(8,x)+"px";t.style.top=Math.max(8,y)+"px"}
-function hideTip(){tip().hidden=true}
+const tip=()=>$("tip");
+function showTip(e,html,pin){const t=tip();t.innerHTML=html;t.hidden=false;t.classList.toggle("pinned",!!pin);const r=t.getBoundingClientRect();let x=e.clientX+14,y=e.clientY+14;
+  if(pin&&innerWidth<700)x=e.clientX-r.width/2;else if(x+r.width>innerWidth-8)x=e.clientX-r.width-14;
+  if(y+r.height>innerHeight-(innerWidth<700?76:8))y=e.clientY-r.height-14;
+  t.style.left=Math.min(innerWidth-r.width-8,Math.max(8,x))+"px";t.style.top=Math.max(8,y)+"px"}
+function hideTip(){const t=tip();if(t.hidden)return;t.hidden=true;t.classList.remove("pinned");document.querySelectorAll(".plot .sel").forEach(c=>c.setAttribute("opacity","0"))}
+addEventListener("scroll",()=>{if(!tip().hidden)hideTip()},{passive:true});
 function gotoRow(key){open.add(key);document.querySelector('[data-tab=list]').click();
   const g=groups().find(x=>x.key===key);
-  if(g&&!(window.FILTERED||[]).some(x=>x.key===key)){const sz=Math.round(g.size);if(!st.sizes.includes(sz))st.sizes.push(sz);st.q="";st.brand="";st.panel="";for(const k of["low","hz100","old","dom","stock","stand","bwok"])st[k]=false;save();build()}
-  render();if(!HIST)loadHist();const el=document.getElementById(rowId(key));if(el)el.scrollIntoView({block:"center"})}
-function bindPts(svg,map){svg.querySelectorAll("[data-i]").forEach(c=>{const d=map[+c.dataset.i];
-  c.onmouseenter=c.onmousemove=e=>showTip(e,d.tip);c.onmouseleave=hideTip;c.onclick=()=>{hideTip();d.key&&gotoRow(d.key)}})}
+  if(g&&!(window.FILTERED||[]).some(x=>x.key===key)){const sz=Math.round(g.size);if(!st.sizes.includes(sz))st.sizes.push(sz);st.q="";st.brand="";st.panel="";for(const k of["low","hz100","old","dom","stock","stand","bwok"])st[k]=false;if(!st.shops.some(s=>g[s]))st.shops=[...SHOPS];save();build()}
+  render();if(!HIST)loadHist();const el=document.getElementById(rowId(key));if(el){el.scrollIntoView({block:MOBILE.matches?"start":"center"});el.classList.add("flash");setTimeout(()=>{const x=document.getElementById(rowId(key));x&&x.classList.remove("flash")},1700)}}
+// nærmeste punkt: pekeren trenger bare å være nær, ikke midt på
+function bindPts(svg,W,pts){
+  const sel=svg.querySelector(".sel");
+  const near=(e,max)=>{const r=svg.getBoundingClientRect(),k=r.width/W,x=(e.clientX-r.left)/k,y=(e.clientY-r.top)/k;let b=null,bd=max*max;for(const p of pts){const d=(p.x-x)**2+(p.y-y)**2;if(d<bd){bd=d;b=p}}return b&&{p:b,cx:r.left+b.x*k,cy:r.top+b.y*k}};
+  const mark=p=>{if(!sel)return;if(p){sel.setAttribute("cx",p.x);sel.setAttribute("cy",p.y);sel.setAttribute("opacity","1")}else sel.setAttribute("opacity","0")};
+  svg.onpointermove=e=>{if(e.pointerType!=="mouse"||tip().classList.contains("pinned"))return;const n=near(e,24);svg.style.cursor=n?"pointer":"";mark(n&&n.p);n?showTip(e,n.p.tip):hideTip()};
+  svg.onpointerleave=e=>{if(e.pointerType==="mouse"&&!tip().classList.contains("pinned"))hideTip()};
+  svg.onclick=e=>{const n=near(e,lastPtr==="mouse"?24:34);if(!n){hideTip();return}
+    if(lastPtr==="mouse"){hideTip();n.p.key&&gotoRow(n.p.key);return}
+    hideTip();mark(n.p);showTip({clientX:n.cx,clientY:n.cy+6},n.p.tip+`<div class="ta"><button class="btn sm pri" data-goto="${esc(n.p.key)}">Vis i tabellen</button><button class="btn sm" onclick="hideTip()">Lukk</button></div>`,true)}}
 const shortLabel=g=>g.label.replace(/\s+20\d\d$/,"");
 function drawPlots(gs){
   // --- 1: pris mot kvalitet ---
-  const mode=st.pmode||"now";
-  document.querySelectorAll('input[name=pmode]').forEach(r=>{r.checked=r.value===mode;r.onchange=()=>{st.pmode=r.value;save();drawPlots(window.FILTERED||gs)}});
+  const mode=BW_ON?(st.pmode||"now"):"now";
+  document.querySelectorAll('input[name=pmode]').forEach(r=>{r.checked=r.value===mode;r.onchange=()=>{st.pmode=r.value;save();hideTip();drawPlots(window.FILTERED||gs)}});
   const PX=g=>mode==="bw"?(g.bw?g.bw.mid:null):g.best;
   const pts=gs.filter(g=>PX(g)!=null&&g.quality!=null);
-  const W=900,H=440,L=46,Rm=20,T=14,B=40,el=document.getElementById("p1");
-  document.getElementById("lg1").innerHTML=CAT.map(([,n,c],i)=>`<span><span class="dot" style="background:${c}"></span>${n} (${pts.filter(g=>catOf(g)===i).length})</span>`).join("")+`<span class="muted" style="white-space:nowrap"><svg width="22" height="10" style="display:inline-block;width:22px;vertical-align:0;margin-right:5px"><path d="M1,8H11V2H21" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 3"/></svg>mest for pengene</span>`;
-  if(!pts.length){el.innerHTML='<p class="muted">Ingen TV-er med disse filtrene.</p>';}else{
-  const px=pts.map(PX).concat(mode==="arrow"?pts.filter(g=>g.bw).map(g=>g.bw.mid):[]),lo=Math.min(...px)*0.88,hi=Math.max(...px)*1.12;
-  const qs=pts.map(g=>g.quality),qlo=Math.max(0,Math.floor((Math.min(...qs)-6)/10)*10),qhi=100;
+  const el=$("p1"),W=Math.max(300,Math.floor(el.clientWidth)||900),mob=W<600,H=mob?Math.round(W*1.12):Math.min(540,Math.round(W*.48)),L=34,Rm=mob?12:20,T=26,B=mob?40:44,FS=mob?11.5:12;
+  const ARROW_MIN=0.05,arrows=mode==="arrow"?pts.filter(g=>g.bw&&Math.abs(g.bw.mid-g.best)/g.best>=ARROW_MIN):[];
+  $("lg1").innerHTML=CAT.map(([,n,c],i)=>`<span><span class="dot" style="background:${c}"></span>${n} (${pts.filter(g=>catOf(g)===i).length})</span>`).join("")+`<span><svg width="22" height="10" style="width:22px;flex:none"><path d="M1,8H11V2H21" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 3"/></svg>mest for pengene</span>`+(mode==="arrow"?`<span><svg width="24" height="10" style="width:24px;flex:none"><path d="M1,5H20M16,1.5L21,5L16,8.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>forventet endring til BW (bare ≥ 5 %, ${arrows.length} TV-er)</span>`:"");
+  if(!pts.length){el.innerHTML='<p class="muted" style="padding:24px 0">Ingen TV-er med disse filtrene. <a href="#" data-reset>Nullstill filtre</a></p>';}else{
+  const px=pts.map(PX).concat(arrows.map(g=>g.bw.mid)),lo=Math.min(...px)*0.9,hi=Math.max(...px)*1.12;
+  const qs=pts.map(g=>g.quality),qlo=Math.max(0,Math.floor((Math.min(...qs)-4)/10)*10),qhi=Math.min(100,Math.ceil((Math.max(...qs)+6)/10)*10);
   const X=v=>L+(Math.log(v)-Math.log(lo))/(Math.log(hi)-Math.log(lo))*(W-L-Rm),Y=v=>T+(qhi-v)/(qhi-qlo)*(H-T-B);
-  const xt=[1000,2000,3000,5000,7500,10000,15000,20000,30000,50000,75000].filter(v=>v>=lo&&v<=hi);
+  let lastX=-99;const xt=[1000,1500,2000,3000,4000,5000,7500,10000,15000,20000,30000,50000,75000].filter(v=>{if(v<lo||v>hi)return false;const x=X(v);if(x-lastX<(mob?46:60)||x>W-Rm-14)return false;lastX=x;return true});
   const yt=[];for(let v=qlo;v<=qhi;v+=10)yt.push(v);
-  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Pris mot kvalitet">`;
-  s+=yt.map(v=>`<line x1="${L}" x2="${W-Rm}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${L-6}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="var(--muted)">${v}</text>`).join("");
-  s+=xt.map(v=>`<line x1="${X(v)}" x2="${X(v)}" y1="${T}" y2="${H-B}" stroke="var(--line)" opacity=".6"/><text x="${X(v)}" y="${H-B+16}" text-anchor="middle" font-size="11" fill="var(--muted)">${fmt(v)}</text>`).join("");
-  s+=`<text x="${(L+W-Rm)/2}" y="${H-4}" text-anchor="middle" font-size="12" fill="var(--muted)">${mode==="bw"?"Sannsynlig Black Week-pris, midtestimat (kr)":"Dagens laveste pris (kr)"}</text><text transform="translate(12 ${(T+H-B)/2}) rotate(-90)" text-anchor="middle" font-size="12" fill="var(--muted)">Kvalitet (0–100)</text>`;
-  // piler fra dagens pris til sannsynlig BW-pris
-  if(mode==="arrow"){s+=`<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="var(--muted)"/></marker></defs>`;
-    for(const g of pts){if(!g.bw||Math.abs(g.bw.mid-g.best)/g.best<0.02)continue;const y=Y(g.quality).toFixed(1),x1=X(g.best),x2=X(g.bw.mid),dx=x2>x1?-6:6;
-      s+=`<line x1="${(x1+(x2>x1?6:-6)).toFixed(1)}" y1="${y}" x2="${(x2+dx*0).toFixed(1)}" y2="${y}" stroke="var(--muted)" stroke-width="1.3" stroke-dasharray="3 3" marker-end="url(#ah)" opacity=".85"/>`}}
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Pris mot kvalitet">`;
+  s+=yt.map(v=>`<line x1="${L}" x2="${W-Rm}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--grid)"/><text x="${L-7}" y="${Y(v)+4}" text-anchor="end" font-size="${FS}" fill="var(--muted)">${v}</text>`).join("");
+  s+=xt.map(v=>`<line x1="${X(v)}" x2="${X(v)}" y1="${T}" y2="${H-B}" stroke="var(--grid)"/><text x="${X(v)}" y="${H-B+16}" text-anchor="middle" font-size="${FS}" fill="var(--muted)">${fmt(v)}</text>`).join("");
+  s+=`<text x="0" y="12" font-size="${FS}" font-weight="600" fill="var(--fg2)">↑ Kvalitet (0–100)</text><text x="${W-Rm}" y="${H-5}" text-anchor="end" font-size="${FS}" font-weight="600" fill="var(--fg2)">${mode==="bw"?"Sannsynlig BW-pris, midtestimat (kr) →":"Dagens laveste pris (kr) →"}</text>`;
   // frontier
   const sorted=[...pts].sort((a,b)=>PX(a)-PX(b)||b.quality-a.quality);const fr=[];let mq=-1;for(const g of sorted)if(g.quality>mq){fr.push(g);mq=g.quality}
   const frSet=new Set(fr);
   let d="";fr.forEach((g,i)=>{d+=(i?`H${X(PX(g)).toFixed(1)}V`:`M${X(PX(g)).toFixed(1)},`)+Y(g.quality).toFixed(1)});
-  s+=`<path d="${d}" fill="none" stroke="var(--fg)" stroke-width="1.5" stroke-dasharray="4 4" opacity=".55"/>`;
+  s+=`<path d="${d}" fill="none" stroke="var(--fg)" stroke-width="1.5" stroke-dasharray="4 4" opacity=".45"/>`;
+  // piler fra dagens pris til sannsynlig BW-pris: tynne, i panelfargen, bare når endringen er minst 5 %
+  for(const g of arrows){const y=Y(g.quality),x1=X(g.best),x2=X(g.bw.mid),dir=x2>x1?1:-1,c=CAT[catOf(g)][2];if(Math.abs(x2-x1)<7)continue;
+    s+=`<path d="M${(x1+dir*5).toFixed(1)},${y.toFixed(1)}H${(x2-dir*1).toFixed(1)}" stroke="${c}" stroke-width="1.4" opacity=".75" fill="none"/><path d="M${(x2-dir*5.5).toFixed(1)},${(y-3.5).toFixed(1)}L${x2.toFixed(1)},${y.toFixed(1)}L${(x2-dir*5.5).toFixed(1)},${(y+3.5).toFixed(1)}" fill="none" stroke="${c}" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>`}
   const map=[];
   const order=[...pts].sort((a,b)=>frSet.has(a)-frSet.has(b));
-  s+=order.map(g=>{const i=map.length,c=CAT[catOf(g)][2],o=g[g.bestShop];
-    map.push({key:g.key,tip:`<b>${esc(g.label)}</b><br>${esc(g.panel)} · ${esc(g.hz||"")}<br><b>${fmt(g.best)} kr</b> hos ${esc(g.bestShop)}${o&&o.before?` (førpris ${fmt(o.before)})`:""}<br>Laveste 60 d: ${g.low60?fmt(g.low60.price)+" kr":"–"}<br>Sannsynlig BW-pris: ${g.bw?`<b>${fmt(g.bw.low)}–${fmt(g.bw.high)} kr</b> (midt ${fmt(g.bw.mid)})`:"–"}<br>Kvalitet <b>${g.quality}</b> – ${esc(g.qbasis)}${frSet.has(g)?"<br><i>På «mest for pengene»-linjen</i>":""}`});
-    const x=X(PX(g)).toFixed(1),y=Y(g.quality).toFixed(1),r=frSet.has(g)?6:4.5;
-    return `<circle cx="${x}" cy="${y}" r="${r}" fill="${c}" stroke="var(--card)" stroke-width="2"/><circle data-i="${i}" cx="${x}" cy="${y}" r="11" fill="transparent" style="cursor:pointer"/>`}).join("");
-  // labels for frontier points, skip collisions
-  const placed=[];
-  for(const g of fr){const x=X(PX(g))+8,y=Y(g.quality)-8;if(placed.some(p=>Math.abs(p[1]-y)<14&&Math.abs(p[0]-x)<150))continue;if(x>W-150)continue;placed.push([x,y]);
-    s+=`<text x="${x}" y="${y}" font-size="11" fill="var(--fg)" stroke="var(--card)" stroke-width="3" paint-order="stroke" pointer-events="none">${esc(shortLabel(g))}</text>`}
-  el.innerHTML=s+"</svg>";bindPts(el.querySelector("svg"),map);}
+  s+=order.map(g=>{const c=CAT[catOf(g)][2],o=g[g.bestShop],x=X(PX(g)),y=Y(g.quality),r=frSet.has(g)?(mob?5.5:6):(mode==="arrow"?4:4.5);
+    map.push({key:g.key,x,y,tip:`<div class="tt">${esc(g.label)}</div><span class="muted">${esc(g.panel)}${g.hz?" · "+esc(g.hz):""}</span><br><b class="num">${fmt(g.best)} kr</b> hos ${esc(g.bestShop)}${o&&o.before?` <span class="muted">(førpris ${fmt(o.before)})</span>`:""}<br>Laveste 60 d: <span class="num">${g.low60?fmt(g.low60.price)+" kr":"–"}</span>${BW_ON?`<br>Sannsynlig BW-pris: ${g.bw?`<b class="num">${fmt(g.bw.low)}–${fmt(g.bw.high)} kr</b>`:"–"}`:""}<br>Kvalitet <b>${g.quality}</b> <span class="muted">– ${esc(g.qbasis)}</span>${frSet.has(g)?"<br><i>På «mest for pengene»-linjen</i>":""}`});
+    return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}" fill="${c}" stroke="var(--card)" stroke-width="2"/>`}).join("");
+  // etiketter for frontier-punktene; hopp over kollisjoner, snu mot venstre ved høyre kant
+  const placed=[],cw=FS*0.56;
+  for(const g of [...fr].reverse()){const t=shortLabel(g),w=t.length*cw;let x=X(PX(g))+9,y=Y(g.quality)-8,anchor="start",x0=x;
+    if(x+w>W-2){anchor="end";x=X(PX(g))-9;x0=x-w}if(x0<L)continue;
+    if(placed.some(p=>Math.abs(p[1]-y)<FS+3&&x0<p[0]+p[2]+6&&p[0]<x0+w+6))continue;placed.push([x0,y,w]);
+    s+=`<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="${anchor}" font-size="${FS}" font-weight="500" fill="var(--fg)" stroke="var(--card)" stroke-width="3.5" paint-order="stroke" stroke-linejoin="round" pointer-events="none">${esc(t)}</text>`}
+  s+=`<circle class="sel" r="10" fill="none" stroke="var(--fg)" stroke-width="2" opacity="0" pointer-events="none"/><rect x="0" y="0" width="${W}" height="${H}" fill="transparent"/>`;
+  el.innerHTML=s+"</svg>";bindPts(el.querySelector("svg"),W,map);}
   // --- 2: ekte rabatt? ---
-  const el2=document.getElementById("p2"),off=[];
-  for(const g of gs)for(const sh of SHOPS){const o=g[sh];if(!o||!o.before||!g.low60||!st.shops.includes(sh))continue;
+  const el2=$("p2"),off=[];
+  for(const g of gs)for(const sh of SHOPS){const o=g[sh];if(!o||!o.before||!g.low60||!st.shops.includes(sh)||OUT(o))continue;
     off.push({g,sh,o,x:(o.before-o.price)/o.before*100,y:(o.price-g.low60.price)/g.low60.price*100})}
-  if(!off.length){el2.innerHTML='<p class="muted">Ingen tilbud med oppgitt førpris med disse filtrene.</p>';return}
-  const L2=62,H2=380,xmax=Math.max(10,Math.ceil(Math.max(...off.map(o=>o.x))/10)*10);
+  if(!off.length){el2.innerHTML='<p class="muted" style="padding:24px 0">Ingen tilbud med oppgitt førpris med disse filtrene.</p>';return}
+  const L2=mob?46:52,H2=mob?Math.round(W*.95):Math.min(440,Math.round(W*.4)),xmax=Math.max(10,Math.ceil(Math.max(...off.map(o=>o.x))/10)*10);
   const ymin=Math.min(-10,Math.floor(Math.min(...off.map(o=>o.y))/10)*10),ymax=Math.max(20,Math.ceil(Math.min(150,Math.max(...off.map(o=>o.y)))/10)*10);
+  const ystep=(ymax-ymin)/10>(mob?7:9)?20:10,xstep=xmax/10>(mob?6:12)?20:10;
   const X2=v=>L2+v/xmax*(W-L2-Rm),Y2=v=>T+(ymax-Math.min(v,ymax))/(ymax-ymin)*(H2-T-B);
-  let s2=`<svg viewBox="0 0 ${W} ${H2}" role="img" aria-label="Oppgitt rabatt mot pris sammenlignet med laveste 60 dager">`;
-  s2+=`<rect x="${L2}" y="${T}" width="${W-L2-Rm}" height="${Y2(0)-T}" fill="var(--badbg)" opacity=".55"/><rect x="${L2}" y="${Y2(0)}" width="${W-L2-Rm}" height="${H2-B-Y2(0)}" fill="var(--goodbg)" opacity=".55"/>`;
-  for(let v=ymin;v<=ymax;v+=10)s2+=`<line x1="${L2}" x2="${W-Rm}" y1="${Y2(v)}" y2="${Y2(v)}" stroke="var(--line)"/><text x="${L2-6}" y="${Y2(v)+4}" text-anchor="end" font-size="11" fill="var(--muted)">${v>0?"+":""}${v} %</text>`;
-  for(let v=0;v<=xmax;v+=10)s2+=`<text x="${X2(v)}" y="${H2-B+16}" text-anchor="middle" font-size="11" fill="var(--muted)">${v} %</text>`;
+  let s2=`<svg viewBox="0 0 ${W} ${H2}" width="${W}" height="${H2}" role="img" aria-label="Oppgitt rabatt mot pris sammenlignet med laveste 60 dager">`;
+  s2+=`<rect x="${L2}" y="${T}" width="${W-L2-Rm}" height="${Y2(0)-T}" fill="var(--badbg)" opacity=".6"/><rect x="${L2}" y="${Y2(0)}" width="${W-L2-Rm}" height="${H2-B-Y2(0)}" fill="var(--goodbg)" opacity=".7"/>`;
+  for(let v=Math.ceil(ymin/ystep)*ystep;v<=ymax;v+=ystep)s2+=`<line x1="${L2}" x2="${W-Rm}" y1="${Y2(v)}" y2="${Y2(v)}" stroke="var(--card)" opacity=".7"/><text x="${L2-7}" y="${Y2(v)+4}" text-anchor="end" font-size="${FS}" fill="var(--muted)">${v>0?"+":""}${v} %</text>`;
+  for(let v=0;v<=xmax;v+=xstep)s2+=`<text x="${X2(v)}" y="${H2-B+16}" text-anchor="middle" font-size="${FS}" fill="var(--muted)">${v} %</text>`;
   s2+=`<line x1="${L2}" x2="${W-Rm}" y1="${Y2(0)}" y2="${Y2(0)}" stroke="var(--fg)" stroke-width="1.5" opacity=".6"/>`;
-  s2+=`<text x="${W-Rm-6}" y="${T+16}" text-anchor="end" font-size="12" font-weight="600" fill="var(--bad)">Dyrere enn før – rabatten er pynt</text><text x="${W-Rm-6}" y="${H2-B-8}" text-anchor="end" font-size="12" font-weight="600" fill="var(--good)">Ekte lavpris (≤ laveste 60 d)</text>`;
-  s2+=`<text x="${(L2+W-Rm)/2}" y="${H2-4}" text-anchor="middle" font-size="12" fill="var(--muted)">Butikkens oppgitte rabatt fra førpris</text><text transform="translate(12 ${(T+H2-B)/2}) rotate(-90)" text-anchor="middle" font-size="12" fill="var(--muted)">Dagens pris vs laveste 60 d</text>`;
-  const map2=off.map(o=>({key:o.g.key,tip:`<b>${esc(o.g.label)}</b> – ${esc(o.sh)}<br>Nå <b>${fmt(o.o.price)} kr</b>, førpris ${fmt(o.o.before)} (−${o.x.toFixed(0)} %)<br>Laveste 60 d: ${fmt(o.g.low60.price)} kr hos ${esc(o.g.low60.shop)}<br>${o.y<=0.05?'<span class="good">Ekte lavpris</span>':`<span class="bad">${o.y.toFixed(0)} % over laveste 60 d</span>`}`}));
-  s2+=off.map((o,i)=>{const x=X2(o.x).toFixed(1),y=Y2(o.y).toFixed(1);return `<circle cx="${x}" cy="${y}" r="5" fill="var(--s1)" stroke="var(--card)" stroke-width="2"/><circle data-i="${i}" cx="${x}" cy="${y}" r="11" fill="transparent" style="cursor:pointer"/>`}).join("");
-  el2.innerHTML=s2+"</svg>";bindPts(el2.querySelector("svg"),map2);
+  s2+=`<text x="${W-Rm-8}" y="${T+18}" text-anchor="end" font-size="${FS+.5}" font-weight="700" fill="var(--bad)">✗ Dyrere enn før – rabatten er pynt</text><text x="${W-Rm-8}" y="${H2-B-9}" text-anchor="end" font-size="${FS+.5}" font-weight="700" fill="var(--good)">✓ Ekte lavpris (≤ laveste 60 d)</text>`;
+  s2+=`<text x="0" y="12" font-size="${FS}" font-weight="600" fill="var(--fg2)">↑ Dagens pris mot laveste 60 d</text><text x="${W-Rm}" y="${H2-5}" text-anchor="end" font-size="${FS}" font-weight="600" fill="var(--fg2)">Butikkens oppgitte rabatt fra førpris →</text>`;
+  const map2=off.map(o=>({key:o.g.key,x:X2(o.x),y:Y2(o.y),tip:`<div class="tt">${esc(o.g.label)}</div><span class="muted">${esc(o.sh)}</span><br>Nå <b class="num">${fmt(o.o.price)} kr</b>, førpris <span class="num">${fmt(o.o.before)}</span> (−${o.x.toFixed(0)} %)<br>Laveste 60 d: <span class="num">${fmt(o.g.low60.price)} kr</span> hos ${esc(o.g.low60.shop)}<br>${o.y<=0.05?'<b class="good">✓ Ekte lavpris</b>':`<b class="bad">${o.y.toFixed(0)} % over laveste 60 d</b>`}`}));
+  s2+=map2.map(p=>`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="5" fill="var(--c1)" stroke="var(--card)" stroke-width="2"/>`).join("");
+  s2+=`<circle class="sel" r="10" fill="none" stroke="var(--fg)" stroke-width="2" opacity="0" pointer-events="none"/><rect x="0" y="0" width="${W}" height="${H2}" fill="transparent"/>`;
+  el2.innerHTML=s2+"</svg>";bindPts(el2.querySelector("svg"),W,map2);
 }
 
 // ---------- Kjøpeguide med levende data ----------
 function pickHTML(el){
   const m=(el.dataset.match||"").toLowerCase(),sizes=(el.dataset.sizes||"").split(",").filter(Boolean).map(Number);
-  const gs=flag(groups()).filter(g=>(g.label+" "+g.items.map(p=>p.name).join(" ")).toLowerCase().includes(m)&&(!sizes.length||sizes.includes(Math.round(g.size))));
+  const gs=(ALL.length?ALL:flag(groups())).filter(g=>(g.label+" "+g.items.map(p=>p.name).join(" ")).toLowerCase().includes(m)&&(!sizes.length||sizes.includes(Math.round(g.size))));
   gs.sort((a,b)=>(b.year-a.year)||((a.best??1e9)-(b.best??1e9)));
-  const head=`<h4>${esc(el.dataset.title||el.dataset.match)}</h4><div>${el.innerHTML}</div>`;
+  const title=`<h4>${esc(el.dataset.title||el.dataset.match)}</h4>`,text=`<div class="pick-text">${el.innerHTML}</div>`;
   const rev=(el.dataset.reviews||"").split("|").filter(Boolean).map(x=>{const [t,u]=x.split("@@");return `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a>`}).join("");
-  if(!gs.length)return `<div class="pick"><div></div><div>${head}<div class="muted small">Ikke funnet i dagens data hos butikkene.</div><div class="links">${rev}</div></div></div>`;
-  const g=gs[0];
-  const shops=SHOPS.filter(s=>g[s]).map(s=>{const o=g[s],out=OUT(o);return `<span>${s}: ${out?`<s>${fmt(o.price)}</s> <span class="chip small">utsolgt</span>`:`<b>${fmt(o.price)}</b>`}</span>`}).join("");
-  const urls=[];for(const p of g.items)for(const s of SHOPS){const o=p.shops[s];if(o&&o.url&&!urls.some(u=>u[0]===s))urls.push([s,o.url])}
-  const pj=g.items.find(p=>typeof p.id==="number");
-  return `<div class="pick"><img loading="lazy" alt="" src="${g.img_url||IMG(g.img)}" onerror="this.style.visibility='hidden'"><div>${head}
-    <div class="live">${shops}<span class="muted">Lav 60 d: ${g.low60?fmt(g.low60.price):"–"}</span>${verdict(g)}<span class="q" title="${esc(g.qbasis)}">${g.quality}</span>${standCell(g)}${g.bw?`<span title="Sannsynlig Black Week-pris">BW: ${fmt(g.bw.low)}–${fmt(g.bw.high)}${g.bw.p_billigere!=null?` · ${Math.round(g.bw.p_billigere*100)} % sjanse lavere`:""}${g.best!=null&&g.best<=g.bw.mid?' <span class="badge b-good">i nivå</span>':""}</span>`:""}</div>
-    <div class="links"><a href="#" data-goto="${esc(g.key)}">Vis i tabellen</a>${pj?`<a href="${pj.url}" target="_blank" rel="noopener">Prisjakt</a>`:""}${urls.map(([s,u])=>`<a href="${esc(u)}" target="_blank" rel="noopener">Kjøp hos ${s}</a>`).join("")}${rev}</div>
+  const revs=rev?`<div class="links revs"><span class="muted">Tester:</span>${rev}</div>`:"";
+  if(!gs.length)return `<div class="pick"><div></div>${title}<div class="pick-b"><div><span class="badge">Ikke i dagens data hos butikkene</span></div>${text}${revs}</div></div>`;
+  const g=gs[0],o=g.bestShop?g[g.bestShop]:null,bw=bwInfo(g);
+  const shops=SHOPS.filter(s=>g[s]).map(s=>{const x=g[s],out=OUT(x);return `<span class="sp${!out&&x.price===g.best?" best":""}${out?" out":""}">${s} <b>${out?`<s>${fmt(x.price)}</s>`:fmt(x.price)}</b>${out?" utsolgt":""}</span>`}).join("");
+  const urls=[];for(const p of g.items)for(const s of SHOPS){const x=p.shops[s];if(x&&x.url&&!OUT(x)&&!urls.some(u=>u[0]===s))urls.push([s,x.url,x.price])}
+  urls.sort((a,b)=>a[2]-b[2]);
+  const pj=g.items.find(p=>typeof p.id==="number"&&p.url);
+  return `<div class="pick"><img loading="lazy" alt="" src="${esc(g.img_url||IMG(g.img))}" onerror="this.style.visibility='hidden'">${title}<div class="pick-b">
+    <div class="live">${o?`<span class="price">${fmt(o.price)} <small>kr hos ${esc(g.bestShop)}</small></span>${stockChip(o)}`:'<span class="badge b-bad">utsolgt hos butikkene</span>'}${verdict(g)}</div>
+    <div class="live small">${qBadge(g)}${standCell(g)}<span class="muted">Lav 60 d: ${g.low60?fmt(g.low60.price)+" kr":"–"}</span>${bw?`<span>BW: <b>${bw.rng}</b>${bw.pb?` · ${bw.pb}`:""}</span>${bw.tag}`:""}</div>
+    ${shops?`<div class="live">${shops}</div>`:""}
+    ${text}
+    <div class="links"><a class="btn sm pri" href="#" data-goto="${esc(g.key)}">Vis i tabellen</a>${pj?`<a class="btn sm" href="${esc(pj.url)}" target="_blank" rel="noopener">Se alle butikker (Prisjakt)</a>`:""}${urls.map(([s,u])=>`<a class="btn sm" href="${esc(u)}" target="_blank" rel="noopener">Kjøp hos ${s}</a>`).join("")}</div>
+    ${revs}
     <div class="muted small">${esc(g.label)}${g.items.length>1?` · ${g.items.length} varianter`:""}${gs.length>1?` · også: ${gs.slice(1,3).map(x=>esc(x.label)).join(", ")}`:""}</div></div></div>`;
 }
 let QT=null;
 async function renderGuide(){
-  const root=document.getElementById("guide");if(!root||!DATA.length)return;
+  const root=$("guide");if(!root||!DATA.length)return;
   root.querySelectorAll(".pick-src").forEach(el=>{el.hidden=true;let out=el.nextElementSibling;if(!out||!out.classList.contains("pick-out")){out=document.createElement("div");out.className="pick-out";el.after(out)}out.innerHTML=pickHTML(el)});
-  root.querySelectorAll("[data-goto]").forEach(a=>a.onclick=e=>{e.preventDefault();gotoRow(a.dataset.goto)});
   const qt=root.querySelector("#qtable");
   if(qt){if(!QT){try{QT=await (await fetch("data/quality_tiers.json")).json()}catch(e){QT={tiers:[],adjust:[]}}}
     qt.innerHTML=`<div class="qtwrap"><table class="qt"><thead><tr><th>Serie</th><th class="num">Poeng (55")</th></tr></thead><tbody>${QT.tiers.map(t=>`<tr><td>${esc(t.label)}</td><td class="num">${t.score}</td></tr>`).join("")}</tbody></table></div><h3>Justeringer</h3><ul>${QT.adjust.map(a=>`<li>${esc(a)}</li>`).join("")}</ul>`}
 }
 document.addEventListener("click",e=>{const a=e.target.closest("[data-qlink]");if(!a)return;e.preventDefault();document.querySelector("[data-tab=guide]").click();setTimeout(()=>{const q=document.getElementById("kvalitet");q&&q.scrollIntoView()},300)});
-async function loadHist(){try{HIST=await (await fetch("data/history.json")).json()}catch(e){HIST={}}render()}
-document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll("nav.tabs button").forEach(x=>x.classList.toggle("on",x===b));for(const t of["list","plots","guide","finn","help"])document.getElementById("tab-"+t).hidden=t!==b.dataset.tab;document.getElementById("filters").hidden=!["list","plots"].includes(b.dataset.tab);if(b.dataset.tab==="plots")render();if(b.dataset.tab==="guide")renderGuide()});
+async function loadHist(){try{HIST=await (await fetch("data/history.json")).json()}catch(e){HIST={}}drawCharts();document.querySelectorAll(".chartbox[data-chart] > p").forEach(p=>p.remove())}
+// ---------- Faner, status, tema ----------
+document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>{const tab=b.dataset.tab;hideTip();
+  document.querySelectorAll("nav.tabs button").forEach(x=>{x.classList.toggle("on",x===b);x.setAttribute("aria-current",x===b?"page":"false")});
+  for(const t of["list","plots","guide","finn","help"])$("tab-"+t).hidden=t!==tab;
+  $("filters").hidden=!["list","plots"].includes(tab);togglePanel(false);
+  window.scrollTo(0,0);
+  if(tab==="plots")render();else if(tab==="list")renderHero();else $("hero-wrap").hidden=true;
+  if(tab==="guide")renderGuide()});
+function renderStatus(){
+  const up=new Date(window.UPDATED),mins=Math.max(0,Math.round((Date.now()-up)/6e4)),h=mins/60;
+  const ago=isNaN(up)?"ukjent":mins<1?"nå nettopp":mins<60?`for ${mins} min siden`:h<36?`for ${Math.round(h)} t siden`:`for ${Math.round(h/24)} dager siden`;
+  const src=Object.entries(SOURCES||{});
+  const sev=([,v])=>v.feil&&!v.ok?2:v.feil&&v.feil>Math.max(3,(v.ok||0)*0.1)?1:0;
+  const worst=Math.max(0,...src.map(sev)),failed=src.filter(x=>sev(x)===2).map(x=>x[0]);
+  const lbl=failed.length?`${failed.join(", ")} feilet`:worst?"Delvis feil":"";
+  $("status").innerHTML=`<details><summary><span class="sdot ${worst===2?"b":worst===1?"w":h>8?"b":""}"></span><span class="age${h>8?" old":""}"><span class="age-pre">oppdatert </span>${ago}</span>${lbl?`<span class="badge ${worst===2?"b-bad":"b-warn"}">${esc(lbl)}</span>`:""}</summary>
+   <div class="spop"><b>Siste innhenting</b><div>${isNaN(up)?"–":up.toLocaleString("nb-NO",{dateStyle:"medium",timeStyle:"short"})}${h>8?' <span class="bad">– over 8 timer gammelt</span>':""}</div>
+   ${src.map(x=>{const [n,v]=x,s=sev(x);return `<div><span class="sdot ${s===2?"b":s===1?"w":""}"></span><span><b>${esc(n)}</b>: ${s===2?"feilet":`${v.ok??0} OK`}${v.feil?`, ${v.feil} feil`:""}${v.melding?`<br><span class="muted small">${esc(v.melding)}</span>`:""}</span></div>`}).join("")||'<div class="muted">Ingen kildestatus i dataene ennå.</div>'}
+   <div class="muted small">Prisene hentes to ganger daglig.</div></div></details>`}
+document.addEventListener("click",e=>{const d=document.querySelector("#status details[open]");if(d&&!e.target.closest("#status"))d.open=false});
+$("theme").onclick=()=>{const r=document.documentElement,cur=r.dataset.theme||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light"),nx=cur==="dark"?"light":"dark";r.dataset.theme=nx;try{localStorage.setItem("tvtheme",nx)}catch(e){}};
+let rsT=null,lastW=innerWidth;
+addEventListener("resize",()=>{if(innerWidth===lastW)return;lastW=innerWidth;clearTimeout(rsT);rsT=setTimeout(()=>{if(DATA.length){hideTip();render()}},150)});
 (async()=>{
-  const d=await (await fetch("data/products.json")).json();DATA=d.products;window.UPDATED=d.updated;for(const p of DATA)if(p.img_url)IMGURL[p.id]=p.img_url;build();render();
-  try{document.getElementById("guide").innerHTML=await (await fetch("guide.html")).text();renderGuide()}catch(e){}
+  let d;try{d=await (await fetch("data/products.json")).json()}catch(e){$("age").textContent="Klarte ikke å laste prisdata";$("meta").textContent="Klarte ikke å laste prisdata. Prøv å laste siden på nytt.";return}
+  DATA=d.products||[];window.UPDATED=d.updated;SOURCES=d.sources||null;BW_ON=d.bw_active!=null?!!d.bw_active:DATA.some(p=>p.bw);
+  document.body.classList.toggle("no-bw",!BW_ON);if(!BW_ON&&sortK==="bw"){sortK="verdict";sortDir=1}
+  for(const p of DATA)if(p.img_url)IMGURL[p.id]=p.img_url;build();render();renderStatus();setInterval(renderStatus,6e4);
+  try{$("guide").innerHTML=await (await fetch("guide.html")).text();renderGuide()}catch(e){}
 })();
 </script>
 </body>
