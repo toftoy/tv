@@ -88,7 +88,7 @@ nav.tabs .l-long{display:none}
 /* ---------- Layout ---------- */
 main{max-width:1400px;margin:auto;padding:14px 16px 24px}
 /* ---------- Hero ---------- */
-.hero-h{display:flex;align-items:baseline;gap:8px;margin:2px 0 8px}
+.hero-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 8px;margin:2px 0 8px}
 .hero-h h2{font-size:16px;letter-spacing:-.01em}
 .hero{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px 14px;padding:2px 16px 6px;scrollbar-width:none}
 .hero::-webkit-scrollbar{display:none}
@@ -120,7 +120,7 @@ button.hc:active{transform:scale(.98)}
 .fbar{display:flex;gap:8px}
 .inp,.filters select,.filters input[type=search]{min-height:44px;border:1px solid var(--line2);border-radius:12px;background:var(--card);color:var(--fg);padding:0 12px;font-size:16px;min-width:0}
 .search{flex:1;position:relative;min-width:0}
-.search input{width:100%;padding-left:38px;-webkit-appearance:none;appearance:none}
+.filters .search input{width:100%;padding-left:38px;-webkit-appearance:none;appearance:none}
 .search svg{position:absolute;left:12px;top:50%;translate:0 -50%;color:var(--muted);pointer-events:none}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line2);background:var(--card);color:var(--fg);font-weight:600;font-size:14px;text-decoration:none;white-space:nowrap;transition:background .12s,transform .1s;-webkit-tap-highlight-color:transparent}
 .btn:hover{background:var(--raise)}.btn:active{transform:scale(.97)}
@@ -143,7 +143,7 @@ button.hc:active{transform:scale(.98)}
 .tg span{grid-column:2;font-size:12.5px;color:var(--muted);line-height:1.35}
 .fend{display:flex;gap:8px;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
 .meta{display:flex;align-items:center;gap:8px;justify-content:space-between;margin:0 0 10px;font-size:13px;color:var(--muted);min-height:36px}
-.meta select{min-height:40px;border:1px solid var(--line2);border-radius:10px;background:var(--card);padding:0 8px;font-size:16px;max-width:56vw}
+.meta select{min-height:44px;border:1px solid var(--line2);border-radius:10px;background:var(--card);padding:0 8px;font-size:16px;max-width:56vw}
 /* ---------- Merker ---------- */
 .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:650;white-space:nowrap;background:var(--chip);color:var(--fg2);line-height:1.5}
 .b-good{background:var(--goodbg);color:var(--good)}.b-warn{background:var(--warnbg);color:var(--warn)}.b-bad{background:var(--badbg);color:var(--bad)}
@@ -159,7 +159,7 @@ button.hc:active{transform:scale(.98)}
 .c-main{display:grid;grid-template-columns:76px 1fr auto;gap:4px 12px;padding:12px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .12s}
 .c-main:active{background:var(--raise)}
 .c-img{width:76px;height:58px;object-fit:contain;background:#fff;border-radius:10px;grid-row:1/3}
-.c-title{font-weight:680;font-size:15.5px;line-height:1.25;letter-spacing:-.01em}
+.c-title{align-self:end;font-weight:680;font-size:15.5px;line-height:1.25;letter-spacing:-.01em}
 .c-sub{font-size:12.5px;color:var(--muted);grid-column:2/4}
 .c-badges{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .c-price{grid-column:1/-1;display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 8px;margin-top:8px}
@@ -177,24 +177,24 @@ button.hc:active{transform:scale(.98)}
 .c-detail{border-top:1px solid var(--line);background:var(--raise);padding:12px}
 /* ---------- Tabell (desktop) ---------- */
 .tablewrap{display:none;background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
-table.main{border-collapse:separate;border-spacing:0;width:100%;min-width:1240px;font-size:13.5px}
-table.main th,table.main td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;background:var(--card)}
+table.main{border-collapse:separate;border-spacing:0;width:100%;font-size:13.5px}
+table.main th,table.main td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;background:var(--card)}
 table.main th{position:sticky;top:0;z-index:3;font-weight:600;font-size:12.5px;color:var(--fg2);cursor:pointer;user-select:none;white-space:nowrap;border-bottom:1px solid var(--line2);vertical-align:bottom}
 table.main th:hover{color:var(--fg)}
 table.main th[aria-sort]{color:var(--fg)}
-table.main th[data-k]::after{content:"↕";opacity:.3;margin-left:4px;font-size:11px}
+table.main th[data-k]::after{margin-left:3px;font-size:10px}
 table.main th[aria-sort=ascending]::after{content:"▲";opacity:1;color:var(--accent)}
 table.main th[aria-sort=descending]::after{content:"▼";opacity:1;color:var(--accent)}
 table.main th:first-child{border-top-left-radius:var(--r)}table.main th:last-child{border-top-right-radius:var(--r)}
-td.num,th.num{text-align:right;white-space:nowrap}
+table.main td.num,table.main th.num,td.num,th.num{text-align:right;white-space:nowrap}
 .stk1{position:sticky;left:0;z-index:2}.stk2{position:sticky;left:72px;z-index:2;box-shadow:1px 0 0 var(--line)}
-th.stk1,th.stk2{z-index:4}
+table.main th.stk1,table.main th.stk2{z-index:5}
 tr.row{cursor:pointer;scroll-margin-top:60px}
 tr.row:hover td{background:var(--raise)}
 tr.row.open td{background:var(--raise);border-bottom-color:transparent}
 td.imgc{width:72px;padding:6px 8px}
 .thumb{width:56px;height:42px;object-fit:contain;background:#fff;border-radius:7px;display:block}
-td.mcol{min-width:250px;max-width:330px}
+td.mcol{min-width:230px;max-width:330px}
 .m-t{font-weight:650;font-size:14px;display:flex;gap:6px;align-items:baseline;justify-content:space-between}
 .m-b{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
 .chev{flex:none;color:var(--muted);transition:transform .2s;align-self:center}
@@ -215,12 +215,12 @@ tr.flash td{animation:flashbg 1.6s ease-out}
 .fact .big{font-size:19px;font-weight:740;letter-spacing:-.01em}
 .fact p{margin:4px 0 0;font-size:13px;color:var(--fg2);overflow-wrap:anywhere}
 .mini{width:100%;border-collapse:collapse;font-size:13px}
-.mini td{padding:3px 0;border:0;background:none;vertical-align:baseline}
-.mini td:nth-child(2){text-align:right;font-weight:650;padding:3px 10px}
+table.mini td,table.main table.mini td{padding:3px 0;border:0;background:none;vertical-align:baseline}
+table.mini td:nth-child(2),table.main table.mini td:nth-child(2){text-align:right;font-weight:650;padding:3px 10px;white-space:nowrap}
 .mini td:last-child{color:var(--muted);font-size:12.5px;overflow-wrap:anywhere}
 .chart-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
 .seg{display:inline-flex;gap:0;border:1px solid var(--line2);border-radius:10px;overflow:hidden;background:var(--card)}
-.seg button{border:0;background:none;min-height:36px;min-width:52px;padding:0 10px;font-size:13px;font-weight:600;color:var(--fg2)}
+.seg button{border:0;background:none;min-height:44px;min-width:52px;padding:0 10px;font-size:13px;font-weight:600;color:var(--fg2)}
 .seg button+button{border-left:1px solid var(--line2)}
 .seg button.on{background:var(--fg);color:var(--bg)}
 .chartbox{min-height:210px;position:relative}
@@ -232,9 +232,9 @@ tr.flash td{animation:flashbg 1.6s ease-out}
 .lk.d{background:repeating-linear-gradient(90deg,var(--mk) 0 4px,transparent 4px 7px)!important}
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;flex:none}
 .variants{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px}
-.v{display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:start}
+.v{display:grid;grid-template-columns:1fr;gap:10px;align-items:start}
 .v>div{min-width:0}
-.bigimg{width:96px;aspect-ratio:4/3;object-fit:contain;background:#fff;border-radius:8px;border:1px solid var(--line);display:block}
+.bigimg{width:120px;aspect-ratio:4/3;object-fit:contain;background:#fff;border-radius:8px;border:1px solid var(--line);display:block}
 .v h4{font-size:13.5px;line-height:1.3;overflow-wrap:anywhere}
 .so{padding:7px 0;border-top:1px solid var(--line);margin-top:7px}
 .so-h{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline}
@@ -304,19 +304,20 @@ tr.flash td{animation:flashbg 1.6s ease-out}
   .hc{flex:none}
   #cards{display:none}.tablewrap{display:block}
   .filters{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin-bottom:12px;box-shadow:var(--shadow)}
-  .ftop{display:flex;gap:10px 18px;align-items:center;flex-wrap:wrap}
+  .ftop{display:grid;grid-template-columns:auto minmax(220px,420px);gap:0 24px;align-items:center;justify-content:space-between}
   .frow{margin:0}
-  .fsticky{position:static;margin:0;padding:0;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;flex:1;min-width:240px}
-  .ftop .fsticky{order:2}
+  .fsticky{display:contents}
+  .fpanel{grid-column:1/-1}
   #fbtn,.fend .btn.pri,.msort{display:none}
   .chips label,.seg label,a.chipbtn{min-height:34px;padding:0 12px;font-size:13.5px}
   .inp,.filters select,.filters input[type=search]{min-height:36px;font-size:14px;border-radius:10px}
-  .fpanel{display:block!important;animation:none!important;border:0;box-shadow:none;padding:0;margin-top:12px;max-height:none;overflow:visible;background:none}
+  .fpanel{display:block!important;animation:none!important;border:0;box-shadow:none;padding:0;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);border-radius:0;max-height:none;overflow:visible;background:none}
   .fgrid{display:grid;grid-template-columns:minmax(260px,1.2fr) 2.4fr;gap:6px 24px}
   .fsel{margin:10px 0 0}
   .tgs{grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:0 8px}
   .tg{padding:6px;min-height:0}.tg b{font-size:13.5px}.tg span{font-size:12px}
   .tg input{width:17px;height:17px}
+  .seg button{min-height:32px}.meta select{min-height:36px}
   .fend{border:0;margin:4px 0 0;padding:0;justify-content:flex-end}
   .meta{margin-bottom:8px}
   .guide{padding:8px 24px 20px}
@@ -326,9 +327,9 @@ tr.flash td{animation:flashbg 1.6s ease-out}
   .plot{padding:16px 18px}
   .v{grid-template-columns:140px 1fr}.bigimg{width:140px}
 }
-@media (min-width:700px) and (max-width:1339px){.tablewrap{overflow:auto;max-height:calc(100vh - 20px)}}
+.tablewrap.scroll{overflow:auto;max-height:calc(100vh - 20px)}
 @media (min-width:700px) and (max-width:1100px){nav.tabs .l-long{display:none}nav.tabs .l-short{display:inline}}
-@media (max-width:420px){.brand h1{font-size:17px}.status .age-pre{display:none}}
+@media (max-width:480px){.brand h1{font-size:17px}.status .age-pre,.status summary .badge{display:none}}
 body.no-bw .bwonly{display:none!important}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
@@ -392,8 +393,8 @@ body.no-bw .bwonly{display:none!important}
   <div id="cards"></div>
   <div class="tablewrap" id="tablewrap"><table class="main">
     <thead><tr>
-      <th class="stk1"></th><th data-k="family" class="stk2">Modell</th><th data-k="quality" class="num" title="Kvalitetsscore 0–100 (skjønn basert på tester)">Kvalitet</th><th data-k="size" class="num">Tommer</th><th data-k="stand" title="Passer på TV-stativet (Eva Solo Carry, VESA 100/200/300)">Stativ</th><th data-k="panel">Panel</th>
-      <th data-k="best" class="num" title="Laveste pris hos de valgte butikkene">Beste pris</th><th data-k="verdict" title="Dagens beste pris mot laveste pris siste 60 dager">Nå vs 60 d</th><th data-k="bw" class="num bwonly" title="Sannsynlig laveste pris i Black Week/Black Month">Sannsynlig BW-pris</th>
+      <th class="stk1"></th><th data-k="family" class="stk2">Modell</th><th data-k="quality" class="num" title="Kvalitetsscore 0–100 (skjønn basert på tester)">Kvalitet</th><th data-k="size" class="num">Tommer</th><th data-k="stand" title="Passer på TV-stativet (Eva Solo Carry, VESA 100/200/300)">Stativ</th>
+      <th data-k="best" class="num" title="Laveste pris hos de valgte butikkene">Beste pris</th><th data-k="verdict" title="Dagens beste pris mot laveste pris siste 60 dager">Nå vs 60 d</th><th data-k="bw" class="num bwonly" title="Sannsynlig laveste pris i Black Week/Black Month">BW-pris</th>
       <th data-k="Elkjøp" class="num">Elkjøp</th><th data-k="Power" class="num">Power</th><th data-k="Komplett" class="num">Komplett</th><th data-k="NetOnNet" class="num">NetOnNet</th><th data-k="Multicom" class="num">Multicom</th><th data-k="Samsung" class="num" title="Samsungs egen nettbutikk">Samsung</th>
     </tr></thead>
     <tbody id="tb"></tbody>
@@ -455,6 +456,7 @@ const OUT=o=>/outofstock|soldout|discontinued/i.test(o.stock||"");
 const INSTOCK=o=>!o.stock||/^(instock|unknown|limitedavailability|onlineonly)$/i.test(o.stock);
 const stockTxt=o=>OUT(o)?"utsolgt":/backorder|preorder/i.test(o.stock||"")?"bestillingsvare":/instoreonly/i.test(o.stock||"")?"kun i butikk":/^(instock|limitedavailability|onlineonly)$/i.test(o.stock||"")?"på lager":"";
 const stockChip=o=>{const t=stockTxt(o);return t?`<span class="badge ${t==="på lager"?"b-good":t==="utsolgt"?"b-bad":"b-warn"}">${t}</span>`:""};
+const SHORTST={"bestillingsvare":"bestilling","kun i butikk":"kun butikk","utsolgt":"utsolgt"};
 const rowId=k=>"r-"+String(k).replace(/[^A-Za-z0-9]/g,"_");
 const IMG=(id,big)=>IMGURL[id]||IMG0(id,big);
 const IMG0=(id,big)=>window.IMG_BASE?`${window.IMG_BASE}/${id}.jpg`:`https://pricespy-75b8.kxcdn.com/product/standard/${big?800:140}/${id}.jpg`;
@@ -564,7 +566,7 @@ function qBadge(g){return `<span class="q${g.quality==null||g.quality<55?" lo":"
 function shopCell(g,s){const o=g[s];if(!o)return'<span class="muted">–</span>';
   if(OUT(o))return `<span class="muted"><s>${fmt(o.price)}</s></span><br><span class="chip">utsolgt</span>`;
   const best=o.price===g.best?"cellbest":"";const t=stockTxt(o);
-  return `<span class="${best}">${fmt(o.price)}</span>${o.member?' <span class="chip" title="Medlemspris">M</span>':""}${o.before?`<br><s class="small">${fmt(o.before)}</s>`:""}${t&&t!=="på lager"?`<br><span class="chip">${t}</span>`:""}`}
+  return `<span class="${best}">${fmt(o.price)}</span>${o.member?' <span class="chip" title="Medlemspris">M</span>':""}${o.before?`<br><s class="small">${fmt(o.before)}</s>`:""}${t&&t!=="på lager"?`<br><span class="chip" title="${t}">${SHORTST[t]}</span>`:""}`}
 function flagsHTML(g,full){
   if(g.olderWorse)return full?`<div class="flag b-warn"><span>Nyere modell er billigere: <b>${esc(g.olderWorse.label)}</b> koster ${fmt(g.olderWorse.best)} kr.</span><a href="#" data-goto="${esc(g.olderWorse.key)}">Vis den</a></div>`:`<span class="badge b-warn">Nyere modell er billigere</span>`;
   if(g.dominatedBy)return full?`<div class="flag b-bad"><span>Finnes bedre og billigere: <b>${esc(g.dominatedBy.label)}</b> – ${fmt(g.dominatedBy.best)} kr, kvalitet ${g.dominatedBy.quality}.</span><a href="#" data-goto="${esc(g.dominatedBy.key)}">Vis den</a></div>`:`<span class="badge b-bad">Finnes bedre og billigere</span>`;
@@ -591,16 +593,16 @@ function cardHTML(g){
     <div class="c-sub">${subline(g)}</div>
     <div class="c-price">${price}</div>
     <div class="c-badges">${verdict(g)}${standBadge(g,true)}${flagsHTML(g)}</div>
-    ${bw?`<div class="c-bw"><span>Sannsynlig BW-pris <b class="num">${bw.rng}</b></span>${bw.pb?`<span class="muted">· ${bw.pb}</span>`:""}${bw.tag}</div>`:""}
+    ${bw?`<div class="c-bw"><span>BW-pris trolig <b class="num">${bw.rng}</b></span>${bw.tag}${bw.pb?`<span class="muted" style="flex-basis:100%">${bw.pb} senere i Black Month</span>`:""}</div>`:""}
     ${sl}
     <div class="c-foot">${CHEV}</div>
   </div>${isOpen?`<div class="c-detail">${detail(g)}</div>`:""}</article>`}
 function rowHTML(g,cols){
   const o=g.bestShop?g[g.bestShop]:null,isOpen=open.has(g.key);
   return `<tr class="row${isOpen?" open":""}" data-k="${esc(g.key)}" id="${rowId(g.key)}" tabindex="0" aria-expanded="${isOpen}"><td class="imgc stk1"><img class="thumb" loading="lazy" alt="" src="${esc(g.img_url||IMG(g.img))}" onerror="this.style.visibility='hidden'"></td>
-   <td class="mcol stk2"><div class="m-t"><span>${esc(g.label)}</span>${CHEV}</div><div class="muted small">${[g.hz,g.items.length>1?`${g.items.length} varianter`:""].filter(Boolean).map(esc).join(" · ")}</div>${flagsHTML(g)?`<div class="m-b">${flagsHTML(g)}</div>`:""}</td>
-   <td class="num">${qBadge(g)}</td><td class="num">${Math.round(g.size)}"</td><td>${standBadge(g)}</td><td>${g.panel}</td>
-   <td class="num">${o?`<span class="bestp">${fmt(o.price)}</span><br><span class="muted small">${esc(g.bestShop)}${stockTxt(o)&&stockTxt(o)!=="på lager"?" · "+stockTxt(o):""}</span>`:'<span class="chip">utsolgt</span>'}</td>
+   <td class="mcol stk2"><div class="m-t"><span>${esc(g.label)}</span>${CHEV}</div><div class="muted small">${[g.panel,g.hz,g.items.length>1?`${g.items.length} varianter`:""].filter(Boolean).map(esc).join(" · ")}</div>${flagsHTML(g)?`<div class="m-b">${flagsHTML(g)}</div>`:""}</td>
+   <td class="num">${qBadge(g)}</td><td class="num">${Math.round(g.size)}"</td><td>${standBadge(g)}</td>
+   <td class="num">${o?`<span class="bestp">${fmt(o.price)}</span><br><span class="muted small">${esc(g.bestShop)}</span>${stockTxt(o)&&stockTxt(o)!=="på lager"?`<br><span class="chip">${SHORTST[stockTxt(o)]}</span>`:""}`:'<span class="chip">utsolgt</span>'}</td>
    <td>${verdictShort(g)}${g.low60&&g.best!=null?`<br><span class="muted small">lav 60 d: ${fmt(g.low60.price)}</span>`:""}</td>
    ${BW_ON?`<td class="num">${bwCell(g)}</td>`:""}${SHOPS.map(s=>`<td class="num">${shopCell(g,s)}</td>`).join("")}</tr>
    ${isOpen?`<tr class="detail"><td colspan="${cols}"><div class="detail-wrap">${detail(g)}</div></td></tr>`:""}`}
@@ -611,15 +613,15 @@ function render(){
   window.FILTERED=gs;
   if(!$("tab-plots").hidden)drawPlots(gs);
   renderHero();
-  const mob=MOBILE.matches,cols=BW_ON?15:14;
+  const mob=MOBILE.matches,cols=BW_ON?14:13;
   const cards=$("cards"),tb=$("tb");
   if(mob){tb.innerHTML="";cards.innerHTML=gs.map(cardHTML).join("")||EMPTY}
   else{cards.innerHTML="";tb.innerHTML=gs.map(g=>rowHTML(g,cols)).join("")||`<tr><td colspan="${cols}" style="padding:16px">${EMPTY}</td></tr>`;
-    $("tablewrap").style.setProperty("--ww",$("tablewrap").clientWidth+"px")}
+    const tw=$("tablewrap");tw.classList.remove("scroll");tw.classList.toggle("scroll",tw.querySelector("table").offsetWidth>tw.clientWidth+1);tw.style.setProperty("--ww",tw.clientWidth+"px")}
   document.querySelectorAll("th[data-k]").forEach(th=>{if(th.dataset.k===sortK)th.setAttribute("aria-sort",sortDir>0?"ascending":"descending");else th.removeAttribute("aria-sort")});
   const ss=$("sortsel");ss.value=sortK+":"+sortDir;if(ss.selectedIndex<0){ss.selectedIndex=-1}
   const total=ALL.filter(g=>st.sizes.includes(Math.round(g.size))).length;
-  $("meta").innerHTML=`<b style="color:var(--fg)">${gs.length}</b> ${gs.length===1?"TV-modell":"TV-modeller"}${gs.length<total?` <span class="muted">av ${total} i valgt størrelse</span>`:""}`;
+  $("meta").innerHTML=`<b style="color:var(--fg)">${gs.length}</b> ${gs.length<total?`av ${total} `:""}${gs.length===1&&gs.length===total?"TV-modell":"TV-modeller"}${gs.length<total?" vises":""}`;
   const n=activeFilters();$("fbtn-t").innerHTML=n?`Filtre <span class="cnt">${n}</span>`:"Filtre";
   drawCharts();
 }
@@ -649,11 +651,13 @@ function renderHero(){
   const drop=c.filter(g=>g.histDays>=60&&g.low60&&g.best<g.low60.price*0.995&&!used.has(g.key)).sort((a,b)=>a.verdict-b.verdict)[0];
   if(drop)add("Størst ekte prisfall",drop,`${Math.round(-drop.verdict*100)||1} % under laveste pris siste 60 dager (${fmt(drop.low60.price)} kr)`);
   // 3: nærmest/tryggest mot forventet BW-pris
-  if(BW_ON){const b=c.filter(g=>g.bw&&g.best<=g.bw.high&&!used.has(g.key)&&!g.dominatedBy).sort((a,b)=>((a.bw.p_billigere??1)-(b.bw.p_billigere??1))||((a.best-a.bw.mid)/a.bw.mid-(b.best-b.bw.mid)/b.bw.mid)||b.quality-a.quality)[0];
+  if(BW_ON){const b=c.filter(g=>g.bw&&g.best<=g.bw.high&&!used.has(g.key)&&!g.dominatedBy&&g.quality>=50).sort((a,b)=>((a.bw.p_billigere??1)-(b.bw.p_billigere??1))||((a.best-a.bw.mid)/a.bw.mid-(b.best-b.bw.mid)/b.bw.mid)||b.quality-a.quality)[0];
     if(b)add("Nærmest Black Week-pris",b,`${b.best<=b.bw.mid?"Allerede i forventet BW-nivå":"Nær forventet BW-nivå"}${b.bw.p_billigere!=null?` · ${pct(b.bw.p_billigere)} sjanse for lavere`:""}`)}
   // reserve: mest kvalitet per krone
-  if(cards.length<3){const v=fr.filter(g=>!used.has(g.key)&&g.quality>=50).sort((a,b)=>(b.quality-40)/b.best-(a.quality-40)/a.best)[0];
+  if(cards.length<3){const v=fr.filter(g=>!used.has(g.key)&&g.quality>=50&&(g.histDays<60||g.verdict<0.1)).sort((a,b)=>(b.quality-40)/b.best-(a.quality-40)/a.best)[0];
     if(v)add("Mest for pengene",v,`Kvalitet ${v.quality} · ${verdict(v).replace(/<[^>]+>/g,"")||"på «mest for pengene»-linjen"}`)}
+  if(cards.length<3){const o=c.filter(g=>g.panel==="OLED"&&!used.has(g.key)).sort((a,b)=>a.best-b.best)[0];
+    if(o)add("Billigste OLED nå",o,`Kvalitet ${o.quality??"–"} · ${verdict(o).replace(/<[^>]+>/g,"").replace("✓ ","")||"OLED på lager"}`)}
   // nedtelling
   const now=new Date(),day=new Date(now.getFullYear(),now.getMonth(),now.getDate()),y=now.getFullYear(),bf=blackFriday(y),end=new Date(y,11,2);
   const dd=d=>Math.round((d-day)/864e5),df=d=>d.toLocaleDateString("nb-NO",{weekday:"long",day:"numeric",month:"long"});
@@ -661,7 +665,7 @@ function renderHero(){
     if(dd(bf)>0)cards.push(`<div class="hc cd"><span class="k"><i></i>Nedtelling</span><span class="big num">${dd(bf)}</span><span class="n">${dd(bf)===1?"dag":"dager"} til<br>Black Friday</span><span class="w">${df(bf)}. Black Month varer til 2. desember.</span></div>`);
     else if(dd(bf)===0)cards.push(`<div class="hc cd"><span class="k"><i></i>I dag</span><span class="big">Nå!</span><span class="n">Black Friday</span><span class="w">Sjekk at prisen er en ekte lavpris før du slår til.</span></div>`);
     else cards.push(`<div class="hc cd"><span class="k"><i></i>Innspurt</span><span class="big num">${dd(end)}</span><span class="n">${dd(end)===1?"dag":"dager"} igjen av<br>Black Month</span><span class="w">Tilbudene varer til ${df(end)}.</span></div>`)}
-  const sz=[...st.sizes].sort((a,b)=>a-b);$("hero-sub").textContent=sz.length?`${sz.length>1?sz[0]+"–"+sz[sz.length-1]:sz[0]}" · på lager hos valgte butikker`:"";
+  const sz=[...st.sizes].sort((a,b)=>a-b);$("hero-sub").textContent=sz.length?`${sz.length>1?sz[0]+"–"+sz[sz.length-1]:sz[0]}" · på lager nå`:"";
   $("hero").innerHTML=cards.join("");wrap.hidden=!used.size||$("tab-list").hidden;
 }
 // ---------- Detalj ----------
@@ -671,7 +675,7 @@ function detail(g){
   const b=g.bw,bi=bwInfo(g);
   const facts=`<div class="facts">
     <div class="fact"><h5>Laveste pris før i dag</h5>${lows.length?`<table class="mini">${lows.map(([n,l])=>`<tr><td>${n}</td><td class="num">${fmt(l.price)} kr</td><td>${esc(l.shop||"")}${l.date?", "+dshort(l.date):""}</td></tr>`).join("")}</table>`:'<p>Ingen historikk ennå.</p>'}<p class="muted small">Hos noen butikk på Prisjakt. ${g.histDays?`Historikk: ${g.histDays>=365?"over ett år":g.histDays+" dager"}.`:""}</p></div>
-    ${b?`<div class="fact"><h5>Sannsynlig Black Week-pris</h5><div class="big num">${bi.rng} kr</div><p>${bi.tag} Midtestimat <b class="num">${fmt(b.mid)} kr</b>${g.best!=null?` (${g.best<=b.mid?"dagens pris er på eller under":`dagens pris er ${Math.round((g.best-b.mid)/b.mid*100)} % over`})`:""}.</p><p class="small">Laveste kjente pris: <b class="num">${fmt(b.ref)} kr</b>. Gruppe: ${esc(b.group)} (${b.n} tilsvarende TV-er i fjor).${b.p_billigere!=null?` ${pct(b.p_billigere)} sjanse for at noen butikk går minst 2 % under dagens pris.`:""}</p></div>`:""}
+    ${b?`<div class="fact"><h5>Sannsynlig Black Week-pris</h5><div class="big num">${bi.rng} kr</div><p>${bi.tag} Midtestimat <b class="num">${fmt(b.mid)} kr</b>${g.best!=null?` (${g.best<=b.mid?"dagens pris er på eller under":`dagens pris er ${Math.round((g.best-b.mid)/b.mid*100)} % over`})`:""}.</p><p class="small">Laveste kjente pris: <b class="num">${fmt(b.ref)} kr</b>. Gruppe: ${esc(b.group)} (${b.n} tilsvarende TV-er i fjor).${b.p_billigere!=null?` Sjanse for at noen butikk går minst 2 % under dagens pris: ${pct(b.p_billigere)}.`:""}</p></div>`:""}
     <div class="fact"><h5>TV-stativ (Eva Solo Carry)</h5><div>${standBadge(g)}</div><p>${g.vesa?`VESA <b>${esc(g.vesa)}</b>`:"VESA-mål ukjent"}${g.stand==="nei"&&!g.vesa?' / utenfor 40–65"':""}${g.vesaLow?" – usikker kilde, sjekk før kjøp":""}${g.stand==null?". Sjekk VESA-mål hos butikken":""}.</p><p class="small muted">${g.vesaNote?"Kilde: "+linkify(g.vesaNote):g.vesa?"Kilde: Prisjakt":""}</p></div>
     <div class="fact"><h5>Kvalitet</h5><div class="big">${g.quality??"–"} <span class="muted small" style="font-weight:500">av 100</span></div><p>${esc(g.qbasis||"")}</p><p class="small"><a href="#" data-qlink>Slik regnes scoren</a></p></div>
   </div>`;
@@ -733,7 +737,7 @@ function drawChart(box,g){
     xh.setAttribute("x1",x);xh.setAttribute("x2",x);xh.setAttribute("opacity",".35");
     const rows=ser.map(s=>[s,stepAt(s.pts,t)]).filter(x=>x[1]!=null).sort((a,b)=>a[1]-b[1]);
     showTip({clientX:r.left+x*k,clientY:r.top+T*k+20},`<div class="tt">${new Date(t).toLocaleDateString("nb-NO",{day:"numeric",month:"short",year:"numeric"})}</div>`+(rows.map(([s,v])=>`<div class="tr"><span><i class="lk${s.dash?" d":""}" style="background:${s.c}"></i>${esc(s.n)}</span><b class="num">${fmt(v)} kr</b></div>`).join("")||'<span class="muted">Ingen pris</span>'))};
-  svg.onpointermove=svg.onpointerdown=move;svg.onpointerleave=()=>{xh.setAttribute("opacity","0");hideTip()};
+  svg.onpointermove=svg.onpointerdown=move;svg.onpointerleave=e=>{if(e.pointerType!=="mouse")return;xh.setAttribute("opacity","0");hideTip()};
 }
 
 const FINN_LOC="1.22046.20220"; // Bergen
@@ -784,19 +788,23 @@ function drawPlots(gs){
   s+=yt.map(v=>`<line x1="${L}" x2="${W-Rm}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--grid)"/><text x="${L-7}" y="${Y(v)+4}" text-anchor="end" font-size="${FS}" fill="var(--muted)">${v}</text>`).join("");
   s+=xt.map(v=>`<line x1="${X(v)}" x2="${X(v)}" y1="${T}" y2="${H-B}" stroke="var(--grid)"/><text x="${X(v)}" y="${H-B+16}" text-anchor="middle" font-size="${FS}" fill="var(--muted)">${fmt(v)}</text>`).join("");
   s+=`<text x="0" y="12" font-size="${FS}" font-weight="600" fill="var(--fg2)">↑ Kvalitet (0–100)</text><text x="${W-Rm}" y="${H-5}" text-anchor="end" font-size="${FS}" font-weight="600" fill="var(--fg2)">${mode==="bw"?"Sannsynlig BW-pris, midtestimat (kr) →":"Dagens laveste pris (kr) →"}</text>`;
+  // i pilmodus: spre TV-er med samme score litt i høyden, så pilene ikke ligger oppå hverandre
+  const dy=new Map();if(mode==="arrow"){const rows=new Map();for(const g of arrows){if(!rows.has(g.quality))rows.set(g.quality,[]);rows.get(g.quality).push(g)}
+    const stepY=Math.min(6,(H-T-B)/(qhi-qlo)*0.9);for(const r of rows.values()){r.sort((a,b)=>b.best-a.best);r.forEach((g,i)=>dy.set(g,(i-(r.length-1)/2)*Math.min(stepY,14/r.length+2)))}}
+  const YY=g=>Y(g.quality)+(dy.get(g)||0),arrowSet=new Set(arrows);
   // frontier
   const sorted=[...pts].sort((a,b)=>PX(a)-PX(b)||b.quality-a.quality);const fr=[];let mq=-1;for(const g of sorted)if(g.quality>mq){fr.push(g);mq=g.quality}
   const frSet=new Set(fr);
   let d="";fr.forEach((g,i)=>{d+=(i?`H${X(PX(g)).toFixed(1)}V`:`M${X(PX(g)).toFixed(1)},`)+Y(g.quality).toFixed(1)});
   s+=`<path d="${d}" fill="none" stroke="var(--fg)" stroke-width="1.5" stroke-dasharray="4 4" opacity=".45"/>`;
   // piler fra dagens pris til sannsynlig BW-pris: tynne, i panelfargen, bare når endringen er minst 5 %
-  for(const g of arrows){const y=Y(g.quality),x1=X(g.best),x2=X(g.bw.mid),dir=x2>x1?1:-1,c=CAT[catOf(g)][2];if(Math.abs(x2-x1)<7)continue;
-    s+=`<path d="M${(x1+dir*5).toFixed(1)},${y.toFixed(1)}H${(x2-dir*1).toFixed(1)}" stroke="${c}" stroke-width="1.4" opacity=".75" fill="none"/><path d="M${(x2-dir*5.5).toFixed(1)},${(y-3.5).toFixed(1)}L${x2.toFixed(1)},${y.toFixed(1)}L${(x2-dir*5.5).toFixed(1)},${(y+3.5).toFixed(1)}" fill="none" stroke="${c}" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>`}
+  for(const g of arrows){const y=YY(g),x1=X(g.best),x2=X(g.bw.mid),dir=x2>x1?1:-1,c=CAT[catOf(g)][2];if(Math.abs(x2-x1)<7)continue;
+    s+=`<path d="M${(x1+dir*5).toFixed(1)},${y.toFixed(1)}H${(x2-dir*1).toFixed(1)}" stroke="${c}" stroke-width="1.3" opacity=".65" fill="none"/><path d="M${(x2-dir*4.5).toFixed(1)},${(y-3).toFixed(1)}L${x2.toFixed(1)},${y.toFixed(1)}L${(x2-dir*4.5).toFixed(1)},${(y+3).toFixed(1)}" fill="none" stroke="${c}" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>`}
   const map=[];
   const order=[...pts].sort((a,b)=>frSet.has(a)-frSet.has(b));
-  s+=order.map(g=>{const c=CAT[catOf(g)][2],o=g[g.bestShop],x=X(PX(g)),y=Y(g.quality),r=frSet.has(g)?(mob?5.5:6):(mode==="arrow"?4:4.5);
-    map.push({key:g.key,x,y,tip:`<div class="tt">${esc(g.label)}</div><span class="muted">${esc(g.panel)}${g.hz?" · "+esc(g.hz):""}</span><br><b class="num">${fmt(g.best)} kr</b> hos ${esc(g.bestShop)}${o&&o.before?` <span class="muted">(førpris ${fmt(o.before)})</span>`:""}<br>Laveste 60 d: <span class="num">${g.low60?fmt(g.low60.price)+" kr":"–"}</span>${BW_ON?`<br>Sannsynlig BW-pris: ${g.bw?`<b class="num">${fmt(g.bw.low)}–${fmt(g.bw.high)} kr</b>`:"–"}`:""}<br>Kvalitet <b>${g.quality}</b> <span class="muted">– ${esc(g.qbasis)}</span>${frSet.has(g)?"<br><i>På «mest for pengene»-linjen</i>":""}`});
-    return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}" fill="${c}" stroke="var(--card)" stroke-width="2"/>`}).join("");
+  s+=order.map(g=>{const c=CAT[catOf(g)][2],o=g[g.bestShop],x=X(PX(g)),y=YY(g),r=frSet.has(g)?(mob?5.5:6):(mode==="arrow"?3.5:4.5),fade=mode==="arrow"&&!arrowSet.has(g)&&!frSet.has(g);
+    map.push({key:g.key,x,y,tip:`<div class="tt">${esc(g.label)}</div><span class="muted">${esc(g.panel)}${g.hz?" · "+esc(g.hz):""}</span><br><b class="num">${fmt(g.best)} kr</b> hos ${esc(g.bestShop)}${o&&o.before?` <span class="muted">(førpris ${fmt(o.before)})</span>`:""}<br>Laveste 60 d: <span class="num">${g.low60?fmt(g.low60.price)+" kr":"–"}</span>${BW_ON?`<br>Sannsynlig BW-pris: ${g.bw?`<b class="num">${bwInfo(g).rng} kr</b>`:"–"}`:""}<br>Kvalitet <b>${g.quality}</b> <span class="muted">– ${esc(g.qbasis)}</span>${frSet.has(g)?"<br><i>På «mest for pengene»-linjen</i>":""}`});
+    return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}" fill="${c}" stroke="var(--card)" stroke-width="${mode==="arrow"?1.5:2}"${fade?' opacity=".35"':""}/>`}).join("");
   // etiketter for frontier-punktene; hopp over kollisjoner, snu mot venstre ved høyre kant
   const placed=[],cw=FS*0.56;
   for(const g of [...fr].reverse()){const t=shortLabel(g),w=t.length*cw;let x=X(PX(g))+9,y=Y(g.quality)-8,anchor="start",x0=x;
