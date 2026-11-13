@@ -142,7 +142,7 @@ def main():
         fkey, flabel, fsrc = families.family(r["brand"], r["name"], r["size"], extra)
         products.append({
             "id": r["id"], "name": r["name"], "brand": r["brand"], "size": r["size"],
-            "panel": r["panel"], "hz": r["hz"], "res": r["res"], "img": r["img"], "vesa": d.get("vesa"),
+            "panel": r["panel"], "hz": r["hz"], "res": r["res"], "img": r["img"], "vesa": d.get("vesa"), "specs": d.get("specs") or {},
             "rating": r["rating"], "expert": r["expert"],
             "family": fkey, "family_label": flabel, "family_src": fsrc,
             "shops": d["shops"], "market_now": d["market_now"],
@@ -217,7 +217,7 @@ def main():
         if not p.get("vesa") and p["family"] in fam_vesa:
             p["vesa"], p["vesa_note"] = fam_vesa[p["family"]], "fra annen variant av samme TV"
     for p in products:
-        p["quality"], p["quality_basis"] = quality.score(p)
+        p["quality"], p["quality_basis"] = quality.score(p, CFG.get("quality_profile"))
         p["stand"] = stand_fit(p)
     # Sannsynlig Black Month-pris (bf_model v2), kalibrert på fjorårets Black Month
     cal = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bw_calibration.json")

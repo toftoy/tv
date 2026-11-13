@@ -142,5 +142,14 @@
   },
   "secondary_shops": [
     "Multicom"
-  ]
+  ],
+  "quality_profile": {
+    "bruk": "Primær-TV: fotball, strømming, PS4",
+    "hz_100_pluss": 6,
+    "hz_60_eller_lavere": -4,
+    "dolby_vision": 2,
+    "hdr10_pluss": 1,
+    "kantbelysning": -3,
+    "vrr_hdmi21": 1
+  }
 }

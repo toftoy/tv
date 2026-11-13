@@ -152,6 +152,20 @@ def price_history(pid, time_range="TWO_YEARS"):
             for x in (d.get("priceHistory") or {}).get("historyItems", [])]
 
 
+SPEC_KEYS = ("Oppdateringsfrekvens", "HDR-format", "Bakbelysningsteknologi", "Type synkronisering",
+             "HDMI-standarder", "Antall HDMI-innganger", "Operativsystem", "Integrerte høyttalere")
+
+
+def specs(html):
+    """Utvalgte tekniske egenskaper fra produktsidens spesifikasjonstabell."""
+    out = {}
+    for m in re.finditer(r'>([^<>]{3,60})</p><p class="text-body-small text-text-tertiary[^>]*>([^<]{1,120})<', html):
+        k, v = m.group(1).strip(), m.group(2).strip()
+        if k in SPEC_KEYS and k not in out:
+            out[k] = v.replace("&quot;", '"')
+    return out
+
+
 def vesa(html):
     m = re.search(r"VESA-feste \(størrelse\)</p>.*?>([^<]{3,40})</", html, re.S)
     if not m:
@@ -189,4 +203,4 @@ def product(pid):
                                member=r.get("priceType") == "MemberPrice",
                                title=r.get("name"), sku=r.get("shopOfferId"),
                                stock=r.get("stockStatus"))
-    return dict(history=history, shops=shops, market_now=market_now, vesa=vesa(html))
+    return dict(history=history, shops=shops, market_now=market_now, vesa=vesa(html), specs=specs(html))
