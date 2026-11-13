@@ -40,6 +40,7 @@ TIERS = [
     (r"HISENSE U7", 68, "Hisense U7"),
     (r"TCL C6KS", 60, "TCL C6KS"),
     (r"TCL (C6|Q6C|T8D)", 68, "TCL C6"),
+    (r"SAMSUNG QN7\d\D*2026|QN7\dH", 56, "Samsung QN70H (2026: kantbelyst, svak dimming – RTINGS)"),
     (r"SAMSUNG QN7\d|SAMSUNG QN1", 66, "Samsung QN70"),
     (r"LG MRGB|LG QNED9", 70, "LG Mini RGB/QNED9x"),
     (r"LG QNED8[5-9]", 63, "LG QNED85/86 Mini-LED"),
@@ -50,12 +51,12 @@ TIERS = [
     (r"BRAVIA 5\b|XR50", 62, "Sony Bravia 5"),
     # --- QLED / LED ---
     (r"SAMSUNG Q8\d?F?|SAMSUNG Q80", 56, "Samsung Q80"),
-    (r"PHILIPS PQS9", 52, "Philips PQS9 (120 Hz QLED, Ambilight)"),
-    (r"BRAVIA 3 II", 52, "Sony Bravia 3 II (120 Hz, HDMI 2.1, Dolby Vision, men lav lysstyrke)"),
+    (r"PHILIPS PQS9", 50, "Philips PQS9 (QLED, Ambilight; ingen uavhengig test)"),
+    (r"BRAVIA 3\w? II|XR3\dM2", 50, "Sony Bravia 3 II (lav lysstyrke, svak HDR)"),
     (r"BRAVIA 2 II", 34, "Sony Bravia 2 II (HDMI 2.0, 60 Hz)"),
     (r"THE FRAME|LS03", 55, "Samsung The Frame"),
     (r"TCL P8", 55, "TCL P8"),
-    (r"SAMSUNG Q7", 48, "Samsung Q7 (60 Hz, ingen lokal dimming, ingen Dolby Vision)"),
+    (r"SAMSUNG Q7", 50, "Samsung Q7 (ingen lokal dimming)"),
     (r"HISENSE E7.*PRO", 55, "Hisense E7 Pro"),
     (r"PHILIPS (PUS9|PUS8[5-9]|THE ONE)", 50, "Philips Ambilight 8/9xxx"),
     (r"LG QNED7", 46, "LG QNED7x"),
@@ -82,7 +83,7 @@ ADJUST = [
     "43\" og mindre LCD: −6 (enklere panel, færre dimmesoner, ofte 60 Hz)",
     "Hotell-/bedrifts-TV: −6 (forenklet programvare og bilde)",
     "Ukjent serie: grunnverdi etter paneltype (OLED 72, Mini-LED 58, QLED 42, LED 30), −8 for HD/Full HD",
-    "Egenskaper (vektet for primær-TV med fotball, strømming og PS4, se config.json): ekte 100/120 Hz +6, 50/60 Hz −4, Dolby Vision +2 (ellers HDR10+ +1), kantbelyst −3, VRR/HDMI 2.1 +1",
+    "Egenskaper (vektet for primær-TV med fotball, strømming og PS4, se config.json): ekte 100/120 Hz +6, 50/60 Hz −4 (ukjent Hz på 43\" og mindre LCD antas 60), Dolby Vision +2 (ellers HDR10+ +1), kantbelyst −3, VRR/HDMI 2.1 +1 (fra spesifikasjon eller kjent serie)",
 ]
 
 
@@ -110,7 +111,8 @@ def features(p, prof):
     prof = {**DEFAULT_PROFILE, **(prof or {})}
     sp = p.get("specs") or {}
     adj, why = 0, []
-    hzs = re.findall(r"(\d{2,3})\s*Hz", (p.get("hz") or "") + " " + sp.get("Oppdateringsfrekvens", ""))
+    hzs = re.findall(r"(\d{2,3})\s*Hz", (p.get("hz") or "") + " " + sp.get("Oppdateringsfrekvens", "")
+                     + " " + " ".join(p.get("family_hz") or []))
     nm = (p.get("family_label", "") + " " + p.get("name", "") + " " + (p.get("panel") or "")).upper()
     if not hzs and "OLED" in nm and "QNED" not in nm:
         hzs = ["120"]  # alle aktuelle OLED-TV-er har ekte 120 Hz
@@ -120,6 +122,9 @@ def features(p, prof):
             adj += prof["hz_100_pluss"]; why.append(f"{hz} Hz {prof['hz_100_pluss']:+d}")
         else:
             adj += prof["hz_60_eller_lavere"]; why.append(f"{hz} Hz {prof['hz_60_eller_lavere']:+d}")
+    elif (p.get("size") or 99) <= 43:
+        # Ukjent Hz på en liten LCD: nesten alltid 60 Hz
+        adj += prof["hz_60_eller_lavere"]; why.append(f"Hz ukjent, antatt 60 {prof['hz_60_eller_lavere']:+d}")
     hdr = sp.get("HDR-format", "").upper()
     if "DOLBY VISION" in hdr:
         adj += prof["dolby_vision"]; why.append(f"Dolby Vision {prof['dolby_vision']:+d}")
@@ -129,7 +134,9 @@ def features(p, prof):
     if re.search(r"EDGE|KANT", bl):
         adj += prof["kantbelysning"]; why.append(f"kantbelyst {prof['kantbelysning']:+d}")
     sync = (sp.get("Type synkronisering", "") + " " + sp.get("HDMI-standarder", "")).upper()
-    if re.search(r"VRR|FREESYNC|G-SYNC|HDMI 2\.1", sync):
+    hdmi21_series = re.search(r"BRAVIA [3789]\w? II|BRAVIA [789]\b|LG OLED [BCGM]\d|SAMSUNG (S[89]\d|QN[89]\d)|PHILIPS (PQS9|OLED|MLED)"
+                              r"|TCL (C[6789]|X\d)|HISENSE (U[78]|UR|E8)", nm)
+    if re.search(r"VRR|FREESYNC|G-SYNC|HDMI 2\.1", sync) or hdmi21_series:
         adj += prof["vrr_hdmi21"]; why.append(f"VRR/HDMI 2.1 {prof['vrr_hdmi21']:+d}")
     return adj, why
 

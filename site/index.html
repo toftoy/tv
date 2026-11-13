@@ -493,10 +493,15 @@ function groups(){
     return g})
 }
 function flag(gs){
+  // «Finnes bedre og billigere»: samme størrelse ±1" (42" OLED og 43" LCD sammenlignes), minst 3 poeng bedre
+  // og ikke dyrere, eller like god (±2) og minst 10 % billigere. Prisen må ikke bare komme fra en sekundærbutikk.
+  const SEC=["Multicom"];
   for(const g of gs){g.olderWorse=null;g.dominatedBy=null;if(g.best==null)continue;
-    for(const h of gs){if(h===g||h.best==null||Math.round(h.size)!==Math.round(g.size))continue;
-      if(h.base===g.base&&h.year>g.year&&h.best<=g.best&&!g.olderWorse)g.olderWorse=h;
-      if(h.quality!=null&&g.quality!=null&&h.best<=g.best&&h.quality>=g.quality&&(h.best<g.best||h.quality>g.quality)&&(!g.dominatedBy||h.best<g.dominatedBy.best))g.dominatedBy=h}}
+    for(const h of gs){if(h===g||h.best==null)continue;
+      if(Math.round(h.size)===Math.round(g.size)&&h.base===g.base&&h.year>g.year&&h.best<=g.best&&!g.olderWorse)g.olderWorse=h;
+      if(Math.abs(Math.round(h.size)-Math.round(g.size))>1||h.quality==null||g.quality==null||SEC.includes(h.bestShop))continue;
+      const dom=h.best<=g.best&&(h.quality>=g.quality+3||(h.quality>=g.quality-2&&h.best<=g.best*0.9));
+      if(dom&&(!g.dominatedBy||h.quality>g.dominatedBy.quality||(h.quality===g.dominatedBy.quality&&h.best<g.dominatedBy.best)))g.dominatedBy=h}}
   return gs}
 // ---------- Filtre ----------
 function chipHTML(v,label,on){return `<label><input type="checkbox" value="${esc(v)}" ${on?"checked":""}>${esc(label)}</label>`}
@@ -569,7 +574,7 @@ function shopCell(g,s){const o=g[s];if(!o)return'<span class="muted">–</span>'
   return `<span class="${best}">${fmt(o.price)}</span>${o.member?' <span class="chip" title="Medlemspris">M</span>':""}${o.before?`<br><s class="small">${fmt(o.before)}</s>`:""}${t&&t!=="på lager"?`<br><span class="chip" title="${t}">${SHORTST[t]}</span>`:""}`}
 function flagsHTML(g,full){
   if(g.olderWorse)return full?`<div class="flag b-warn"><span>Nyere modell er billigere: <b>${esc(g.olderWorse.label)}</b> koster ${fmt(g.olderWorse.best)} kr.</span><a href="#" data-goto="${esc(g.olderWorse.key)}">Vis den</a></div>`:`<span class="badge b-warn">Nyere modell er billigere</span>`;
-  if(g.dominatedBy)return full?`<div class="flag b-bad"><span>Finnes bedre og billigere: <b>${esc(g.dominatedBy.label)}</b> – ${fmt(g.dominatedBy.best)} kr, kvalitet ${g.dominatedBy.quality}.</span><a href="#" data-goto="${esc(g.dominatedBy.key)}">Vis den</a></div>`:`<span class="badge b-bad">Finnes bedre og billigere</span>`;
+  if(g.dominatedBy)return full?`<div class="flag b-bad"><span>Finnes bedre og billigere: <b>${esc(g.dominatedBy.label)}</b> – ${fmt(g.dominatedBy.best)} kr hos ${esc(g.dominatedBy.bestShop||"")}${(g.dominatedBy[g.dominatedBy.bestShop]||{}).member?" (medlemspris)":""}, kvalitet ${g.dominatedBy.quality} mot ${g.quality}.</span><a href="#" data-goto="${esc(g.dominatedBy.key)}">Vis den</a></div>`:`<span class="badge b-bad">Finnes bedre og billigere</span>`;
   return""}
 const CHEV='<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>';
 const subline=g=>[Math.round(g.size)+'"',g.panel,g.hz,g.items.length>1?`${g.items.length} varianter`:""].filter(Boolean).map(esc).join(" · ");

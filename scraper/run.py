@@ -39,6 +39,7 @@ def parse_dt(s):
 
 
 OSLO = __import__("zoneinfo").ZoneInfo("Europe/Oslo")
+PRO = re.compile(r"hotel|hospitality|signage|skilt|infoskjerm|bedrift|business|b-line|\bHG\d\d|\bBE\d\dF|\bLH\d\d|DM66|PK640|UK660|BFL\d", re.I)
 
 
 def oslo_date(iso):
@@ -118,6 +119,8 @@ def main():
             continue
         if d["shops"] and set(d["shops"]) <= sec:
             continue  # bare hos «sekundære» butikker (f.eks. Multicom)
+        if PRO.search(r["name"]):
+            continue  # hotell-/bedrifts-/skiltskjermer
         h = history.setdefault(str(r["id"]), {"market": [], "shops": {}})
         seen = {x[0] for x in h["market"]}
         for x in d["history"]:
@@ -216,6 +219,20 @@ def main():
     for p in products:
         if not p.get("vesa") and p["family"] in fam_vesa:
             p["vesa"], p["vesa_note"] = fam_vesa[p["family"]], "fra annen variant av samme TV"
+    # Del egenskaper innen familien (varianter av samme TV), og Hz fra butikktitler
+    fam_specs, fam_hz = {}, {}
+    for p in products:
+        fs = fam_specs.setdefault(p["family"], {})
+        for k, v in (p.get("specs") or {}).items():
+            fs.setdefault(k, v)
+        hz = fam_hz.setdefault(p["family"], set())
+        if p.get("hz"):
+            hz.add(p["hz"])
+        for o in p["shops"].values():
+            hz.update(re.findall(r"\d{2,3}\s*Hz", o.get("title") or ""))
+    for p in products:
+        p["specs"] = {**fam_specs.get(p["family"], {}), **(p.get("specs") or {})}
+        p["family_hz"] = sorted(fam_hz.get(p["family"], []))
     for p in products:
         p["quality"], p["quality_basis"] = quality.score(p, CFG.get("quality_profile"))
         p["stand"] = stand_fit(p)
@@ -312,6 +329,8 @@ def merge_shops(products, history):
                 for sh, lst in history.pop(old_id).get("shops", {}).items():
                     h["shops"][sh] = sorted(lst + h["shops"].get(sh, []), key=lambda x: x[0])
         else:
+            if PRO.search(it["name"]):
+                continue
             brand = it.get("brand") or it["name"].split()[0]
             name = it["name"] + (f" - {it['mpn']}" if it.get("mpn") else "")
             fkey, flabel, fsrc = families.family(brand, name, it["size"], [it.get("mpn") or ""])

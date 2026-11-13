@@ -157,12 +157,16 @@ SPEC_KEYS = ("Oppdateringsfrekvens", "HDR-format", "Bakbelysningsteknologi", "Ty
 
 
 def specs(html):
-    """Utvalgte tekniske egenskaper fra produktsidens spesifikasjonstabell."""
+    """Utvalgte tekniske egenskaper fra spesifikasjonstabellen (alle verdier i raden) og JSON-LD."""
     out = {}
-    for m in re.finditer(r'>([^<>]{3,60})</p><p class="text-body-small text-text-tertiary[^>]*>([^<]{1,120})<', html):
-        k, v = m.group(1).strip(), m.group(2).strip()
+    for m in re.finditer(r'>([^<>]{3,60})</p><p class="text-body-small text-text-tertiary[^>]*>(.{1,300}?)</p>', html, re.S):
+        k = m.group(1).strip()
         if k in SPEC_KEYS and k not in out:
-            out[k] = v.replace("&quot;", '"')
+            v = re.sub(r"<!--.*?-->|<[^>]+>", "", m.group(2))
+            out[k] = re.sub(r"\s+", " ", v).replace("&quot;", '"').strip()
+    for name, val in re.findall(r'"name":"([^"]{3,40})","value":"([^"]{1,60})"', html):
+        if name in SPEC_KEYS and val and name not in out:
+            out[name] = val
     return out
 
 
