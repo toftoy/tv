@@ -247,7 +247,8 @@ function chart(g){
   const mk=[],sh={};
   for(const p of g.items){const h=HIST[p.id];if(!h)continue;mk.push(...h.market.map(x=>[Date.parse(x[0]),x[1]]));
     for(const [s,l] of Object.entries(h.shops||{}))(sh[s]=sh[s]||[]).push(...l.map(x=>[Date.parse(x[0]),x[1]]))}
-  const step=(pts)=>{pts.sort((a,b)=>a[0]-b[0]);const o=[];let last=null;for(const [t,v] of pts){if(t<t0){last=v;continue}if(!o.length&&last!=null)o.push([t0,last]);o.push([t,v])}if(!o.length&&last!=null)o.push([t0,last]);if(o.length)o.push([now,o[o.length-1][1]]);return o};
+  const clean=pts=>{const v=pts.map(x=>x[1]).filter(x=>x!=null).sort((a,b)=>a-b);if(v.length<3)return pts;const med=v[Math.floor(v.length/2)];return pts.filter(x=>x[1]==null||x[1]>=0.3*med)};
+  const step=(pts0)=>{const pts=clean(pts0);pts.sort((a,b)=>a[0]-b[0]);const o=[];let last=null;for(const [t,v] of pts){if(t<t0){last=v;continue}if(!o.length&&last!=null)o.push([t0,last]);o.push([t,v])}if(!o.length&&last!=null)o.push([t0,last]);if(o.length)o.push([now,o[o.length-1][1]]);return o};
   // markedsserien er "laveste blant varianter" -> ta min per tidspunkt
   const m=step(mk);ser.push(["Laveste marked",m,colors.market]);
   for(const s of SHOPS)if(sh[s])ser.push([s,step(sh[s].filter(x=>x[1]!=null)),colors[s]]);

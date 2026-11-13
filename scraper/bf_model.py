@@ -26,12 +26,12 @@ def _p(s):
 
 
 def clean(raw):
-    """Fjerner feilpriser: punkter under 40 % av medianprisen i serien (f.eks. 949 kr for en 43" TV)."""
+    """Fjerner feilpriser: punkter under 30 % av medianprisen i serien (f.eks. 949 kr for en 43" TV)."""
     vals = [x[1] for x in raw if x[1] is not None]
     if len(vals) < 3:
         return [x for x in raw if x[1] is not None]
     med = statistics.median(vals)
-    return [x for x in raw if x[1] is not None and x[1] >= 0.4 * med]
+    return [x for x in raw if x[1] is not None and x[1] >= 0.3 * med]
 
 
 def _series(raw):
