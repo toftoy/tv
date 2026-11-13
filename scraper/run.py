@@ -38,6 +38,13 @@ def parse_dt(s):
     return dt.datetime.fromisoformat(s.replace("Z", "+00:00"))
 
 
+OSLO = __import__("zoneinfo").ZoneInfo("Europe/Oslo")
+
+
+def oslo_date(iso):
+    return parse_dt(iso).astimezone(OSLO).date().isoformat()
+
+
 def lowest(series, days):
     """series: [[iso-dato, pris, butikk], ...] trinnvis (pris gjelder fra dato). Laveste i vinduet."""
     start = NOW - dt.timedelta(days=days)
@@ -48,107 +55,142 @@ def lowest(series, days):
     if not vals:
         return None
     m = min(vals, key=lambda x: x[1])
-    return {"price": m[1], "shop": m[2], "date": m[0][:10]}
+    return {"price": m[1], "shop": m[2], "date": oslo_date(m[0])}
+
+
+def lowest_multi(serieses, days):
+    """Laveste over flere trinnvise serier (marked + hver butikk), beregnet per serie."""
+    lows = [x for x in (lowest(s, days) for s in serieses if s) if x]
+    return min(lows, key=lambda x: x["price"]) if lows else None
+
+
+def series_of(h, before=None):
+    """Markedsserien og hver butikkserie som egne trinnvise serier [[dato, pris, butikk]]."""
+    out = [list(h.get("market", []))]
+    for shop, lst in h.get("shops", {}).items():
+        out.append([[x[0], x[1], shop] for x in lst])
+    if before:
+        out = [[x for x in s if parse_dt(x[0]) < before] for s in out]
+    return out
 
 
 def main():
     os.makedirs(DATA, exist_ok=True)
     history = load("history.json", {})      # pid -> {"market": [[dato,pris,butikk]], "shops": {butikk: [[dato,pris,før,medlem]]}}
     prev = {p["id"]: p for p in load("products.json", {"products": []})["products"]}
+    sources = {}
 
     cache = os.environ.get("CACHE_DIR")
     if cache and os.path.exists(os.path.join(cache, "category.json")):
         cat = json.load(open(os.path.join(cache, "category.json"), encoding="utf-8"))
     else:
         cat = prisjakt.category("tv")
-    f = CFG["filter"]
-    cand = [r for r in cat if r["size"] and f["min_size"] <= r["size"] <= f["max_size"]
-            and r["stock"] == "in_stock" and r["offers"] >= f["min_offers"]]
-    # Ta alltid med produkter som tidligere har vært hos Elkjøp/Power/Komplett
+    flt = CFG["filter"]
+    in_range = lambda r: r["size"] and flt["min_size"] <= r["size"] <= flt["max_size"]  # noqa: E731
+    cand = [r for r in cat if in_range(r) and r["stock"] == "in_stock" and r["offers"] >= flt["min_offers"]]
+    # Ta alltid med produkter vi har fulgt før (innenfor størrelsesområdet)
     ids = {r["id"] for r in cand}
-    cand += [r for r in cat if r["id"] in prev and r["id"] not in ids
-             and r["size"] and f["min_size"] <= r["size"] <= f["max_size"]]
+    cand += [r for r in cat if r["id"] in prev and r["id"] not in ids and in_range(r)]
     print(f"Kategori: {len(cat)} produkter, {len(cand)} kandidater", flush=True)
 
-    products = []
+    products, fails, consecutive = [], 0, 0
+    sec = set(CFG.get("secondary_shops", []))
     for i, r in enumerate(cand):
         try:
             if cache:
-                p = os.path.join(cache, f"{r['id']}.html")
-                if not os.path.exists(p):
+                cp = os.path.join(cache, f"{r['id']}.html")
+                if not os.path.exists(cp):
                     continue
-                prisjakt.fetch = lambda _path, _p=p: open(_p, encoding="utf-8").read()
+                prisjakt.fetch = lambda _path, _p=cp: open(_p, encoding="utf-8").read()
             d = prisjakt.product(r["id"])
+            consecutive = 0
         except Exception as e:
             print("FEIL", r["id"], e, flush=True)
+            fails += 1
+            consecutive += 1
+            if consecutive >= 25:
+                print("Avbryter: 25 feil på rad – Prisjakt blokkerer trolig. Lagrer ingenting.", flush=True)
+                sys.exit(1)
             continue
         if i % 50 == 0:
             print(f"  {i}/{len(cand)}", flush=True)
         if not d["shops"] and r["id"] not in prev:
             continue
-        # TV-er som bare selges hos «sekundære» butikker (f.eks. Multicom) tas ikke med
-        sec = set(CFG.get("secondary_shops", []))
         if d["shops"] and set(d["shops"]) <= sec:
-            continue
-        pid = str(r["id"])
-        h = history.setdefault(pid, {"market": [], "shops": {}})
-        # Slå sammen Prisjakts markedslaveste-serie (bygger historikk utover 3 mnd over tid)
+            continue  # bare hos «sekundære» butikker (f.eks. Multicom)
+        h = history.setdefault(str(r["id"]), {"market": [], "shops": {}})
         seen = {x[0] for x in h["market"]}
         for x in d["history"]:
             if x["date"] not in seen:
                 h["market"].append([x["date"], x["price"], x["shop"]])
-        # To års historikk fra Prisjakts API, én gang per produkt
-        if not h.get("long"):
+        if not h.get("long"):  # to års historikk fra Prisjakts API, én gang per produkt
             lc = os.environ.get("LONG_CACHE")
             try:
                 if lc:
-                    f = os.path.join(lc, f"{r['id']}.json")
-                    long = json.load(open(f)) if os.path.exists(f) else None
+                    lf = os.path.join(lc, f"{r['id']}.json")
+                    long = json.load(open(lf)) if os.path.exists(lf) else None
                 else:
                     long = prisjakt.price_history(r["id"])
                 if long is not None:
                     seen = {x[0] for x in h["market"]}
-                    for x in long:
-                        if x["date"] not in seen:
-                            h["market"].append([x["date"], x["price"], x["shop"]])
+                    h["market"] += [[x["date"], x["price"], x["shop"]] for x in long if x["date"] not in seen]
                     h["long"] = TODAY
             except Exception as e:
                 print("Historikk-API feilet", r["id"], e, flush=True)
         h["market"].sort(key=lambda x: x[0])
-        # Egen historikk per butikk: lagre når prisen endres
-        for shop, o in d["shops"].items():
-            lst = h["shops"].setdefault(shop, [])
-            if not lst or lst[-1][1] != o["price"]:
-                lst.append([NOW.isoformat(timespec="seconds"), o["price"], o["before"], o["member"]])
-        for shop in list(h["shops"]):
-            if shop not in d["shops"] and h["shops"][shop] and h["shops"][shop][-1][1] is not None:
-                h["shops"][shop].append([NOW.isoformat(timespec="seconds"), None, None, False])  # ikke lenger i salg
-
         extra = [o.get("title") or "" for o in d["shops"].values()] + [o.get("sku") or "" for o in d["shops"].values()]
         fkey, flabel, fsrc = families.family(r["brand"], r["name"], r["size"], extra)
-        # Kombinert serie for laveste-beregning: markedsserie + egne butikkpunkter
-        series = [x for x in h["market"]] + [
-            [x[0], x[1], s] for s, lst in h["shops"].items() for x in lst if x[1] is not None]
-        # Laveste pris *før i dag*, slik at dagens tilbud sammenlignes med historikken
-        today0 = NOW.replace(hour=0, minute=0, second=0, microsecond=0)
-        series = [x for x in series if parse_dt(x[0]) < today0]
-        best = min(d["shops"].items(), key=lambda kv: kv[1]["price"]) if d["shops"] else None
-        earliest = min((x[0] for x in series), default=None)
         products.append({
             "id": r["id"], "name": r["name"], "brand": r["brand"], "size": r["size"],
             "panel": r["panel"], "hz": r["hz"], "res": r["res"], "img": r["img"], "vesa": d.get("vesa"),
             "rating": r["rating"], "expert": r["expert"],
             "family": fkey, "family_label": flabel, "family_src": fsrc,
             "shops": d["shops"], "market_now": d["market_now"],
-            "best": {"shop": best[0], "price": best[1]["price"]} if best else None,
-            "low30": lowest(series, 30), "low60": lowest(series, 60),
-            "low90": lowest(series, 92), "low365": lowest(series, 365),
-            "history_since": earliest[:10] if earliest else None,
             "url": f"https://www.prisjakt.no/product.php?p={r['id']}",
         })
+    sources["Prisjakt"] = {"ok": len(products), "feil": fails}
+
+    # Vern mot delvis innhenting: ikke overskriv gode data med en halv kjøring
+    prev_pj = sum(1 for k in prev if isinstance(k, int))
+    if prev_pj and len(products) < 0.6 * prev_pj and not cache:
+        print(f"Avbryter: bare {len(products)} Prisjakt-produkter mot {prev_pj} sist. Lagrer ingenting.", flush=True)
+        sys.exit(1)
 
     if CFG.get("shops", {}).get("enabled", True) and not os.environ.get("SKIP_SHOPS"):
-        merge_shops(products, history)
+        sources.update(merge_shops(products, history))
+
+    # Egen historikk per butikk: skrives én gang, fra endelig tilstand (utsolgt = None)
+    stamp = NOW.isoformat(timespec="seconds")
+    for p in products:
+        h = history.setdefault(str(p["id"]), {"market": [], "shops": {}})
+        h["seen"] = TODAY
+        for shop, o in p["shops"].items():
+            lst = h["shops"].setdefault(shop, [])
+            price = None if o.get("stock") == "OutOfStock" else o["price"]
+            if not lst or lst[-1][1] != price:
+                lst.append([stamp, price, o.get("before"), o.get("member")])
+        for shop, lst in h["shops"].items():
+            if shop not in p["shops"] and lst and lst[-1][1] is not None:
+                lst.append([stamp, None, None, False])  # ikke lenger i salg
+    # Laveste priser *før i dag*, per serie
+    today0 = NOW.replace(hour=0, minute=0, second=0, microsecond=0)
+    for p in products:
+        h = history[str(p["id"])]
+        ss = series_of(h, before=today0)
+        for key, days in (("low30", 30), ("low60", 60), ("low90", 90), ("low365", 365)):
+            p[key] = lowest_multi(ss, days)
+        allpts = [x[0] for s in series_of(h) for x in s if x[1] is not None]
+        first = min(allpts, default=None)
+        p["history_since"] = oslo_date(first) if first else None
+        p["history_days"] = (NOW - parse_dt(first)).days if first else 0
+        live = {s: o for s, o in p["shops"].items() if o.get("stock") != "OutOfStock"}
+        b = min(live.items(), key=lambda kv: kv[1]["price"]) if live else None
+        p["best"] = {"shop": b[0], "price": b[1]["price"]} if b else None
+        if not p.get("panel"):  # butikkprodukter: utled paneltype fra navnet
+            n = p["name"].upper()
+            p["panel"] = ("OLED" if "OLED" in n and "QNED" not in n else "Mini-LED" if re.search(r"MINI.?LED", n)
+                          else "QLED" if re.search(r"QLED|QNED|NANO", n) else "LED")
+
     # VESA: forkast urimelige verdier, arv fra andre varianter av samme TV
     for p in products:
         v = p.get("vesa")
@@ -188,8 +230,15 @@ def main():
     print(f"Black Month-modell: kalibrert på {model.get('n')} TV-er fra {model.get('year')}", flush=True)
     save("quality_tiers.json", {"tiers": [{"pattern": pt, "score": sc, "label": lb} for pt, sc, lb in quality.TIERS],
                                 "adjust": quality.ADJUST})
+    # Rydd historikk: behold produkter som er med nå eller sett siste 30 dager
+    keep = {str(p["id"]) for p in products}
+    cutoff = (NOW - dt.timedelta(days=30)).date().isoformat()
+    for k in list(history):
+        if k not in keep and history[k].get("seen", "0000") < cutoff:
+            del history[k]
     save("history.json", history)
-    save("products.json", {"updated": NOW.isoformat(timespec="seconds"), "products": products})
+    save("products.json", {"updated": NOW.isoformat(timespec="seconds"), "sources": sources,
+                           "bw_active": any(p.get("bw") for p in products), "products": products})
     print(f"Lagret {len(products)} produkter", flush=True)
     alerts(products, prev)
 
@@ -215,14 +264,15 @@ def _norm(c):
 
 
 def merge_shops(products, history):
+    """Kobler Power/Elkjøp sine egne produktsider til Prisjakt-produktene. Returnerer kildestatus."""
     sc = CFG.get("shops", {})
     cache = os.environ.get("SHOPS_CACHE")
     if cache and os.path.exists(cache):
-        items = json.load(open(cache, encoding="utf-8"))
+        items, status = json.load(open(cache, encoding="utf-8")), {}
     else:
-        items = shopsrc.collect({"min_size": sc.get("min_size", CFG["filter"]["min_size"]),
-                                 "max_size": sc.get("max_size", CFG["filter"]["max_size"]),
-                                 "min_year": sc.get("min_year", 2024)})
+        items, status = shopsrc.collect({"min_size": sc.get("min_size", CFG["filter"]["min_size"]),
+                                         "max_size": sc.get("max_size", CFG["filter"]["max_size"]),
+                                         "min_year": sc.get("min_year", 2024)})
     by_sku, codes = {}, []
     for p in products:
         for shop, o in p["shops"].items():
@@ -234,9 +284,8 @@ def merge_shops(products, history):
         for o in p["shops"].values():
             toks.update(_norm(t) for t in re.findall(r"\b[A-Z]{0,4}\d{2}[A-Z0-9]{3,}\b", o.get("title") or ""))
         codes.append((p, {t for t in toks if len(t) >= 7}))
-    added = matched = 0
-    stamp = NOW.isoformat(timespec="seconds")
-    today0 = NOW.replace(hour=0, minute=0, second=0, microsecond=0)
+    added = matched = skipped = 0
+    watch = CFG.get("watch", [])
     for it in items:
         shop, mpn = it["shop"], _norm(it.get("mpn"))
         p = by_sku.get((shop, it["sku"]))
@@ -247,6 +296,7 @@ def merge_shops(products, history):
                     break
         entry = {"price": it["price"], "before": None, "member": it["member"], "title": it["name"],
                  "sku": it["sku"], "stock": it["stock"], "url": it["url"], "source": "butikk"}
+        old_id = f"{shop[0]}{it['sku']}"
         if p:
             matched += 1
             o = p["shops"].get(shop)
@@ -256,35 +306,31 @@ def merge_shops(products, history):
                     o["price"] = it["price"]  # butikkens egen side er ferskest
             else:
                 p["shops"][shop] = entry
+            # Tidligere «kun i butikk»-produkt som nå finnes på Prisjakt: flytt historikken
+            if str(p["id"]) != old_id and old_id in history:
+                h = history.setdefault(str(p["id"]), {"market": [], "shops": {}})
+                for sh, lst in history.pop(old_id).get("shops", {}).items():
+                    h["shops"][sh] = sorted(lst + h["shops"].get(sh, []), key=lambda x: x[0])
         else:
-            added += 1
             brand = it.get("brand") or it["name"].split()[0]
             name = it["name"] + (f" - {it['mpn']}" if it.get("mpn") else "")
             fkey, flabel, fsrc = families.family(brand, name, it["size"], [it.get("mpn") or ""])
-            p = {"id": f"{shop[0]}{it['sku']}", "name": name, "brand": brand, "size": it["size"],
+            p = {"id": old_id, "name": name, "brand": brand, "size": it["size"],
                  "panel": None, "hz": None, "res": None, "img": None, "vesa": None, "img_url": it.get("img"),
                  "rating": None, "expert": None, "family": fkey, "family_label": flabel, "family_src": fsrc,
-                 "shops": {shop: entry}, "market_now": None, "low30": None, "low60": None, "low90": None,
-                 "low365": None, "history_since": None, "url": it["url"], "store_only": True}
+                 "shops": {shop: entry}, "market_now": None, "url": it["url"], "store_only": True}
+            # Utsolgte butikkprodukter tas bare med hvis de er på overvåkingslisten eller fulgt før
+            if it["stock"] == "OutOfStock" and old_id not in history and not any(
+                    matches(dict(p, family_label=flabel), w) for w in watch):
+                skipped += 1
+                continue
+            added += 1
             products.append(p)
             codes.append((p, {mpn} if len(mpn) >= 7 else set()))
             by_sku[(shop, it["sku"])] = p
-        # historikk per butikk
-        h = history.setdefault(str(p["id"]), {"market": [], "shops": {}})
-        lst = h["shops"].setdefault(shop, [])
-        price = p["shops"][shop]["price"] if it["stock"] != "OutOfStock" else None
-        if not lst or lst[-1][1] != price:
-            lst.append([stamp, price, None, it["member"]])
-        if p.get("store_only"):
-            series = [[x[0], x[1], s] for s, l in h["shops"].items() for x in l
-                      if x[1] is not None and parse_dt(x[0]) < today0]
-            p["low30"], p["low60"] = lowest(series, 30), lowest(series, 60)
-            p["low90"], p["low365"] = lowest(series, 92), lowest(series, 365)
-    for p in products:
-        live = {s: o for s, o in p["shops"].items() if o.get("stock") != "OutOfStock"}
-        b = min(live.items(), key=lambda kv: kv[1]["price"]) if live else None
-        p["best"] = {"shop": b[0], "price": b[1]["price"]} if b else None
-    print(f"Butikksider: {len(items)} lest, {matched} koblet til Prisjakt, {added} nye", flush=True)
+    print(f"Butikksider: {len(items)} lest, {matched} koblet til Prisjakt, {added} nye, {skipped} utsolgte hoppet over",
+          flush=True)
+    return status
 
 
 # ---------------- Varsling ----------------
@@ -302,7 +348,8 @@ def matches(p, w):
 
 def alerts(products, prev):
     first_run = not os.path.exists(os.path.join(DATA, "alert_state.json"))
-    state = load("alert_state.json", {})
+    old_state = load("alert_state.json", {})
+    state = dict(old_state)
     rules = CFG.get("watch", [])
     lines = []
     for p in products:
@@ -311,9 +358,12 @@ def alerts(products, prev):
             price = o["price"]
             if o.get("stock") == "OutOfStock":
                 continue
+            last = state.get(k)
+            if last is not None and price > last * 1.02:
+                state.pop(k)  # prisen har steget igjen: nytt varsel neste gang den faller
+                last = None
             po = ((prev.get(p["id"]) or {}).get("shops") or {}).get(shop) or {}
             back = po.get("stock") == "OutOfStock"
-            last = state.get(k)
             if last is not None and price >= last and not back:
                 continue  # allerede varslet om denne prisen eller lavere
             for w in rules:
@@ -325,25 +375,26 @@ def alerts(products, prev):
                 bw = p.get("bw")
                 if w.get("on_bw", True) and bw and price <= bw["mid"]:
                     why.append(f"i forventet Black Week-nivå ({bw['low']:,}–{bw['high']:,} kr)".replace(",", " "))
-                l60 = p["low60"]["price"] if p["low60"] else None
-                if w.get("on_low60", True) and l60 and price <= l60:
+                l60 = p["low60"]["price"] if p.get("low60") else None
+                if w.get("on_low60", True) and l60 and price <= l60 and p.get("history_days", 0) >= 60:
                     why.append(f"laveste pris siste 60 d (var {l60:,.0f} kr)".replace(",", " "))
                 if why:
                     state[k] = price
                     lines.append((p, shop, o, why))
                     break
-    save("alert_state.json", state, indent=1)
     if first_run:
+        save("alert_state.json", state, indent=1)
         print(f"Første kjøring: {len(lines)} treff registrert uten varsel (se dashboardet)")
         return
     if not lines:
+        save("alert_state.json", state, indent=1)
         print("Ingen nye varsler")
         return
     body = ["Nye prisvarsler fra TV-prisvakta:\n"]
     for p, shop, o, why in sorted(lines, key=lambda x: x[2]["price"]):
         before = f" (førpris {o['before']:,} kr)".replace(",", " ") if o.get("before") else ""
         mem = " – medlemspris" if o.get("member") else ""
-        l90 = p["low90"]["price"] if p["low90"] else None
+        l90 = p["low90"]["price"] if p.get("low90") else None
         body.append(f"- **{p['family_label']}** – {shop}: **{o['price']:,} kr**{before}{mem}".replace(",", " ")
                     + f"  \n  {'; '.join(why)}. Laveste 90 d: {fmt_kr(l90)}. [{p['name']}]({o.get('url') or p['url']})")
     site = CFG.get("site_url")
@@ -351,25 +402,41 @@ def alerts(products, prev):
         body.append(f"\nDashboard: {site}")
     text = "\n".join(body)
     print(text)
-    title = f"Prisvarsel {TODAY}: {len(lines)} TV-er"
-    create_issue(title, text)
+    try:
+        create_issue(f"Prisvarsel {TODAY}: {len(lines)} TV-er", text)
+        save("alert_state.json", state, indent=1)
+    except Exception as e:
+        # Varselet ble ikke levert: behold gammel tilstand så det prøves igjen neste kjøring
+        print("Klarte ikke opprette varsel:", e, flush=True)
+        save("alert_state.json", old_state, indent=1)
 
 
 def fmt_kr(v):
     return f"{v:,.0f} kr".replace(",", " ") if v is not None else "ukjent"
 
 
+def gh(method, path, data=None):
+    token, repo = os.environ["GITHUB_TOKEN"], os.environ["GITHUB_REPOSITORY"]
+    req = urllib.request.Request(f"https://api.github.com/repos/{repo}{path}", method=method,
+                                 data=json.dumps(data).encode() if data is not None else None,
+                                 headers={"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"})
+    with urllib.request.urlopen(req, timeout=30) as r:
+        return json.load(r)
+
+
 def create_issue(title, body):
-    token, repo = os.environ.get("GITHUB_TOKEN"), os.environ.get("GITHUB_REPOSITORY")
-    if not token or not repo:
+    if not os.environ.get("GITHUB_TOKEN") or not os.environ.get("GITHUB_REPOSITORY"):
         print("(Ikke i GitHub Actions – oppretter ikke issue)")
         return
-    owner = repo.split("/")[0]
-    data = json.dumps({"title": title, "body": body + f"\n\n@{owner}", "labels": ["prisvarsel"]}).encode()
-    req = urllib.request.Request(f"https://api.github.com/repos/{repo}/issues", data=data, method="POST",
-                                 headers={"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"})
-    with urllib.request.urlopen(req) as r:
-        print("Opprettet issue:", json.load(r).get("html_url"))
+    owner = os.environ["GITHUB_REPOSITORY"].split("/")[0]
+    new = gh("POST", "/issues", {"title": title, "body": body + f"\n\n@{owner}", "labels": ["prisvarsel"]})
+    print("Opprettet issue:", new.get("html_url"))
+    try:  # lukk eldre prisvarsler så listen holder seg ryddig
+        for old in gh("GET", "/issues?labels=prisvarsel&state=open&per_page=50"):
+            if old["number"] != new["number"]:
+                gh("PATCH", f"/issues/{old['number']}", {"state": "closed", "state_reason": "completed"})
+    except Exception as e:
+        print("Klarte ikke lukke gamle varsler:", e, flush=True)
 
 
 if __name__ == "__main__":

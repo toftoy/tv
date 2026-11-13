@@ -1,6 +1,6 @@
 """Sannsynlig Black Week-/Black Month-pris (modell v2).
 
-Målet er laveste markedspris i Black Month (1. nov – 2. des).
+Målet er laveste markedspris i resten av Black Month (fra i dag til 2. des).
 
 Referanse (D): laveste kjente markedspris fram til i dag, over hele historikken (inntil to år,
 fra Prisjakts API) – inkludert det som allerede har skjedd i november.
@@ -87,7 +87,8 @@ def fit(series_by_id, year):
             if not s or s[0][0] > dt.datetime(year, 10, 1, tzinfo=UTC) or s[-1][0] < dt.datetime(year, 8, 1, tzinfo=UTC):
                 continue
             f = features(s, year, cut)
-            tgt = _wmin(s, nov1, end)
+            # Mål: laveste pris i resten av Black Month (etter skjæringsdatoen)
+            tgt = _wmin(s, max(nov1, cut), end)
             if not f or not tgt:
                 continue
             r = tgt / f["D"]
@@ -118,6 +119,8 @@ def predict(model, raw_series, now, best=None):
     if now > dt.datetime(year, 12, 2, 23, 59, tzinfo=UTC) or now < dt.datetime(year, 9, 1, tzinfo=UTC):
         return None
     s = _series(raw_series)
+    if not s or s[0][0] > dt.datetime(year, 10, 1, tzinfo=UTC):
+        return None  # for kort historikk: modellen er bare kalibrert på TV-er som fantes før oktober
     f = features(s, year, now)
     if not f:
         return None
@@ -126,8 +129,8 @@ def predict(model, raw_series, now, best=None):
     if not g:
         return None
     D = f["D"]
-    return {"low": round(D * g["q25"] / 10) * 10, "mid": round(D * g["q50"] / 10) * 10,
-            "high": round(D * g["q75"] / 10) * 10, "ref": D, "group": f["group"], "n": g["n"],
+    return {"low": round(D * g["q25"]), "mid": round(D * g["q50"]),
+            "high": round(D * g["q75"]), "ref": D, "group": f["group"], "n": g["n"],
             "p_lavere": g["p_lavere"], "cut": cut_key(now),
             # sjanse for at laveste markedspris i Black Month blir minst 2 % under dagens beste butikkpris
             "p_billigere": _p_below(g.get("dist", []), best * 0.98 / D) if best and g.get("dist") else None}

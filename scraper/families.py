@@ -35,7 +35,7 @@ def lg(code):
 
 # ---------- Samsung ----------
 SAM_Y = {'R':2019,'T':2020,'A':2021,'B':2022,'C':2023,'D':2024,'F':2025,'H':2026}
-SAM_ALIAS = {'Q64':'Q60','Q65':'Q60','Q67':'Q60','Q68':'Q60','Q72':'Q70','Q74':'Q70','Q77':'Q70',
+SAM_ALIAS = {'QN72': 'QN70', 'QN73': 'QN70', 'M72': 'M70', 'M73': 'M70', 'M74': 'M70', 'Q64':'Q60','Q65':'Q60','Q67':'Q60','Q68':'Q60','Q72':'Q70','Q74':'Q70','Q77':'Q70',
              'QN74':'QN70','QN77':'QN70','QN92':'QN90','QN93':'QN90','S92':'S90','S93':'S90','S94':'S90'}
 SAM = re.compile(r'^(?:QE|GQ|TQ|QN|QA|UE|GU|TU|UN|UA)?(?P<size>\d{2,3})'
                  r'(?:(?P<cy>[A-Z])?U(?P<cu>\d{4})(?P<cy2>[A-Z])?'          # Crystal: DU7100 / U8000F
@@ -49,7 +49,7 @@ def samsung(code):
         y = SAM_Y.get(m['cy'] or m['cy2'])
         return f'Samsung Crystal U{m["cu"][:2]} {size}" {y}'   # U8092 -> U80, DU7172 -> U71
     ser = SAM_ALIAS.get(m['ser'], m['ser'])
-    fam = ser + (m['v'] or '')                                 # keep Q7F3 apart until verified
+    fam = ser + ((m['yr'] + m['v']) if m['v'] else '')        # Q7F3/Q7F4 holdes adskilt (usikkert om lik Q7F)
     if ser.startswith('S') and m['yr'] == 'F' and m['rest'][:2] in ('AE', 'AT'):  # kun dokumentert for 2025
         fam += ' WOLED' if m['rest'][1] == 'E' else ' QD-OLED'
     return f'Samsung {fam} {size}" {SAM_Y.get(m["yr"])}'
@@ -125,7 +125,12 @@ def _name_family(brand, name, size):
     year = year.group(1) if year else ""
     rest = name[len(brand):].strip() if name.lower().startswith(brand.lower()) else name
     m = re.match(r"(.*?)\s*\d{2,3}(?:[.,]\d)?\s*[\"”'″]", rest)
-    series = re.sub(r"\s+", " ", (m.group(1) if m else "").strip()) or "?"
+    series = re.sub(r"\s+", " ", (m.group(1) if m else "").strip())
+    if not series:
+        # Ingen serie i navnet (f.eks. «Sharp 43" 4K QLED … 43HP6465E»): bruk modellkoden
+        code = name.rsplit(" - ", 1)[-1] if " - " in name else ""
+        cands = re.findall(r"\b[A-Z0-9][A-Z0-9\-]*\d[A-Z0-9\-]{2,}\b", code or name)
+        series = (cands[-1] if cands else "?").upper()
     if brand.upper() == "LG" and re.fullmatch(r"[ABCGMZ]\d[A-Z]?", series):
         series = "OLED " + series  # «LG C5» -> «LG OLED C5», samme nøkkel som kodebasert
     sz = int(round(size)) if size else ""

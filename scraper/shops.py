@@ -9,6 +9,7 @@ import gzip
 import json
 import re
 import time
+import urllib.error
 import urllib.request
 
 UA = ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -17,15 +18,17 @@ DELAY = 1.0
 _last = 0.0
 
 SHOPS = {
-    "Power": {
-        "index": "https://www.power.no/services/sitemap.xml",
-        "child": r"/services/sitemap/products-\d+\.xml",
-        "tv": r"/tv-og-lyd/tv/",
-    },
     "Elkjøp": {
         "index": "https://www.elkjop.no/sitemaps/OCNOELK.pdp.index.sitemap.xml",
         "child": r"/sitemaps/OCNOELK\.pdp-\d+\.xml",
         "tv": r"/tv-og-tilbehor/tv/",
+        "delay": 2.0,
+    },
+    "Power": {
+        "index": "https://www.power.no/services/sitemap.xml",
+        "child": r"/services/sitemap/products-\d+\.xml",
+        "tv": r"/tv-og-lyd/tv/",
+        "delay": 1.0,
     },
 }
 
@@ -50,6 +53,10 @@ def get(url, tries=3):
                 if r.headers.get("Content-Encoding") == "gzip" or b[:2] == b"\x1f\x8b":
                     b = gzip.decompress(b)
                 return b.decode("utf-8", "replace")
+        except urllib.error.HTTPError as e:
+            err = e
+            ra = e.headers.get("Retry-After") if e.headers else None
+            time.sleep(min(120, int(ra)) if ra and ra.isdigit() else 15 * (i + 1) if e.code == 429 else 4 * (i + 1))
         except Exception as e:
             err = e
             time.sleep(4 * (i + 1))
@@ -91,6 +98,9 @@ def product(url):
                 offers = n["offers"] if isinstance(n["offers"], list) else [n["offers"]]
                 best = None
                 for o in offers:
+                    cond = (o.get("itemCondition") or "NewCondition").rsplit("/", 1)[-1]
+                    if cond != "NewCondition":
+                        continue  # outlet/demo/brukt (Power legger ut «Refurbished» til −20 %)
                     ect = o.get("eligibleCustomerType") or {}
                     ect = ect.get("@id", "") if isinstance(ect, dict) else str(ect)
                     if ect.rstrip("/").endswith("Business") or re.search(r"bedrift|b2b|business", (o.get("name") or "").lower()):
@@ -118,22 +128,29 @@ def product(url):
 
 
 def collect(cfg):
-    """Returnerer liste med produkter fra alle butikkene i SHOPS."""
-    res = []
-    for shop in SHOPS:
+    """Returnerer (produkter, status per butikk)."""
+    global DELAY
+    res, status = [], {}
+    for shop, c in SHOPS.items():
+        DELAY = c.get("delay", 1.0)
         try:
             urls = tv_urls(shop, cfg["min_size"], cfg["max_size"], cfg.get("min_year", 2024))
         except Exception as e:
             print(f"{shop}: klarte ikke lese sitemap: {e}", flush=True)
+            status[shop] = {"ok": 0, "feil": 1, "melding": f"sitemap: {e}"[:200]}
             continue
         print(f"{shop}: {len(urls)} TV-sider", flush=True)
+        ok = fail = 0
         for u, size in urls:
             try:
                 p = product(u)
             except Exception as e:
                 print("FEIL", u, e, flush=True)
+                fail += 1
                 continue
             if p:
+                ok += 1
                 p["shop"], p["size"] = shop, size
                 res.append(p)
-    return res
+        status[shop] = {"ok": ok, "feil": fail}
+    return res, status

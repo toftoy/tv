@@ -113,7 +113,8 @@ def score(p):
     else:
         sc, why = _fallback(p)
     size = int(round(p.get("size") or 55))
-    is_oled = "OLED" in why.upper()
+    nm = (p.get("family_label", "") + " " + p.get("name", "") + " " + (p.get("panel") or "")).upper()
+    is_oled = "OLED" in nm and "QNED" not in nm
     if is_oled and size <= 42:
         sc -= 4; why += ", 42\" svakere"
     elif not is_oled and size == 50:
