@@ -51,11 +51,11 @@ TIERS = [
     # --- QLED / LED ---
     (r"SAMSUNG Q8\d?F?|SAMSUNG Q80", 56, "Samsung Q80"),
     (r"PHILIPS PQS9", 52, "Philips PQS9 (120 Hz QLED, Ambilight)"),
-    (r"BRAVIA 3 II", 48, "Sony Bravia 3 II (120 Hz, lav lysstyrke)"),
+    (r"BRAVIA 3 II", 52, "Sony Bravia 3 II (120 Hz, HDMI 2.1, Dolby Vision, men lav lysstyrke)"),
     (r"BRAVIA 2 II", 34, "Sony Bravia 2 II (HDMI 2.0, 60 Hz)"),
     (r"THE FRAME|LS03", 55, "Samsung The Frame"),
     (r"TCL P8", 55, "TCL P8"),
-    (r"SAMSUNG Q7", 50, "Samsung Q7"),
+    (r"SAMSUNG Q7", 48, "Samsung Q7 (60 Hz, ingen lokal dimming, ingen Dolby Vision)"),
     (r"HISENSE E7.*PRO", 55, "Hisense E7 Pro"),
     (r"PHILIPS (PUS9|PUS8[5-9]|THE ONE)", 50, "Philips Ambilight 8/9xxx"),
     (r"LG QNED7", 46, "LG QNED7x"),
