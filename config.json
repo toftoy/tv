@@ -1,7 +1,7 @@
 {
   "filter": {
-    "min_size": 38,
-    "max_size": 50,
+    "min_size": 40,
+    "max_size": 55,
     "min_offers": 1
   },
   "site_url": "https://toftoy.github.io/tv/",
@@ -9,56 +9,7 @@
     {
       "contains": "OLED C6",
       "sizes": [
-        42
-      ],
-      "on_low60": true
-    },
-    {
-      "contains": "OLED C5",
-      "sizes": [
-        42
-      ],
-      "on_low60": true
-    },
-    {
-      "contains": "S90",
-      "sizes": [
-        42
-      ],
-      "on_low60": true
-    },
-    {
-      "contains": "QN90",
-      "sizes": [
-        43
-      ],
-      "on_low60": true
-    },
-    {
-      "contains": "QNED8",
-      "sizes": [
-        43
-      ],
-      "on_low60": true
-    },
-    {
-      "contains": "QN7",
-      "sizes": [
-        43
-      ],
-      "on_low60": true
-    },
-    {
-      "contains": "PQS9",
-      "sizes": [
-        43
-      ],
-      "on_low60": true
-    },
-    {
-      "contains": "Bravia 3",
-      "sizes": [
-        43
+        48
       ],
       "on_low60": true
     },
@@ -70,18 +21,9 @@
       "on_low60": true
     },
     {
-      "contains": "OLED C6",
-      "sizes": [
-        48,
-        42
-      ],
-      "on_low60": true
-    },
-    {
       "contains": "OLED C5",
       "sizes": [
-        48,
-        42
+        48
       ],
       "on_low60": true
     },
@@ -89,6 +31,44 @@
       "contains": "S90",
       "sizes": [
         48
+      ],
+      "on_low60": true
+    },
+    {
+      "contains": "S85",
+      "sizes": [
+        48
+      ],
+      "on_low60": true
+    },
+    {
+      "contains": "QN90",
+      "sizes": [
+        43,
+        50
+      ],
+      "on_low60": true
+    },
+    {
+      "contains": "Bravia 3",
+      "sizes": [
+        43,
+        50
+      ],
+      "on_low60": true
+    },
+    {
+      "contains": "PQS9",
+      "sizes": [
+        43,
+        50
+      ],
+      "on_low60": true
+    },
+    {
+      "contains": "Hisense U7",
+      "sizes": [
+        50
       ],
       "on_low60": true
     },
@@ -107,7 +87,7 @@
       "on_low60": true
     },
     {
-      "contains": "Hisense U7",
+      "contains": "Hisense E8",
       "sizes": [
         50
       ],
@@ -116,16 +96,15 @@
     {
       "contains": "OLED81",
       "sizes": [
-        48,
-        42
+        48
       ],
       "on_low60": true
     }
   ],
   "shops": {
     "enabled": true,
-    "min_size": 38,
-    "max_size": 50,
+    "min_size": 40,
+    "max_size": 55,
     "min_year": 2024
   },
   "stand": {
@@ -135,10 +114,10 @@
       200,
       300
     ],
-    "min_size": 40,
+    "min_size": 43,
     "max_size": 65,
     "max_kg": 60,
-    "note": "VESA-mål etter brukerens opplysning (100/200/300). Eva Solo oppgir 40–65\" og maks 60 kg."
+    "note": "Eva Solo Carry: VESA 100/200/300 (brukerens opplysning). Relevante størrelser for stativet: 43–50\" (brukerens erfaring)."
   },
   "secondary_shops": [
     "Multicom"

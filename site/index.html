@@ -507,7 +507,7 @@ function flag(gs){
 function chipHTML(v,label,on){return `<label><input type="checkbox" value="${esc(v)}" ${on?"checked":""}>${esc(label)}</label>`}
 function build(){
   const sizes=[...new Set(DATA.map(p=>Math.round(p.size)))].sort((a,b)=>a-b);
-  if(!st.sizes)st.sizes=sizes.filter(s=>s>=40&&s<=43);
+  if(!st.sizes)st.sizes=sizes.filter(s=>s>=43&&s<=50);
   $("f-size").innerHTML=sizes.map(s=>chipHTML(s,s+'"',st.sizes.includes(s))).join("");
   if(!st.shops)st.shops=[...SHOPS];
   if(!st.known)st.known=["Elkjøp","Power","Komplett"];
@@ -747,8 +747,8 @@ function drawChart(box,g){
 }
 
 const FINN_LOC="1.22046.20220"; // Bergen
-const FINN=[["40–43\"",[["LG OLED C5 42","OLED42C5"],["LG OLED C4 42","OLED42C4"],["LG OLED C3 42","OLED42C3"],["Samsung S90F 42","42S90F"],["Samsung S90D 42","42S90D"],["Samsung S90C 42","42S90C"],["Samsung QN90F 43","43QN90F"],["Samsung QN90D 43","43QN90D"],["Samsung QN90C 43","43QN90C"],["Alle OLED 42\"","42 OLED"]]],
-["48–55\"",[["LG OLED C4 48","OLED48C4"],["LG OLED C4 55","OLED55C4"],["LG OLED C3 55","OLED55C3"],["LG OLED G4 55","OLED55G4"],["Sony Bravia 8 55","Bravia 8 55"],["Sony A80L 55","A80L 55"],["Samsung S90D 55","S90D 55"],["Samsung S95D 55","S95D 55"],["Samsung QN90D 55","QN90D 55"],["Philips OLED809 55","OLED809"]]]];
+const FINN=[["43–50\"",[["LG OLED C5 48","OLED48C5"],["LG OLED C4 48","OLED48C4"],["LG OLED C3 48","OLED48C3"],["LG OLED B4 48","OLED48B4"],["Samsung S90D 48","48S90D"],["Samsung S90F 48","48S90F"],["Samsung QN90D 50","50QN90D"],["Samsung QN90F 50","50QN90F"],["Samsung QN90D 43","43QN90D"],["Samsung QN90F 43","43QN90F"],["Sony X85L 50","X85L 50"],["Alle OLED 48\"","48 OLED"]]],
+["42\" (hvis stativet tillater)",[["LG OLED C4 42","OLED42C4"],["LG OLED C5 42","OLED42C5"],["Samsung S90D 42","42S90D"]]]];
 $("finnlinks").innerHTML=FINN.map(([t,l])=>`<h3>${t}</h3><div class='group'>`+l.map(([n,q])=>`<a class="chipbtn" target="_blank" rel="noopener" href="https://www.finn.no/recommerce/forsale/search?location=${FINN_LOC}&q=${encodeURIComponent(q)}">${esc(n)}</a>`).join("")+"</div>").join("");
 // ---------- Plott ----------
 const CAT=[["OLED","OLED","var(--c1)"],["Mini-LED","Mini-LED","var(--c2)"],["LCD","QLED/LED","var(--c3)"]];
