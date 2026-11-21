@@ -468,6 +468,7 @@ let DATA=[],HIST=null,ALL=[],open=new Set();
 const NEWUSER=(()=>{try{return localStorage.getItem("tvf")===null}catch(e){return false}})();
 const st=(()=>{try{return JSON.parse(localStorage.getItem("tvf")||"{}")||{}}catch(e){return{}}})();
 if(NEWUSER)st.stock=true;
+if((st.v||0)<2){delete st.sizes;st.v=2;try{localStorage.setItem("tvf",JSON.stringify(st))}catch(e){}} // ny standard 43–50" (stativet)
 let [sortK,sortDir]=(()=>{const m=/^(.+):(-?1)$/.exec(st.sort||"");return m?[m[1],+m[2]]:["verdict",1]})();
 function save(){try{st.sort=sortK+":"+sortDir;localStorage.setItem("tvf",JSON.stringify(st))}catch(e){}}
 function panelType(p){const n=p.name,s=(p.panel||"")+" "+n;if(/mini.?led|micro rgb|rgb/i.test(n))return"Mini-LED";if(/QNED|QLED|Nano/i.test(n))return/mini/i.test(p.panel||"")?"Mini-LED":"QLED";if(/OLED/i.test(n))return"OLED";if(/OLED/i.test(s))return"OLED";if(/mini.?led/i.test(s))return"Mini-LED";if(/QLED|QNED|Nano/i.test(s))return"QLED";return"LED"}
@@ -648,7 +649,7 @@ document.addEventListener("pointerdown",e=>{lastPtr=e.pointerType||"mouse"},true
 // ---------- Dagens beste kjøp ----------
 function blackFriday(y){const d=new Date(y,10,1);const thu=1+((4-d.getDay()+7)%7);return new Date(y,10,thu+22)}
 function renderHero(){
-  const wrap=$("hero-wrap"),c=ALL.filter(g=>st.sizes.includes(Math.round(g.size))&&g.best!=null&&g.inStock&&g.stand!=="nei");
+  const wrap=$("hero-wrap"),c=ALL.filter(g=>st.sizes.includes(Math.round(g.size))&&g.best!=null&&g.inStock&&g.stand!=="nei"&&!(g.standNote&&g.standNote.level==="warn"));
   const used=new Set(),cards=[];
   const add=(k,g,why)=>{if(!g||used.has(g.key))return;used.add(g.key);cards.push(`<button class="hc" data-goto="${esc(g.key)}"><span class="k"><i></i>${k}</span><span class="n">${esc(g.label.replace(/\s+20\d\d$/,""))}</span><img loading="lazy" alt="" src="${esc(g.img_url||IMG(g.img))}" onerror="this.style.visibility='hidden'"><span class="p num">${fmt(g.best)} <small>kr · ${esc(g.bestShop)}</small></span><span class="w">${why}</span></button>`)};
   // 1: beste TV (på «mest for pengene»-linjen) som er på ekte lavpris
