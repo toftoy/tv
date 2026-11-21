@@ -205,7 +205,8 @@ def main():
     vp = os.path.join(ROOT, "vesa.json")
     manual = json.load(open(vp, encoding="utf-8")) if os.path.exists(vp) else []
     by_fam = {m["family"].upper(): m for m in manual if m.get("vesa")}
-    by_code = {_norm(m["code"]): m for m in manual if m.get("vesa") and len(_norm(m.get("code"))) >= 6}
+    by_code = {_norm(re.sub(r"/\d{2}$|\.A\w{2}$", "", m["code"])): m for m in manual
+               if m.get("vesa") and len(_norm(m.get("code"))) >= 6}
     for p in products:
         m = by_fam.get(p["family"])
         if not m:
