@@ -242,7 +242,7 @@ def main():
         note = next((n for n in STAND_NOTES if _norm(n["match"]) in _norm(p["name"] + " " + p["family_label"] + " " + " ".join(o.get("title") or "" for o in p["shops"].values()))
                      and (not n.get("sizes") or round(p.get("size") or 0) in n["sizes"])), None)
         if note:
-            p["stand_note"] = {k: note.get(k) for k in ("level", "note", "source")}
+            p["stand_note"] = {k: note.get(k) for k in ("level", "pos", "mm", "conf", "note", "source")}
     # Sannsynlig Black Month-pris (bf_model v2), kalibrert på fjorårets Black Month
     cal = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bw_calibration.json")
     model = json.load(open(cal, encoding="utf-8")) if os.path.exists(cal) else bf_model.fit(

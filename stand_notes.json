@@ -1,9 +1,268 @@
 [
-  {
-    "match": "PQS9081",
-    "sizes": [43],
-    "level": "warn",
-    "note": "Kontroll-/IR-boks nede til høyre stikker ned under kanten – TV-en kan ikke henges sentrert på Eva Solo Carry.",
-    "source": "Brukerens egen observasjon (21.11.2026)"
-  }
+ {
+  "match": "PQS9081",
+  "sizes": [
+   43
+  ],
+  "level": "warn",
+  "pos": "høyre",
+  "mm": "7–8",
+  "conf": "bekreftet",
+  "note": "Kontroll-/IR-boks nede til høyre (ca. 31 mm bred) stikker ned under kanten – TV-en kan ikke henges sentrert på Eva Solo Carry.",
+  "source": "Brukerens egen observasjon + Elkjøp-bilde 1108232 + Philips-manual"
+ },
+ {
+  "match": "PQS9081",
+  "sizes": [
+   50
+  ],
+  "level": "warn",
+  "pos": "høyre",
+  "mm": "8–9",
+  "conf": "sannsynlig",
+  "note": "Samme boks nede til høyre som på 43\" (ca. 36 mm bred). Ventelig samme problem på stativet.",
+  "source": "Bildemåling (piksler mot kjent bredde, ±1–2 mm) 21.11.2026: Elkjøp-bilde 1108238"
+ },
+ {
+  "match": "S85H",
+  "sizes": [
+   48
+  ],
+  "level": "box",
+  "pos": "midt",
+  "mm": "5–6",
+  "conf": "bekreftet",
+  "note": "Modul midt under kanten (ca. 95 mm bred), pluss logoplate nede til høyre (~3 mm).",
+  "source": "Bildemåling (piksler mot kjent bredde, ±1–2 mm) 21.11.2026: Samsung produktbilde"
+ },
+ {
+  "match": "S90H",
+  "sizes": [
+   48
+  ],
+  "level": "box",
+  "pos": "midt",
+  "mm": "3–4",
+  "conf": "sannsynlig",
+  "note": "Tynn knast midt under kanten (ca. 55 mm bred), liten detalj nede til høyre (~2 mm).",
+  "source": "Bildemåling (piksler mot kjent bredde, ±1–2 mm) 21.11.2026: Samsung produktbilde"
+ },
+ {
+  "match": "OLEDC6",
+  "sizes": [
+   48
+  ],
+  "level": "box",
+  "pos": "midt",
+  "mm": "~3",
+  "conf": "bekreftet",
+  "note": "Flat knast (joystick/IR) midt under kanten, ca. 50 mm bred. Fast, kan ikke felles inn.",
+  "source": "Bildemåling (piksler mot kjent bredde, ±1–2 mm) 21.11.2026: https://www.lg.com/no (målskisse large04)"
+ },
+ {
+  "match": "OLEDC6",
+  "sizes": [
+   42
+  ],
+  "level": "box",
+  "pos": "midt",
+  "mm": "~3",
+  "conf": "sannsynlig",
+  "note": "Antatt samme knast midt under kanten som 48\".",
+  "source": "Bildemåling (piksler mot kjent bredde, ±1–2 mm) 21.11.2026: antatt lik 48\""
+ },
+ {
+  "match": "OLEDC5",
+  "sizes": [
+   42,
+   48
+  ],
+  "level": "box",
+  "pos": "midt",
+  "mm": "~3",
+  "conf": "antatt",
+  "note": "Ikke målt – antatt samme knast midt under kanten som C6.",
+  "source": "antatt lik LG C6"
+ },
+ {
+  "match": "OLEDB6",
+  "sizes": [
+   48
+  ],
+  "level": "box",
+  "pos": "midt",
+  "mm": "4–5",
+  "conf": "sannsynlig",
+  "note": "Knast midt under kanten, ca. 37 mm bred (lavoppløst bilde).",
+  "source": "Bildemåling (piksler mot kjent bredde, ±1–2 mm) 21.11.2026: Elkjøp-bilde 1047676"
+ },
+ {
+  "match": "QN90F",
+  "sizes": [
+   43
+  ],
+  "level": "box",
+  "pos": "høyre",
+  "mm": "~2",
+  "conf": "bekreftet",
+  "note": "Logo-/IR-modul nede til høyre, ca. 78 mm bred.",
+  "source": "Bildemåling (piksler mot kjent bredde, ±1–2 mm) 21.11.2026: Samsung produktbilde (QE43QN90F)"
+ },
+ {
+  "match": "QN90F",
+  "sizes": [
+   50
+  ],
+  "level": "box",
+  "pos": "høyre",
+  "mm": "~2",
+  "conf": "sannsynlig",
+  "note": "Antatt samme modul nede til høyre som 43\".",
+  "source": "Bildemåling (piksler mot kjent bredde, ±1–2 mm) 21.11.2026: antatt lik 43\""
+ },
+ {
+  "match": "SAMSUNGQN70",
+  "sizes": [
+   50
+  ],
+  "level": "box",
+  "pos": "høyre",
+  "mm": "2,5–3",
+  "conf": "bekreftet",
+  "note": "Logo-modul nede til høyre, ca. 100 mm bred, ca. 45 mm fra høyre kant. Midten er fri.",
+  "source": "Bildemåling (piksler mot kjent bredde, ±1–2 mm) 21.11.2026: Samsung produktbilde (QE50QN70H)"
+ },
+ {
+  "match": "SAMSUNGQN70",
+  "sizes": [
+   43
+  ],
+  "level": "box",
+  "pos": "høyre",
+  "mm": "?",
+  "conf": "sannsynlig",
+  "note": "Antatt samme logo-modul nede til høyre som 50\".",
+  "source": "antatt lik 50\""
+ },
+ {
+  "match": "SAMSUNGQN80",
+  "sizes": [
+   50
+  ],
+  "level": "box",
+  "pos": "høyre",
+  "mm": "1,5–2",
+  "conf": "bekreftet",
+  "note": "Modul nede til høyre. Midten er fri.",
+  "source": "Bildemåling (piksler mot kjent bredde, ±1–2 mm) 21.11.2026: Samsung produktbilde (QE50QN83H)"
+ },
+ {
+  "match": "BRAVIA3EII",
+  "sizes": [
+   50
+  ],
+  "level": "ok",
+  "pos": null,
+  "mm": null,
+  "conf": "sannsynlig",
+  "note": "Ingen synlig boks under kanten på Bravia 3 II (bilde ca. 1,8 mm/piksel – 1–2 mm kan være oversett).",
+  "source": "Bildemåling (piksler mot kjent bredde, ±1–2 mm) 21.11.2026: Elkjøp-bilde 1110922"
+ },
+ {
+  "match": "BRAVIA3II",
+  "sizes": [
+   43,
+   50
+  ],
+  "level": "ok",
+  "pos": null,
+  "mm": null,
+  "conf": "sannsynlig",
+  "note": "Ingen synlig boks under kanten (bilde ca. 1,8 mm/piksel – 1–2 mm kan være oversett).",
+  "source": "Bildemåling (piksler mot kjent bredde, ±1–2 mm) 21.11.2026: Elkjøp-bilde 1110922"
+ },
+ {
+  "match": "U77SE",
+  "sizes": [
+   50
+  ],
+  "level": "box",
+  "pos": "midt",
+  "mm": "~4",
+  "conf": "usikker",
+  "note": "Element midt under kanten (ca. 100 mm bredt) – kan være en del av foten.",
+  "source": "Bildemåling (piksler mot kjent bredde, ±1–2 mm) 21.11.2026: Elkjøp-bilde 1151005"
+ },
+ {
+  "match": "MQLED75K",
+  "sizes": [
+   50
+  ],
+  "level": "box",
+  "pos": "midt",
+  "mm": "~7",
+  "conf": "sannsynlig",
+  "note": "List midt under kanten, ca. 110 mm bred.",
+  "source": "Bildemåling (piksler mot kjent bredde, ±1–2 mm) 21.11.2026: Elkjøp-bilder 986178"
+ },
+ {
+  "match": "MQLED70K",
+  "sizes": [
+   50
+  ],
+  "level": "box",
+  "pos": "midt",
+  "mm": "~7",
+  "conf": "sannsynlig",
+  "note": "List midt under kanten, ca. 110 mm bred.",
+  "source": "Bildemåling (piksler mot kjent bredde, ±1–2 mm) 21.11.2026: Elkjøp-bilder 899844"
+ },
+ {
+  "match": "50C7K",
+  "sizes": [
+   50
+  ],
+  "level": "box",
+  "pos": "midt",
+  "mm": "~7",
+  "conf": "antatt",
+  "note": "Ikke målt – antatt lik MQLED75K (list midt under kanten).",
+  "source": "antatt lik TCL MQLED75K"
+ },
+ {
+  "match": "QNED86B6",
+  "sizes": [
+   50
+  ],
+  "level": "box",
+  "pos": "midt",
+  "mm": "~5",
+  "conf": "bekreftet",
+  "note": "Knast midt under kanten, ca. 35 mm bred.",
+  "source": "Bildemåling (piksler mot kjent bredde, ±1–2 mm) 21.11.2026: https://www.lg.com/no (målskisse large04)"
+ },
+ {
+  "match": "QNED87B6",
+  "sizes": [
+   50
+  ],
+  "level": "box",
+  "pos": "midt",
+  "mm": "~5",
+  "conf": "bekreftet",
+  "note": "Knast midt under kanten, ca. 35 mm bred.",
+  "source": "Bildemåling (piksler mot kjent bredde, ±1–2 mm) 21.11.2026: https://www.lg.com/no (målskisse large04)"
+ },
+ {
+  "match": "43QNED80B6",
+  "sizes": [
+   43
+  ],
+  "level": "box",
+  "pos": "midt",
+  "mm": "?",
+  "conf": "sannsynlig",
+  "note": "Antatt knast midt under kanten som QNED86.",
+  "source": "antatt lik LG QNED86"
+ }
 ]

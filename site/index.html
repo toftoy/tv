@@ -435,7 +435,7 @@ body.no-bw .bwonly{display:none!important}
 <li><b>Beste pris og butikkprisene</b> er dagens pris hos Elkjøp, Power, Komplett, NetOnNet, Multicom og Samsung (butikkfilteret bestemmer hvilke som regnes med i «beste pris»). <s>Overstrøket</s> = butikkens oppgitte førpris. <span class="chip">M</span> = medlemspris (gratis kundeklubb).</li>
 <li><b>Nå vs 60 d</b>: <span class="badge b-good">Lavpris</span> dagens beste pris hos de valgte butikkene er lik/under laveste pris i hele markedet siste 60 dager. <span class="badge b-warn">+x %</span> under 10 % over. <span class="badge b-bad">+x %</span> mer enn 10 % over – da er «tilbudet» trolig ikke reelt. <span class="badge">kort historikk</span> = under 60 dager med prisdata.</li>
 <li><b>Laveste pris 30/60/90/365 d</b> ligger i detaljvisningen, med butikk og dato.</li>
-<li><b>Stativ</b>: om TV-en passer på Eva Solo Carry-stativet (VESA 100/200/300 mm, 40–65"). «? ukjent» betyr at Prisjakt ikke oppgir VESA-mål – sjekk hos butikken. VESA-mål og kilde står i detaljvisningen. VESA-målene stativet tar kan justeres i <code>config.json</code>. «⚠ ikke sentrert» betyr at TV-en har en boks under nederkanten (av/på-knapp, IR-mottaker) som hindrer sentrert montering – se <code>stand_notes.json</code>.</li>
+<li><b>Stativ</b>: om TV-en passer på Eva Solo Carry-stativet (VESA 100/200/300 mm, 40–65"). «? ukjent» betyr at Prisjakt ikke oppgir VESA-mål – sjekk hos butikken. VESA-mål og kilde står i detaljvisningen. VESA-målene stativet tar kan justeres i <code>config.json</code>. Mange TV-er har en knast/boks under nederkanten (av/på, IR-mottaker). «⚠ ikke sentrert» = bekreftet/ventet problem på stativet (Philips PQS9081). «knast midt/høyre x mm» = noe stikker ned (målt på produktbilder, ±1–2 mm) – sjekk om stativet har klaring der. «ingen boks» = ingen synlig knast. «kant ikke sjekket» = bare VESA er kontrollert. Kilder i <code>stand_notes.json</code>.</li>
 <li class="bwonly"><b>Sannsynlig BW-pris</b>: anslått laveste markedspris i <i>resten av</i> Black Month (fra i dag til 2. des). Utgangspunktet er TV-ens <i>laveste kjente pris</i> over inntil to års historikk, inkludert det som allerede har skjedd i november. Den justeres med hvordan tilsvarende TV-er beveget seg i fjor fra samme dato fram til Black Week. TV-ene er gruppert etter om de allerede har fått ny bunnpris i november og om de har falt mye siden høsten. Intervallet er 25–75 %. «x % sjanse lavere» = andelen tilsvarende TV-er i fjor som ble minst 2 % billigere enn dagens pris. «i BW-nivå» = dagens pris er på eller under midtestimatet. Testet mot Black Week 2025 bommet modellen med 2 % i median (272 TV-er). Det er et statistisk anslag, ikke en garanti.</li>
 <li><b>Kvalitet</b> er en skjønnsmessig score 0–100 per modellserie, justert for størrelse. <a href="#" data-qlink>Se forklaring og hele tabellen</a>.</li>
 <li><b>Dagens beste kjøp</b> øverst regnes ut fra valgte størrelser og butikker: beste TV som er på ekte lavpris, størst fall under laveste 60-dagerspris, og TV-en som ligger best an mot forventet Black Week-pris.</li>
@@ -533,7 +533,7 @@ $("fbtn").onclick=()=>togglePanel();
 $("fclose").onclick=()=>{togglePanel(false);$("tab-list").scrollIntoView({block:"start"})};
 $("freset").onclick=()=>{resetFilters();render()};
 // ---------- Verdier og merker ----------
-const STANDRANK=g=>g.stand==="ja"?(g.standNote?1.5:g.vesaLow?1:0):g.stand==="nei"?3:2;
+const STANDRANK=g=>{const n=g.standNote&&g.standNote.level;return g.stand==="ja"?(n==="ok"?0:n==="warn"?2.5:n==="box"?1.2:g.vesaLow?1:0.5):g.stand==="nei"?3:2};
 function val(g,k){
   if(k==="bw")return g.bw?g.bw.mid:null;
   if(SHOPS.includes(k))return g[k]?g[k].price:null;
@@ -562,11 +562,14 @@ function bwInfo(g){const b=g.bw;if(!b)return null;
   return {rng,tag,pb:b.p_billigere!=null?`${pct(b.p_billigere)} sjanse lavere`:""}}
 function bwCell(g){const i=bwInfo(g);if(!i)return'<span class="muted">–</span>';
   return `${i.rng}${i.tag?`<br>${i.tag}`:""}${i.pb?`<br><span class="muted small">${i.pb}</span>`:""}`}
-function standBadge(g,pre){const p=pre?"Stativ ":"";
-  if(g.stand==="ja"&&g.standNote)return `<span class="badge b-warn" title="${esc(g.standNote.note)}">${p}⚠ ikke sentrert</span>`;
-  if(g.stand==="ja")return g.vesaLow?`<span class="badge b-warn">${p}✓? trolig</span>`:`<span class="badge b-good">${p}✓ passer</span>`;
+function standBadge(g,pre){const p=pre?"Stativ ":"",n=g.standNote;
   if(g.stand==="nei")return `<span class="badge b-bad">${p}✗ passer ikke</span>`;
-  return `<span class="badge">${p}? ukjent</span>`}
+  if(g.stand!=="ja")return `<span class="badge">${p}? ukjent</span>`;
+  const v=g.vesaLow?"VESA ✓?":"VESA ✓";
+  if(n&&n.level==="warn")return `<span class="badge b-bad" title="${esc(n.note)}">${p}⚠ ikke sentrert</span>`;
+  if(n&&n.level==="box")return `<span class="badge b-warn" title="${esc(n.note)}">${p}${v} · knast ${esc(n.pos||"")} ${esc(n.mm||"")} mm</span>`;
+  if(n&&n.level==="ok")return `<span class="badge b-good" title="${esc(n.note)}">${p}✓ passer · ingen boks</span>`;
+  return `<span class="badge ${g.vesaLow?"b-warn":"b-good"}" title="Bare VESA er sjekket – ikke om noe stikker ned under kanten">${p}${v} · kant ikke sjekket</span>`}
 const standCell=g=>standBadge(g,true);
 function qBadge(g){return `<span class="q${g.quality==null||g.quality<55?" lo":""}" aria-label="Kvalitet ${g.quality??"ukjent"}">${g.quality??"–"}</span>`}
 function shopCell(g,s){const o=g[s];if(!o)return'<span class="muted">–</span>';
@@ -682,7 +685,7 @@ function detail(g){
   const facts=`<div class="facts">
     <div class="fact"><h5>Laveste pris før i dag</h5>${lows.length?`<table class="mini">${lows.map(([n,l])=>`<tr><td>${n}</td><td class="num">${fmt(l.price)} kr</td><td>${esc(l.shop||"")}${l.date?", "+dshort(l.date):""}</td></tr>`).join("")}</table>`:'<p>Ingen historikk ennå.</p>'}<p class="muted small">Hos noen butikk på Prisjakt. ${g.histDays?`Historikk: ${g.histDays>=365?"over ett år":g.histDays+" dager"}.`:""}</p></div>
     ${b?`<div class="fact"><h5>Sannsynlig Black Week-pris</h5><div class="big num">${bi.rng} kr</div><p>${bi.tag} Midtestimat <b class="num">${fmt(b.mid)} kr</b>${g.best!=null?` (${g.best<=b.mid?"dagens pris er på eller under":`dagens pris er ${Math.round((g.best-b.mid)/b.mid*100)} % over`})`:""}.</p><p class="small">Laveste kjente pris: <b class="num">${fmt(b.ref)} kr</b>. Gruppe: ${esc(b.group)} (${b.n} tilsvarende TV-er i fjor).${b.p_billigere!=null?` Sjanse for at noen butikk går minst 2 % under dagens pris: ${pct(b.p_billigere)}.`:""}</p></div>`:""}
-    <div class="fact"><h5>TV-stativ (Eva Solo Carry)</h5><div>${standBadge(g)}</div><p>${g.vesa?`VESA <b>${esc(g.vesa)}</b>`:"VESA-mål ukjent"}${g.stand==="nei"&&!g.vesa?' / utenfor 40–65"':""}${g.vesaLow?" – usikker kilde, sjekk før kjøp":""}${g.stand==null?". Sjekk VESA-mål hos butikken":""}.</p><p class="small muted">${g.vesaNote?"Kilde: "+linkify(g.vesaNote):g.vesa?"Kilde: Prisjakt":""}</p>${g.standNote?`<p class="small"><b>⚠ ${esc(g.standNote.note)}</b> <span class="muted">(${esc(g.standNote.source||"")})</span></p>`:""}</div>
+    <div class="fact"><h5>TV-stativ (Eva Solo Carry)</h5><div>${standBadge(g)}</div><p>${g.vesa?`VESA <b>${esc(g.vesa)}</b>`:"VESA-mål ukjent"}${g.stand==="nei"&&!g.vesa?' / utenfor 40–65"':""}${g.vesaLow?" – usikker kilde, sjekk før kjøp":""}${g.stand==null?". Sjekk VESA-mål hos butikken":""}.</p><p class="small muted">${g.vesaNote?"Kilde: "+linkify(g.vesaNote):g.vesa?"Kilde: Prisjakt":""}</p>${g.standNote?`<p class="small"><b>${g.standNote.level==="ok"?"✓":"⚠"} ${esc(g.standNote.note)}</b>${g.standNote.mm?` Utstikk ca. ${esc(g.standNote.mm)} mm, ${esc(g.standNote.pos||"")}.`:""} <span class="muted">(${esc(g.standNote.conf||"")}; ${esc(g.standNote.source||"")})</span></p>`:g.stand==="ja"?`<p class="small muted">Underkanten er ikke sjekket – se etter knast/boks under kanten (IR, av/på) før kjøp.</p>`:""}</div>
     <div class="fact"><h5>Kvalitet</h5><div class="big">${g.quality??"–"} <span class="muted small" style="font-weight:500">av 100</span></div><p>${esc(g.qbasis||"")}</p><p class="small"><a href="#" data-qlink>Slik regnes scoren</a></p></div>
   </div>`;
   const r=st.range||"3m";
