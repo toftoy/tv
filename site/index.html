@@ -435,7 +435,7 @@ body.no-bw .bwonly{display:none!important}
 <li><b>Beste pris og butikkprisene</b> er dagens pris hos Elkjøp, Power, Komplett, NetOnNet, Multicom og Samsung (butikkfilteret bestemmer hvilke som regnes med i «beste pris»). <s>Overstrøket</s> = butikkens oppgitte førpris. <span class="chip">M</span> = medlemspris (gratis kundeklubb).</li>
 <li><b>Nå vs 60 d</b>: <span class="badge b-good">Lavpris</span> dagens beste pris hos de valgte butikkene er lik/under laveste pris i hele markedet siste 60 dager. <span class="badge b-warn">+x %</span> under 10 % over. <span class="badge b-bad">+x %</span> mer enn 10 % over – da er «tilbudet» trolig ikke reelt. <span class="badge">kort historikk</span> = under 60 dager med prisdata.</li>
 <li><b>Laveste pris 30/60/90/365 d</b> ligger i detaljvisningen, med butikk og dato.</li>
-<li><b>Stativ</b>: om TV-en passer på Eva Solo Carry-stativet (VESA 100/200/300 mm, 40–65"). «? ukjent» betyr at Prisjakt ikke oppgir VESA-mål – sjekk hos butikken. VESA-mål og kilde står i detaljvisningen. VESA-målene stativet tar kan justeres i <code>config.json</code>.</li>
+<li><b>Stativ</b>: om TV-en passer på Eva Solo Carry-stativet (VESA 100/200/300 mm, 40–65"). «? ukjent» betyr at Prisjakt ikke oppgir VESA-mål – sjekk hos butikken. VESA-mål og kilde står i detaljvisningen. VESA-målene stativet tar kan justeres i <code>config.json</code>. «⚠ ikke sentrert» betyr at TV-en har en boks under nederkanten (av/på-knapp, IR-mottaker) som hindrer sentrert montering – se <code>stand_notes.json</code>.</li>
 <li class="bwonly"><b>Sannsynlig BW-pris</b>: anslått laveste markedspris i <i>resten av</i> Black Month (fra i dag til 2. des). Utgangspunktet er TV-ens <i>laveste kjente pris</i> over inntil to års historikk, inkludert det som allerede har skjedd i november. Den justeres med hvordan tilsvarende TV-er beveget seg i fjor fra samme dato fram til Black Week. TV-ene er gruppert etter om de allerede har fått ny bunnpris i november og om de har falt mye siden høsten. Intervallet er 25–75 %. «x % sjanse lavere» = andelen tilsvarende TV-er i fjor som ble minst 2 % billigere enn dagens pris. «i BW-nivå» = dagens pris er på eller under midtestimatet. Testet mot Black Week 2025 bommet modellen med 2 % i median (272 TV-er). Det er et statistisk anslag, ikke en garanti.</li>
 <li><b>Kvalitet</b> er en skjønnsmessig score 0–100 per modellserie, justert for størrelse. <a href="#" data-qlink>Se forklaring og hele tabellen</a>.</li>
 <li><b>Dagens beste kjøp</b> øverst regnes ut fra valgte størrelser og butikker: beste TV som er på ekte lavpris, størst fall under laveste 60-dagerspris, og TV-en som ligger best an mot forventet Black Week-pris.</li>
@@ -486,7 +486,7 @@ function groups(){
     g.bestShop=act.filter(s=>g[s]&&!OUT(g[s])).sort((a,b)=>g[a].price-g[b].price)[0];
     g.histDays=Math.max(...ps.map(histDays));
     const bp=g.bestShop?ps.find(p=>p.id===g[g.bestShop].pid):null;g.bw=BW_ON?((bp&&bp.bw)||ps.map(p=>p.bw).filter(Boolean).sort((a,b)=>a.mid-b.mid)[0]||null):null;
-    g.stand=ps.some(p=>p.stand==="ja")?"ja":ps.every(p=>p.stand==="nei")?"nei":null;g.vesa=(ps.find(p=>p.vesa)||{}).vesa;g.vesaNote=(ps.find(p=>p.vesa_note)||{}).vesa_note;
+    g.stand=ps.some(p=>p.stand==="ja")?"ja":ps.every(p=>p.stand==="nei")?"nei":null;g.vesa=(ps.find(p=>p.vesa)||{}).vesa;g.vesaNote=(ps.find(p=>p.vesa_note)||{}).vesa_note;g.standNote=(ps.find(p=>p.stand_note)||{}).stand_note||null;
     g.vesaLow=ps.some(p=>p.vesa_conf==="low")&&!ps.some(p=>p.vesa&&!p.vesa_conf);
     g.year=+((g.label.match(/(20\d\d)$/)||[])[1]||0);g.base=g.label.replace(/\s*20\d\d$/,"").replace(/ (WOLED|QD-OLED)/,"");g.img_url=(ps.find(p=>p.img_url)||{}).img_url;
     g.verdict=g.best!=null&&g.low60?(g.best-g.low60.price)/g.low60.price:9;
@@ -533,7 +533,7 @@ $("fbtn").onclick=()=>togglePanel();
 $("fclose").onclick=()=>{togglePanel(false);$("tab-list").scrollIntoView({block:"start"})};
 $("freset").onclick=()=>{resetFilters();render()};
 // ---------- Verdier og merker ----------
-const STANDRANK=g=>g.stand==="ja"?(g.vesaLow?1:0):g.stand==="nei"?3:2;
+const STANDRANK=g=>g.stand==="ja"?(g.standNote?1.5:g.vesaLow?1:0):g.stand==="nei"?3:2;
 function val(g,k){
   if(k==="bw")return g.bw?g.bw.mid:null;
   if(SHOPS.includes(k))return g[k]?g[k].price:null;
@@ -563,6 +563,7 @@ function bwInfo(g){const b=g.bw;if(!b)return null;
 function bwCell(g){const i=bwInfo(g);if(!i)return'<span class="muted">–</span>';
   return `${i.rng}${i.tag?`<br>${i.tag}`:""}${i.pb?`<br><span class="muted small">${i.pb}</span>`:""}`}
 function standBadge(g,pre){const p=pre?"Stativ ":"";
+  if(g.stand==="ja"&&g.standNote)return `<span class="badge b-warn" title="${esc(g.standNote.note)}">${p}⚠ ikke sentrert</span>`;
   if(g.stand==="ja")return g.vesaLow?`<span class="badge b-warn">${p}✓? trolig</span>`:`<span class="badge b-good">${p}✓ passer</span>`;
   if(g.stand==="nei")return `<span class="badge b-bad">${p}✗ passer ikke</span>`;
   return `<span class="badge">${p}? ukjent</span>`}
@@ -681,7 +682,7 @@ function detail(g){
   const facts=`<div class="facts">
     <div class="fact"><h5>Laveste pris før i dag</h5>${lows.length?`<table class="mini">${lows.map(([n,l])=>`<tr><td>${n}</td><td class="num">${fmt(l.price)} kr</td><td>${esc(l.shop||"")}${l.date?", "+dshort(l.date):""}</td></tr>`).join("")}</table>`:'<p>Ingen historikk ennå.</p>'}<p class="muted small">Hos noen butikk på Prisjakt. ${g.histDays?`Historikk: ${g.histDays>=365?"over ett år":g.histDays+" dager"}.`:""}</p></div>
     ${b?`<div class="fact"><h5>Sannsynlig Black Week-pris</h5><div class="big num">${bi.rng} kr</div><p>${bi.tag} Midtestimat <b class="num">${fmt(b.mid)} kr</b>${g.best!=null?` (${g.best<=b.mid?"dagens pris er på eller under":`dagens pris er ${Math.round((g.best-b.mid)/b.mid*100)} % over`})`:""}.</p><p class="small">Laveste kjente pris: <b class="num">${fmt(b.ref)} kr</b>. Gruppe: ${esc(b.group)} (${b.n} tilsvarende TV-er i fjor).${b.p_billigere!=null?` Sjanse for at noen butikk går minst 2 % under dagens pris: ${pct(b.p_billigere)}.`:""}</p></div>`:""}
-    <div class="fact"><h5>TV-stativ (Eva Solo Carry)</h5><div>${standBadge(g)}</div><p>${g.vesa?`VESA <b>${esc(g.vesa)}</b>`:"VESA-mål ukjent"}${g.stand==="nei"&&!g.vesa?' / utenfor 40–65"':""}${g.vesaLow?" – usikker kilde, sjekk før kjøp":""}${g.stand==null?". Sjekk VESA-mål hos butikken":""}.</p><p class="small muted">${g.vesaNote?"Kilde: "+linkify(g.vesaNote):g.vesa?"Kilde: Prisjakt":""}</p></div>
+    <div class="fact"><h5>TV-stativ (Eva Solo Carry)</h5><div>${standBadge(g)}</div><p>${g.vesa?`VESA <b>${esc(g.vesa)}</b>`:"VESA-mål ukjent"}${g.stand==="nei"&&!g.vesa?' / utenfor 40–65"':""}${g.vesaLow?" – usikker kilde, sjekk før kjøp":""}${g.stand==null?". Sjekk VESA-mål hos butikken":""}.</p><p class="small muted">${g.vesaNote?"Kilde: "+linkify(g.vesaNote):g.vesa?"Kilde: Prisjakt":""}</p>${g.standNote?`<p class="small"><b>⚠ ${esc(g.standNote.note)}</b> <span class="muted">(${esc(g.standNote.source||"")})</span></p>`:""}</div>
     <div class="fact"><h5>Kvalitet</h5><div class="big">${g.quality??"–"} <span class="muted small" style="font-weight:500">av 100</span></div><p>${esc(g.qbasis||"")}</p><p class="small"><a href="#" data-qlink>Slik regnes scoren</a></p></div>
   </div>`;
   const r=st.range||"3m";

@@ -22,6 +22,8 @@ DATA = os.path.join(ROOT, "data")
 NOW = dt.datetime.now(dt.timezone.utc)
 TODAY = NOW.date().isoformat()
 CFG = json.load(open(os.path.join(ROOT, "config.json"), encoding="utf-8"))
+_sn = os.path.join(ROOT, "stand_notes.json")
+STAND_NOTES = json.load(open(_sn, encoding="utf-8")) if os.path.exists(_sn) else []  # manuelle stativ-merknader
 
 
 def load(name, default):
@@ -208,7 +210,7 @@ def main():
         m = by_fam.get(p["family"])
         if not m:
             codes = [_norm(p["name"].rsplit(" - ", 1)[-1])] + [_norm(o.get("title")) for o in p["shops"].values()]
-            m = next((by_code[c] for c in by_code if any(x.startswith(c) or (len(x) >= 6 and c.startswith(x)) for x in codes if x)), None)
+            m = next((by_code[c] for c in by_code if any(c in x or (len(x) >= 6 and c.startswith(x)) for x in codes if x)), None)
         if m and (not p.get("vesa") or p.get("vesa_note")):
             p["vesa"], p["vesa_note"] = m["vesa"], f"undersøkt ({m.get('confidence') or '?'} sikkerhet): {m.get('source', '')}"
             p["vesa_conf"] = m.get("confidence")
@@ -236,6 +238,10 @@ def main():
     for p in products:
         p["quality"], p["quality_basis"] = quality.score(p, CFG.get("quality_profile"))
         p["stand"] = stand_fit(p)
+        note = next((n for n in STAND_NOTES if _norm(n["match"]) in _norm(p["name"] + " " + p["family_label"] + " " + " ".join(o.get("title") or "" for o in p["shops"].values()))
+                     and (not n.get("sizes") or round(p.get("size") or 0) in n["sizes"])), None)
+        if note:
+            p["stand_note"] = {k: note.get(k) for k in ("level", "note", "source")}
     # Sannsynlig Black Month-pris (bf_model v2), kalibrert på fjorårets Black Month
     cal = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bw_calibration.json")
     model = json.load(open(cal, encoding="utf-8")) if os.path.exists(cal) else bf_model.fit(
