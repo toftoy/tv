@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ukulele-stemmer</title>
+<meta name="theme-color" content="#f3efe6">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: én kolonne – stemningsvalg, viser med nål, strengeknapper, kontroller */
+:root {
+  --bg: #f3efe6;        /* lys koa-tre */
+  --surface: #fffaf0;
+  --fg: #2a2118;
+  --muted: #7b6c5c;
+  --line: #ddd2bf;
+  --accent: #c2541f;    /* rosett-oransje */
+  --good: #2f8a4f;
+  --warn: #c98a12;
+  --font-display: "Bricolage Grotesque", system-ui, sans-serif;
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1b1611; --surface: #251e17; --fg: #f2e9dc; --muted: #a8988a;
+    --line: #3d3228; --accent: #ee7a3f; --good: #4fc47a; --warn: #e8b13a;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background: var(--bg); color: var(--fg); font: 16px/1.45 var(--font-body);
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+main { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; padding-block: 16px; }
+header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+h1 { font: 800 1.6rem/1.1 var(--font-display); margin: 0; letter-spacing: -0.01em; }
+label.sel { display: flex; flex-direction: column; gap: 6px; font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+select {
+  font: 500 1rem var(--font-body); color: var(--fg); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; width: 100%;
+}
+
+.meter { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 18px 16px 20px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.meter svg { width: 100%; max-width: 360px; height: auto; display: block; }
+.tick { stroke: var(--muted); stroke-width: 1.5; }
+.tick.major { stroke: var(--fg); stroke-width: 2; }
+.ticklabel { fill: var(--muted); font: 11px var(--font-mono); text-anchor: middle; }
+.zone { fill: none; stroke: var(--good); stroke-width: 10; opacity: .35; stroke-linecap: round; }
+#needle { stroke: var(--muted); stroke-width: 4; stroke-linecap: round; transition: transform .12s linear, stroke .2s; transform-origin: 160px 170px; }
+#hub { fill: var(--fg); }
+.state-good #needle { stroke: var(--good); }
+.state-low #needle, .state-high #needle { stroke: var(--accent); }
+
+.note { font: 800 4.2rem/1 var(--font-display); margin-top: -8px; font-variant-numeric: tabular-nums; }
+.note sub { font-size: .4em; font-weight: 500; color: var(--muted); vertical-align: baseline; }
+.readout { font: 400 .9rem var(--font-mono); color: var(--muted); font-variant-numeric: tabular-nums; min-height: 1.4em; }
+.hint { font: 800 1.35rem/1.2 var(--font-display); min-height: 1.6em; text-align: center; display: flex; align-items: center; gap: 8px; }
+.state-good .hint { color: var(--good); }
+.state-low .hint, .state-high .hint { color: var(--accent); }
+.state-idle .hint { color: var(--muted); font-weight: 500; font-size: 1.05rem; }
+
+.strings { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.strings button {
+  font: 800 1.3rem var(--font-display); color: var(--fg); background: var(--surface);
+  border: 2px solid var(--line); border-radius: 14px; padding: 12px 0 8px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.strings button small { font: 400 .7rem var(--font-mono); color: var(--muted); }
+.strings button[aria-pressed="true"] { border-color: var(--accent); }
+.strings button.done { background: color-mix(in srgb, var(--good) 18%, var(--surface)); border-color: var(--good); }
+.strings button:focus-visible, .controls button:focus-visible, select:focus-visible, .toggle input:focus-visible + span { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+.controls button {
+  font: 600 1rem var(--font-body); border-radius: 999px; padding: 12px 20px; cursor: pointer;
+  border: 2px solid var(--fg); background: transparent; color: var(--fg);
+}
+.controls button.primary { background: var(--accent); border-color: var(--accent); color: #fff; flex: 1 1 100%; font-size: 1.1rem; padding: 16px 20px; }
+.toggle { display: flex; align-items: center; gap: 8px; font-size: .95rem; cursor: pointer; }
+.toggle input { width: 20px; height: 20px; accent-color: var(--accent); }
+.err { color: var(--accent); font-size: .9rem; }
+footer { color: var(--muted); font-size: .8rem; text-align: center; }
+@media (prefers-reduced-motion: reduce) { #needle { transition: none; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Ukulele-stemmer</h1>
+  </header>
+
+  <label class="sel" for="tuning">Stemning
+    <select id="tuning"></select>
+  </label>
+
+  <section class="meter state-idle" id="meter" aria-live="polite">
+    <svg viewBox="0 0 320 190" aria-hidden="true">
+      <g id="ticks"></g>
+      <path class="zone" d="" id="zone"></path>
+      <line id="needle" x1="160" y1="170" x2="160" y2="40"></line>
+      <circle id="hub" cx="160" cy="170" r="8"></circle>
+    </svg>
+    <div class="note" id="note">–</div>
+    <div class="readout" id="readout">Trykk «Start» og gi tilgang til mikrofonen</div>
+    <div class="hint" id="hint">Venter på lyd</div>
+  </section>
+
+  <div class="strings" id="strings" role="group" aria-label="Strenger"></div>
+
+  <div class="controls">
+    <button class="primary" id="start" type="button">Start mikrofon</button>
+    <label class="toggle"><input type="checkbox" id="auto" checked><span>Finn streng automatisk</span></label>
+    <button id="ref" type="button">Spill referansetone</button>
+  </div>
+  <div class="err" id="err" hidden></div>
+
+  <footer>Strengene er listet fra 4 (øverst når du holder ukulelen) til 1. A4 = 440 Hz.</footer>
+</main>
+
+<script src="pitch.js"></script>
+<script>
+(function () {
+  "use strict";
+  var P = window.Pitch;
+
+  // Strenger fra 4 til 1
+  var TUNINGS = [
+    { id: "gcea", name: "Standard GCEA (høy G)", strings: ["G4", "C4", "E4", "A4"] },
+    { id: "lowg", name: "Lav G (GCEA)", strings: ["G3", "C4", "E4", "A4"] },
+    { id: "adfb", name: "D-stemning (ADF#B)", strings: ["A4", "D4", "F#4", "B4"] },
+    { id: "bari", name: "Baryton (DGBE)", strings: ["D3", "G3", "B3", "E4"] },
+    { id: "slack", name: "Slack key (GCEG)", strings: ["G4", "C4", "E4", "G4"] },
+    { id: "b", name: "B-stemning (F#BD#G#)", strings: ["F#4", "B3", "D#4", "G#4"] }
+  ];
+  var IN_TUNE = 5;          // cent
+  var HOLD_FOR_DONE = 700;  // ms i stemt sone før strengen merkes som stemt
+
+  var $ = function (id) { return document.getElementById(id); };
+  var els = {
+    tuning: $("tuning"), strings: $("strings"), meter: $("meter"), note: $("note"),
+    readout: $("readout"), hint: $("hint"), needle: $("needle"), start: $("start"),
+    auto: $("auto"), ref: $("ref"), err: $("err")
+  };
+
+  var state = {
+    tuning: TUNINGS[0], selected: 0, done: [false, false, false, false],
+    ctx: null, analyser: null, stream: null, buf: null, running: false,
+    history: [], lastHeard: 0, inTuneSince: 0
+  };
+
+  function store(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+
+  // ---- Skala på viseren ----
+  (function drawScale() {
+    var g = $("ticks"), ns = "http://www.w3.org/2000/svg";
+    var cx = 160, cy = 170, r = 140;
+    for (var c = -50; c <= 50; c += 5) {
+      var a = (c / 50) * 60 * Math.PI / 180;
+      var major = c % 25 === 0;
+      var len = major ? 16 : 9;
+      var l = document.createElementNS(ns, "line");
+      l.setAttribute("x1", cx + Math.sin(a) * r);
+      l.setAttribute("y1", cy - Math.cos(a) * r);
+      l.setAttribute("x2", cx + Math.sin(a) * (r - len));
+      l.setAttribute("y2", cy - Math.cos(a) * (r - len));
+      l.setAttribute("class", major ? "tick major" : "tick");
+      g.appendChild(l);
+      if (major) {
+        var t = document.createElementNS(ns, "text");
+        t.setAttribute("x", cx + Math.sin(a) * (r + 12));
+        t.setAttribute("y", cy - Math.cos(a) * (r + 12) + 4);
+        t.setAttribute("class", "ticklabel");
+        t.textContent = c === 0 ? "0" : (c > 0 ? "+" + c : String(c));
+        g.appendChild(t);
+      }
+    }
+    var za = (IN_TUNE / 50) * 60 * Math.PI / 180, zr = r - 26;
+    $("zone").setAttribute("d",
+      "M" + (cx - Math.sin(za) * zr) + " " + (cy - Math.cos(za) * zr) +
+      " A" + zr + " " + zr + " 0 0 1 " + (cx + Math.sin(za) * zr) + " " + (cy - Math.cos(za) * zr));
+  })();
+
+  // ---- Stemning og strenger ----
+  TUNINGS.forEach(function (t) {
+    var o = document.createElement("option");
+    o.value = t.id; o.textContent = t.name;
+    els.tuning.appendChild(o);
+  });
+  var saved = load("uke-tuning");
+  if (saved && TUNINGS.some(function (t) { return t.id === saved; })) els.tuning.value = saved;
+
+  function setTuning(id) {
+    state.tuning = TUNINGS.filter(function (t) { return t.id === id; })[0] || TUNINGS[0];
+    state.done = [false, false, false, false];
+    state.selected = 0;
+    store("uke-tuning", state.tuning.id);
+    renderStrings();
+  }
+
+  function renderStrings() {
+    els.strings.textContent = "";
+    state.tuning.strings.forEach(function (n, i) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.id = "string-" + i;
+      b.setAttribute("aria-pressed", String(i === state.selected));
+      if (state.done[i]) b.className = "done";
+      var big = document.createElement("span");
+      big.textContent = n.replace(/-?\d$/, "");
+      var small = document.createElement("small");
+      small.textContent = (4 - i) + " · " + P.midiToFreq(P.noteToMidi(n)).toFixed(0) + " Hz";
+      b.appendChild(big); b.appendChild(small);
+      b.addEventListener("click", function () {
+        state.selected = i;
+        els.auto.checked = false;
+        renderStrings();
+      });
+      els.strings.appendChild(b);
+    });
+  }
+
+  els.tuning.addEventListener("change", function () { setTuning(els.tuning.value); });
+  setTuning(els.tuning.value);
+
+  // ---- Visning ----
+  function show(freq) {
+    var strings = state.tuning.strings, idx, cents;
+    if (els.auto.checked) {
+      var ns = P.nearestString(freq, strings);
+      idx = ns.index; cents = ns.cents;
+      if (idx !== state.selected) { state.selected = idx; state.inTuneSince = 0; renderStrings(); }
+    } else {
+      idx = state.selected;
+      cents = P.centsOff(freq, P.midiToFreq(P.noteToMidi(strings[idx])));
+    }
+
+    var heard = P.midiToName(P.freqToMidi(freq));
+    els.note.innerHTML = "";
+    els.note.appendChild(document.createTextNode(heard.name));
+    var sub = document.createElement("sub"); sub.textContent = heard.octave;
+    els.note.appendChild(sub);
+
+    var target = strings[idx];
+    els.readout.textContent = freq.toFixed(1) + " Hz · " + (cents >= 0 ? "+" : "") +
+      cents.toFixed(0) + " cent fra " + target;
+
+    var clamped = Math.max(-50, Math.min(50, cents));
+    els.needle.style.transform = "rotate(" + (clamped / 50 * 60) + "deg)";
+
+    var cls, text;
+    if (Math.abs(cents) <= IN_TUNE) {
+      cls = "state-good"; text = "✓ Stemt";
+      var now = performance.now();
+      if (!state.inTuneSince) state.inTuneSince = now;
+      if (now - state.inTuneSince > HOLD_FOR_DONE && !state.done[idx]) {
+        state.done[idx] = true; renderStrings();
+      }
+    } else {
+      state.inTuneSince = 0;
+      var far = Math.abs(cents) > 50;
+      if (cents < 0) { cls = "state-low"; text = "▲ For lav – stram strengen" + (far ? " mye" : ""); }
+      else { cls = "state-high"; text = "▼ For høy – slakk strengen" + (far ? " mye" : ""); }
+    }
+    els.meter.className = "meter " + cls;
+    els.hint.textContent = text;
+  }
+
+  function showIdle(msg) {
+    els.meter.className = "meter state-idle";
+    els.hint.textContent = msg;
+    els.needle.style.transform = "rotate(0deg)";
+    state.inTuneSince = 0;
+  }
+
+  // ---- Mikrofon og analyse ----
+  function median(a) {
+    var s = a.slice().sort(function (x, y) { return x - y; });
+    return s[s.length >> 1];
+  }
+
+  function loop() {
+    if (!state.running) return;
+    state.analyser.getFloatTimeDomainData(state.buf);
+    var r = P.detectPitch(state.buf, state.ctx.sampleRate, { minFreq: 80, maxFreq: 1100 });
+    var now = performance.now();
+    if (r && r.clarity > 0.85) {
+      // Forkast plutselige sprang (oktavfeil) ved å nullstille historikk
+      var last = state.history[state.history.length - 1];
+      if (last && Math.abs(P.centsOff(r.freq, last)) > 80) state.history = [];
+      state.history.push(r.freq);
+      if (state.history.length > 5) state.history.shift();
+      state.lastHeard = now;
+      if (state.history.length >= 2) show(median(state.history));
+    } else if (now - state.lastHeard > 600) {
+      state.history = [];
+      showIdle("Spill en streng");
+    }
+    requestAnimationFrame(loop);
+  }
+
+  function ensureCtx() {
+    if (!state.ctx) {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      state.ctx = new AC();
+    }
+    if (state.ctx.state === "suspended") state.ctx.resume();
+    return state.ctx;
+  }
+
+  var wakeLock = null;
+  function keepAwake() {
+    try {
+      if (navigator.wakeLock) navigator.wakeLock.request("screen").then(function (l) { wakeLock = l; }, function () {});
+    } catch (e) {}
+  }
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible" && state.running) keepAwake();
+  });
+
+  function setError(msg) {
+    els.err.hidden = !msg;
+    els.err.textContent = msg || "";
+  }
+
+  function start() {
+    setError("");
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setError("Nettleseren gir ikke tilgang til mikrofonen. Åpne siden over https i Safari eller Chrome.");
+      return;
+    }
+    var ctx = ensureCtx();
+    els.start.disabled = true;
+    navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+    }).then(function (stream) {
+      state.stream = stream;
+      var src = ctx.createMediaStreamSource(stream);
+      var hp = ctx.createBiquadFilter();
+      hp.type = "highpass"; hp.frequency.value = 60;
+      state.analyser = ctx.createAnalyser();
+      state.analyser.fftSize = 4096;
+      src.connect(hp); hp.connect(state.analyser);
+      state.buf = new Float32Array(state.analyser.fftSize);
+      state.running = true;
+      els.start.textContent = "Stopp";
+      els.start.disabled = false;
+      els.readout.textContent = "Lytter …";
+      showIdle("Spill en streng");
+      keepAwake();
+      loop();
+    }, function (e) {
+      els.start.disabled = false;
+      setError(e && e.name === "NotAllowedError"
+        ? "Mikrofontilgang ble avslått. Gi siden tilgang i nettleserens innstillinger og prøv igjen."
+        : "Fikk ikke startet mikrofonen (" + (e && e.name || "ukjent feil") + ").");
+    });
+  }
+
+  function stop() {
+    state.running = false;
+    if (state.stream) state.stream.getTracks().forEach(function (t) { t.stop(); });
+    state.stream = null;
+    if (wakeLock) { try { wakeLock.release(); } catch (e) {} wakeLock = null; }
+    els.start.textContent = "Start mikrofon";
+    els.readout.textContent = "Mikrofonen er av";
+    showIdle("Venter på lyd");
+  }
+
+  els.start.addEventListener("click", function () { state.running ? stop() : start(); });
+
+  // ---- Referansetone ----
+  els.ref.addEventListener("click", function () {
+    var ctx = ensureCtx();
+    var f = P.midiToFreq(P.noteToMidi(state.tuning.strings[state.selected]));
+    var t0 = ctx.currentTime;
+    var osc = ctx.createOscillator(), gain = ctx.createGain();
+    osc.type = "triangle"; osc.frequency.value = f;
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(0.35, t0 + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.8);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(t0); osc.stop(t0 + 1.9);
+  });
+})();
+</script>
+</body>
+</html>
