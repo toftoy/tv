@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Ukulele-stemmer</title>
+<title>Ukulele</title>
 <meta name="theme-color" content="#f3efe6">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,6 +32,7 @@
   }
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { margin: 0; min-height: 100%; }
 body {
   background: var(--bg); color: var(--fg); font: 16px/1.45 var(--font-body);
@@ -90,14 +91,67 @@ select {
 .err { color: var(--accent); font-size: .9rem; }
 footer { color: var(--muted); font-size: .8rem; text-align: center; }
 @media (prefers-reduced-motion: reduce) { #needle { transition: none; } }
+
+/* Faner */
+nav.tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px; }
+nav.tabs a { text-align: center; padding: 9px 4px; border-radius: 999px; color: var(--fg); text-decoration: none; font-weight: 600; }
+nav.tabs a[aria-current="page"] { background: var(--fg); color: var(--bg); }
+nav.tabs a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.view { display: flex; flex-direction: column; gap: 18px; }
+h2 { font: 800 1.15rem/1.2 var(--font-display); margin: 0; }
+.lead { margin: 0; color: var(--muted); font-size: .9rem; }
+
+/* Grepdiagrammer */
+.chordgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 10px; }
+.chord {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 8px 4px 6px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; color: var(--fg); font: inherit;
+}
+.chord b { font: 800 1.2rem var(--font-display); }
+.chord svg { width: 76px; height: auto; }
+.chord:focus-visible, .songlist button:focus-visible, .ch:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.chord.playing { border-color: var(--accent); }
+.dg-line { stroke: var(--fg); stroke-width: 1.5; }
+.dg-nut { stroke: var(--fg); stroke-width: 5; }
+.dg-open { fill: none; stroke: var(--muted); stroke-width: 1.5; }
+.dg-dot { fill: var(--accent); }
+.dg-num { fill: #fff; font: 600 9px var(--font-mono); text-anchor: middle; }
+.dg-lbl { fill: var(--muted); font: 9px var(--font-mono); text-anchor: middle; }
+
+/* Sanger */
+.songlist { display: flex; flex-wrap: wrap; gap: 8px; }
+.songlist button {
+  font: 600 .9rem var(--font-body); color: var(--fg); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; cursor: pointer;
+}
+.songlist button[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.song { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 18px 16px; display: flex; flex-direction: column; gap: 14px; }
+.song .chordgrid { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
+.verse { display: flex; flex-direction: column; gap: 4px; }
+.verse + .verse { border-top: 1px dashed var(--line); padding-top: 12px; }
+.line { line-height: 1.2; }
+.seg { display: inline-flex; flex-direction: column; vertical-align: bottom; }
+.seg .tx { white-space: pre; font-size: 1.05rem; }
+.ch {
+  font: 600 .85rem var(--font-mono); color: var(--accent); background: none; border: 0; padding: 0 6px 1px 0;
+  text-align: left; cursor: pointer; min-height: 1.2em;
+}
+.ch.empty { visibility: hidden; cursor: default; width: 0; padding-right: 0; overflow: hidden; }
+.word { white-space: nowrap; display: inline-block; }
 </style>
 </head>
 <body>
 <main>
   <header>
-    <h1>Ukulele-stemmer</h1>
+    <h1>Ukulele</h1>
   </header>
+  <nav class="tabs" aria-label="Velg visning">
+    <a href="#stemmer" id="tab-stemmer">Stemmer</a>
+    <a href="#grep" id="tab-grep">Grep</a>
+    <a href="#sanger" id="tab-sanger">Sanger</a>
+  </nav>
 
+  <section class="view" id="view-stemmer">
   <label class="sel" for="tuning">Stemning
     <select id="tuning"></select>
   </label>
@@ -124,9 +178,22 @@ footer { color: var(--muted); font-size: .8rem; text-align: center; }
   <div class="err" id="err" hidden></div>
 
   <footer>Strengene er listet fra 4 (øverst når du holder ukulelen) til 1. A4 = 440 Hz.</footer>
+  </section>
+
+  <section class="view" id="view-grep" hidden>
+    <p class="lead">Grepene gjelder vanlig stemning (GCEA, også lav G). Strengene står fra venstre: G C E A. Tallene viser hvilken finger du bruker (1 = pekefinger). Trykk på et grep for å høre det.</p>
+    <div id="chordgroups" class="view"></div>
+  </section>
+
+  <section class="view" id="view-sanger" hidden>
+    <p class="lead">Tradisjonelle barnesanger med enkle grep. Trykk på et grep for å høre det.</p>
+    <div class="songlist" id="songlist" role="group" aria-label="Sanger"></div>
+    <article class="song" id="song"></article>
+  </section>
 </main>
 
 <script src="pitch.js"></script>
+<script src="chords.js"></script>
 <script>
 (function () {
   "use strict";
@@ -391,6 +458,166 @@ footer { color: var(--muted); font-size: .8rem; text-align: center; }
     osc.connect(gain); gain.connect(ctx.destination);
     osc.start(t0); osc.stop(t0 + 1.9);
   });
+
+  // ================= Grep og sanger =================
+  var C = window.Chords;
+  var SVGNS = "http://www.w3.org/2000/svg";
+  var OPEN = ["G4", "C4", "E4", "A4"];
+
+  function svgEl(tag, attrs, text) {
+    var e = document.createElementNS(SVGNS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  // Diagram: strenger loddrett (G C E A fra venstre), bånd vannrett
+  function chordDiagram(name) {
+    var c = C.CHORDS[name];
+    var x0 = 14, dx = 18, y0 = 24, dy = 18, frets = 4;
+    var s = svgEl("svg", { viewBox: "0 0 82 112", "aria-hidden": "true" });
+    for (var i = 0; i < 4; i++) {
+      s.appendChild(svgEl("line", { x1: x0 + i * dx, y1: y0, x2: x0 + i * dx, y2: y0 + frets * dy, "class": "dg-line" }));
+      s.appendChild(svgEl("text", { x: x0 + i * dx, y: 110, "class": "dg-lbl" }, OPEN[i].charAt(0)));
+    }
+    for (var f = 1; f <= frets; f++) {
+      s.appendChild(svgEl("line", { x1: x0, y1: y0 + f * dy, x2: x0 + 3 * dx, y2: y0 + f * dy, "class": "dg-line" }));
+    }
+    s.appendChild(svgEl("line", { x1: x0 - 1, y1: y0, x2: x0 + 3 * dx + 1, y2: y0, "class": "dg-nut" }));
+    c.frets.forEach(function (fr, i) {
+      var x = x0 + i * dx;
+      if (fr === 0) {
+        s.appendChild(svgEl("circle", { cx: x, cy: 13, r: 4.5, "class": "dg-open" }));
+      } else {
+        var y = y0 + (fr - 0.5) * dy;
+        s.appendChild(svgEl("circle", { cx: x, cy: y, r: 7.5, "class": "dg-dot" }));
+        s.appendChild(svgEl("text", { x: x, y: y + 3.2, "class": "dg-num" }, c.fingers[i]));
+      }
+    });
+    return s;
+  }
+
+  function playChord(name) {
+    var c = C.CHORDS[name];
+    if (!c) return;
+    var ctx = ensureCtx();
+    var t0 = ctx.currentTime + 0.02;
+    c.frets.forEach(function (fr, i) {
+      var f = P.midiToFreq(P.noteToMidi(OPEN[i]) + fr);
+      var t = t0 + i * 0.035;
+      var osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.type = "triangle"; osc.frequency.value = f;
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(0.18, t + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 1.6);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(t); osc.stop(t + 1.7);
+    });
+  }
+
+  function chordCard(name) {
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "chord";
+    b.setAttribute("aria-label", "Spill " + name);
+    var n = document.createElement("b"); n.textContent = name;
+    b.appendChild(n); b.appendChild(chordDiagram(name));
+    b.addEventListener("click", function () {
+      playChord(name);
+      b.classList.add("playing");
+      setTimeout(function () { b.classList.remove("playing"); }, 600);
+    });
+    return b;
+  }
+
+  // Grep-fanen
+  C.CHORD_GROUPS.forEach(function (g) {
+    var wrap = document.createElement("div"); wrap.className = "view";
+    var h = document.createElement("h2"); h.textContent = g.name;
+    var grid = document.createElement("div"); grid.className = "chordgrid";
+    g.chords.forEach(function (n) { grid.appendChild(chordCard(n)); });
+    wrap.appendChild(h); wrap.appendChild(grid);
+    $("chordgroups").appendChild(wrap);
+  });
+
+  // Sang-fanen
+  var currentSong = load("uke-song");
+  if (!C.SONGS.some(function (s) { return s.id === currentSong; })) currentSong = C.SONGS[0].id;
+
+  function renderSongList() {
+    var list = $("songlist");
+    list.textContent = "";
+    C.SONGS.forEach(function (s) {
+      var b = document.createElement("button");
+      b.type = "button"; b.id = "song-" + s.id; b.textContent = s.title;
+      b.setAttribute("aria-pressed", String(s.id === currentSong));
+      b.addEventListener("click", function () {
+        currentSong = s.id; store("uke-song", s.id);
+        renderSongList(); renderSong();
+      });
+      list.appendChild(b);
+    });
+  }
+
+  function renderSong() {
+    var s = C.SONGS.filter(function (x) { return x.id === currentSong; })[0];
+    var el = $("song");
+    el.textContent = "";
+    var h = document.createElement("h2"); h.textContent = s.title;
+    var p = document.createElement("p"); p.className = "lead"; p.textContent = s.note;
+    var grid = document.createElement("div"); grid.className = "chordgrid";
+    C.songChords(s).forEach(function (n) { grid.appendChild(chordCard(n)); });
+    el.appendChild(h); el.appendChild(p); el.appendChild(grid);
+
+    s.verses.forEach(function (v) {
+      var vd = document.createElement("div"); vd.className = "verse";
+      v.forEach(function (line) {
+        var ld = document.createElement("div"); ld.className = "line";
+        var word = null; // samler deler av samme ord så de ikke brekkes
+        C.parseLine(line).forEach(function (part) {
+          // Del i ord så linjene kan brekke på smale skjermer; grepet følger første ord
+          var words = part.text.match(/\S*\s*/g).filter(Boolean);
+          if (!words.length) words = [""];
+          words.forEach(function (w, wi) {
+            var seg = document.createElement("span"); seg.className = "seg";
+            var chord = wi === 0 ? part.chord : null;
+            var ch = document.createElement(chord ? "button" : "span");
+            ch.className = chord ? "ch" : "ch empty";
+            ch.textContent = chord || "·";
+            if (chord) {
+              ch.type = "button";
+              ch.setAttribute("aria-label", "Spill " + chord);
+              ch.addEventListener("click", function () { playChord(chord); });
+            }
+            var tx = document.createElement("span"); tx.className = "tx"; tx.textContent = w;
+            seg.appendChild(ch); seg.appendChild(tx);
+            if (!word) { word = document.createElement("span"); word.className = "word"; ld.appendChild(word); }
+            word.appendChild(seg);
+            if (/\s$/.test(w)) word = null;
+          });
+        });
+        vd.appendChild(ld);
+      });
+      el.appendChild(vd);
+    });
+  }
+
+  renderSongList();
+  renderSong();
+
+  // Faner via #stemmer / #grep / #sanger
+  var VIEWS = ["stemmer", "grep", "sanger"];
+  function route() {
+    var v = location.hash.replace("#", "");
+    if (VIEWS.indexOf(v) === -1) v = "stemmer";
+    VIEWS.forEach(function (name) {
+      $("view-" + name).hidden = name !== v;
+      if (name === v) $("tab-" + name).setAttribute("aria-current", "page");
+      else $("tab-" + name).removeAttribute("aria-current");
+    });
+    if (v !== "stemmer" && state.running) stop();
+  }
+  window.addEventListener("hashchange", route);
+  route();
 })();
 </script>
 </body>
