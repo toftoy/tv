@@ -302,7 +302,18 @@ def local_stock_merge(products, prev, sources):
             sources[f"{shop} butikklager"] = {"ok": len(stock), "feil": 0}
             print(f"Butikklager {cfg.get('area')}: {len(stock)} TV-er på lager hos {shop}, {n} koblet", flush=True)
         except Exception as e:
-            # Behold forrige kjente lagerstatus for denne butikken, med gammelt tidspunkt
+            # Reserve: lagerfil hentet utenfra GitHub (data/local_<butikk>.json), ellers forrige kjente status
+            fb = load({"Elkjøp": "local_elkjop.json", "Power": "local_power.json"}[shop], {})
+            old_t = (old_meta.get("updated") or {}).get(shop) or ""
+            if fb.get("stock") and fb.get("updated", "") > old_t and fb["updated"] > (NOW - dt.timedelta(hours=36)).isoformat():
+                for p in products:
+                    sku = str((p["shops"].get(shop) or {}).get("sku") or "")
+                    if fb["stock"].get(sku):
+                        p["local"] = p.get("local", []) + [dict(x, shop=shop) for x in fb["stock"][sku]]
+                meta["updated"][shop] = fb["updated"]
+                sources[f"{shop} butikklager"] = {"ok": len(fb["stock"]), "feil": 1, "melding": f"reservefil: {str(e)[:150]}"}
+                print(f"Butikklager {shop} feilet ({e}); bruker reservefil fra {fb['updated']}", flush=True)
+                continue
             for p in products:
                 old = [x for x in prev.get(p["id"], {}).get("local") or [] if x.get("shop") == shop]
                 if old:
