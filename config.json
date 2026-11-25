@@ -130,5 +130,18 @@
     "hdr10_pluss": 1,
     "kantbelysning": -3,
     "vrr_hdmi21": 1
+  },
+  "local_stores": {
+    "area": "Bergensområdet",
+    "Elkjøp": {
+      "1003": "Gullgruven Åsane",
+      "1067": "Bergen sentrum",
+      "1282": "Fyllingsdalen",
+      "1258": "Askøy",
+      "1028": "Fana",
+      "1513": "Lagunen",
+      "1013": "Straume",
+      "1242": "Os"
+    }
   }
 }

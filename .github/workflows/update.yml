@@ -7,7 +7,7 @@ on:
   workflow_dispatch: {}
   push:
     branches: [main]
-    paths: ["site/**", "config.json", "stand_notes.json", "vesa.json"]
+    paths: ["site/**", "scraper/**", "config.json", "stand_notes.json", "vesa.json"]
 
 permissions:
   contents: write

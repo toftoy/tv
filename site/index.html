@@ -373,6 +373,7 @@ body.no-bw .bwonly{display:none!important}
             <div>
               <div class="tgs">
                 <label class="tg"><input type="checkbox" id="f-stock"><b>Bare på lager</b><span>Minst én valgt butikk har den på lager nå.</span></label>
+                <label class="tg"><input type="checkbox" id="f-local"><b>På lager i Bergensområdet</b><span id="local-desc">På hyllen nå i en Elkjøp-butikk i Bergen, Askøy, Øygarden (Straume) eller Bjørnafjorden (Os). Power og Alver er ikke med ennå.</span></label>
                 <label class="tg"><input type="checkbox" id="f-low"><b>Bare ekte lavpris</b><span>Dagens pris er lik eller under laveste pris siste 60 dager.</span></label>
                 <label class="tg"><input type="checkbox" id="f-stand"><b>Passer TV-stativet</b><span>Eva Solo Carry: VESA 100/200/300, 40–65". Ukjent VESA vises også (merket ?).</span></label>
                 <label class="tg"><input type="checkbox" id="f-dom"><b>Skjul åpenbart dårlige kjøp</b><span>Skjuler TV-er der en annen i samme størrelse er både billigere og minst like god.</span></label>
@@ -433,6 +434,7 @@ body.no-bw .bwonly{display:none!important}
 <ul>
 <li><b>Én rad / ett kort = én TV-familie</b>: samme serie, størrelse og årsmodell. Butikkvarianter med litt ulik kode (f.eks. LG OLED55C54LA / C55LA / C56LA, TCL C69K = C6K = MQLED75K) er slått sammen. Trykk på TV-en for å se prishistorikk, hver butikks produktnavn og varenummer.</li>
 <li><b>Beste pris og butikkprisene</b> er dagens pris hos Elkjøp, Power, Komplett, NetOnNet, Multicom og Samsung (butikkfilteret bestemmer hvilke som regnes med i «beste pris»). <s>Overstrøket</s> = butikkens oppgitte førpris. <span class="chip">M</span> = medlemspris (gratis kundeklubb).</li>
+<li><b>📍 Bergen</b>: TV-en er på lager i minst én av Elkjøp-butikkene i Bergensområdet (Gullgruven Åsane, sentrum, Fyllingsdalen, Fana, Lagunen, Askøy, Straume, Os). Åpne TV-en for å se hvilke butikker og antall. «utstilt» betyr at butikken også har en demo-modell oppe. Sjekkes hver 3. time.</li>
 <li><b>Nå vs 60 d</b>: <span class="badge b-good">Lavpris</span> dagens beste pris hos de valgte butikkene er lik/under laveste pris i hele markedet siste 60 dager. <span class="badge b-warn">+x %</span> under 10 % over. <span class="badge b-bad">+x %</span> mer enn 10 % over – da er «tilbudet» trolig ikke reelt. <span class="badge">kort historikk</span> = under 60 dager med prisdata.</li>
 <li><b>Laveste pris 30/60/90/365 d</b> ligger i detaljvisningen, med butikk og dato.</li>
 <li><b>Stativ</b>: om TV-en passer på Eva Solo Carry-stativet (VESA 100/200/300 mm, 40–65"). «? ukjent» betyr at Prisjakt ikke oppgir VESA-mål – sjekk hos butikken. VESA-mål og kilde står i detaljvisningen. VESA-målene stativet tar kan justeres i <code>config.json</code>. Mange TV-er har en knast/boks under nederkanten (av/på, IR-mottaker). «⚠ ikke sentrert» = bekreftet/ventet problem på stativet (Philips PQS9081). «knast midt/høyre x mm» = noe stikker ned (målt på produktbilder, ±1–2 mm) – sjekk om stativet har klaring der. «ingen boks» = ingen synlig knast. «kant ikke sjekket» = bare VESA er kontrollert. Kilder i <code>stand_notes.json</code>.</li>
@@ -448,7 +450,7 @@ body.no-bw .bwonly{display:none!important}
 <script>
 const SHOPS=["Elkjøp","Power","Komplett","NetOnNet","Multicom","Samsung"];
 const SHOPC={"Elkjøp":"var(--c1)","Power":"var(--c2)","Komplett":"var(--c3)","NetOnNet":"var(--c4)","Multicom":"var(--c5)","Samsung":"var(--c6)"};
-const TOGGLES=[["f-low","low"],["f-100","hz100"],["f-old","old"],["f-dom","dom"],["f-stock","stock"],["f-stand","stand"],["f-bw","bwok"]];
+const TOGGLES=[["f-low","low"],["f-100","hz100"],["f-old","old"],["f-dom","dom"],["f-stock","stock"],["f-local","local"],["f-stand","stand"],["f-bw","bwok"]];
 const $=id=>document.getElementById(id);
 const MOBILE=matchMedia("(max-width:699px)");
 let IMGURL={},BW_ON=true,SOURCES=null,lastPtr="mouse";
@@ -464,7 +466,7 @@ const fmt=n=>n==null?"–":Math.round(n).toLocaleString("nb-NO")+"";
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const dshort=s=>{const d=new Date(s);return isNaN(d)?esc(s||""):d.toLocaleDateString("nb-NO",{day:"numeric",month:"short"})+(Date.now()-d>300*864e5?" "+d.getFullYear():"")};
 const pct=x=>x<0.05?"under 5 %":`${Math.round(x*100)} %`;
-let DATA=[],HIST=null,ALL=[],open=new Set();
+let LOCAL=null,DATA=[],HIST=null,ALL=[],open=new Set();
 const NEWUSER=(()=>{try{return localStorage.getItem("tvf")===null}catch(e){return false}})();
 const st=(()=>{try{return JSON.parse(localStorage.getItem("tvf")||"{}")||{}}catch(e){return{}}})();
 if(NEWUSER)st.stock=true;
@@ -488,7 +490,7 @@ function groups(){
     g.histDays=Math.max(...ps.map(histDays));
     const bp=g.bestShop?ps.find(p=>p.id===g[g.bestShop].pid):null;g.bw=BW_ON?((bp&&bp.bw)||ps.map(p=>p.bw).filter(Boolean).sort((a,b)=>a.mid-b.mid)[0]||null):null;
     g.stand=ps.some(p=>p.stand==="ja")?"ja":ps.every(p=>p.stand==="nei")?"nei":null;g.vesa=(ps.find(p=>p.vesa)||{}).vesa;g.vesaNote=(ps.find(p=>p.vesa_note)||{}).vesa_note;g.standNote=(ps.find(p=>p.stand_note)||{}).stand_note||null;
-    g.vesaLow=ps.some(p=>p.vesa_conf==="low")&&!ps.some(p=>p.vesa&&!p.vesa_conf);
+    g.local=localOf(ps);g.vesaLow=ps.some(p=>p.vesa_conf==="low")&&!ps.some(p=>p.vesa&&!p.vesa_conf);
     g.year=+((g.label.match(/(20\d\d)$/)||[])[1]||0);g.base=g.label.replace(/\s*20\d\d$/,"").replace(/ (WOLED|QD-OLED)/,"");g.img_url=(ps.find(p=>p.img_url)||{}).img_url;
     g.verdict=g.best!=null&&g.low60?(g.best-g.low60.price)/g.low60.price:9;
     return g})
@@ -586,7 +588,7 @@ const subline=g=>[Math.round(g.size)+'"',g.panel,g.hz,g.items.length>1?`${g.item
 // ---------- Rendering ----------
 function filtered(){
   const q=(st.q||"").toLowerCase();
-  return ALL.filter(g=>(!st.old||!g.olderWorse)&&(!st.dom||!g.dominatedBy)&&(!st.stock||g.inStock)&&(!st.stand||g.stand!=="nei")&&(!BW_ON||!st.bwok||(g.bw&&g.best!=null&&g.best<=g.bw.mid))).filter(g=>st.sizes.includes(Math.round(g.size))&&(!st.panel||g.panel===st.panel)&&(!st.brand||g.brand===st.brand)
+  return ALL.filter(g=>(!st.old||!g.olderWorse)&&(!st.dom||!g.dominatedBy)&&(!st.stock||g.inStock)&&(!st.local||g.local.length)&&(!st.stand||g.stand!=="nei")&&(!BW_ON||!st.bwok||(g.bw&&g.best!=null&&g.best<=g.bw.mid))).filter(g=>st.sizes.includes(Math.round(g.size))&&(!st.panel||g.panel===st.panel)&&(!st.brand||g.brand===st.brand)
     &&(!q||(g.label+" "+g.items.map(p=>p.name+" "+Object.values(p.shops).map(o=>o.title+" "+o.sku).join(" ")).join(" ")).toLowerCase().includes(q))
     &&st.shops.some(s=>g[s])&&(!st.low||g.verdict<=0.001)&&(!st.hz100||/1[0-9]{2}\s*Hz/.test(g.hz||"")))}
 function cardHTML(g){
@@ -602,7 +604,7 @@ function cardHTML(g){
     <div class="c-title">${esc(g.label)}</div>${qBadge(g)}
     <div class="c-sub">${subline(g)}</div>
     <div class="c-price">${price}</div>
-    <div class="c-badges">${verdict(g)}${standBadge(g,true)}${flagsHTML(g)}</div>
+    <div class="c-badges">${verdict(g)}${localBadge(g)}${standBadge(g,true)}${flagsHTML(g)}</div>
     ${bw?`<div class="c-bw"><span>BW-pris trolig <b class="num">${bw.rng}</b></span>${bw.tag}${bw.pb?`<span class="muted" style="flex-basis:100%">${bw.pb} senere i Black Month</span>`:""}</div>`:""}
     ${sl}
     <div class="c-foot">${CHEV}</div>
@@ -612,7 +614,7 @@ function rowHTML(g,cols){
   return `<tr class="row${isOpen?" open":""}" data-k="${esc(g.key)}" id="${rowId(g.key)}" tabindex="0" aria-expanded="${isOpen}"><td class="imgc stk1"><img class="thumb" loading="lazy" alt="" src="${esc(g.img_url||IMG(g.img))}" onerror="this.style.visibility='hidden'"></td>
    <td class="mcol stk2"><div class="m-t"><span>${esc(g.label)}</span>${CHEV}</div><div class="muted small">${[g.panel,g.hz,g.items.length>1?`${g.items.length} varianter`:""].filter(Boolean).map(esc).join(" · ")}</div>${flagsHTML(g)?`<div class="m-b">${flagsHTML(g)}</div>`:""}</td>
    <td class="num">${qBadge(g)}</td><td class="num">${Math.round(g.size)}"</td><td>${standBadge(g)}</td>
-   <td class="num">${o?`<span class="bestp">${fmt(o.price)}</span><br><span class="muted small">${esc(g.bestShop)}</span>${stockTxt(o)&&stockTxt(o)!=="på lager"?`<br><span class="chip">${SHORTST[stockTxt(o)]}</span>`:""}`:'<span class="chip">utsolgt</span>'}</td>
+   <td class="num">${o?`<span class="bestp">${fmt(o.price)}</span><br><span class="muted small">${esc(g.bestShop)}</span>${g.local.length?`<br><span class="chip" title="På lager i ${g.local.length} butikk(er) i Bergensområdet">📍${g.local.length}</span>`:""}${stockTxt(o)&&stockTxt(o)!=="på lager"?`<br><span class="chip">${SHORTST[stockTxt(o)]}</span>`:""}`:'<span class="chip">utsolgt</span>'}</td>
    <td>${verdictShort(g)}${g.low60&&g.best!=null?`<br><span class="muted small">lav 60 d: ${fmt(g.low60.price)}</span>`:""}</td>
    ${BW_ON?`<td class="num">${bwCell(g)}</td>`:""}${SHOPS.map(s=>`<td class="num">${shopCell(g,s)}</td>`).join("")}</tr>
    ${isOpen?`<tr class="detail"><td colspan="${cols}"><div class="detail-wrap">${detail(g)}</div></td></tr>`:""}`}
@@ -649,7 +651,7 @@ document.addEventListener("pointerdown",e=>{lastPtr=e.pointerType||"mouse"},true
 // ---------- Dagens beste kjøp ----------
 function blackFriday(y){const d=new Date(y,10,1);const thu=1+((4-d.getDay()+7)%7);return new Date(y,10,thu+22)}
 function renderHero(){
-  const wrap=$("hero-wrap"),c=ALL.filter(g=>st.sizes.includes(Math.round(g.size))&&g.best!=null&&g.inStock&&g.stand!=="nei"&&!(g.standNote&&g.standNote.level==="warn"));
+  const wrap=$("hero-wrap"),c=ALL.filter(g=>st.sizes.includes(Math.round(g.size))&&g.best!=null&&g.inStock&&(!st.local||g.local.length)&&g.stand!=="nei"&&!(g.standNote&&g.standNote.level==="warn"));
   const used=new Set(),cards=[];
   const add=(k,g,why)=>{if(!g||used.has(g.key))return;used.add(g.key);cards.push(`<button class="hc" data-goto="${esc(g.key)}"><span class="k"><i></i>${k}</span><span class="n">${esc(g.label.replace(/\s+20\d\d$/,""))}</span><img loading="lazy" alt="" src="${esc(g.img_url||IMG(g.img))}" onerror="this.style.visibility='hidden'"><span class="p num">${fmt(g.best)} <small>kr · ${esc(g.bestShop)}</small></span><span class="w">${why}</span></button>`)};
   // 1: beste TV (på «mest for pengene»-linjen) som er på ekte lavpris
@@ -675,7 +677,7 @@ function renderHero(){
     if(dd(bf)>0)cards.push(`<div class="hc cd"><span class="k"><i></i>Nedtelling</span><span class="big num">${dd(bf)}</span><span class="n">${dd(bf)===1?"dag":"dager"} til<br>Black Friday</span><span class="w">${df(bf)}. Black Month varer til 2. desember.</span></div>`);
     else if(dd(bf)===0)cards.push(`<div class="hc cd"><span class="k"><i></i>I dag</span><span class="big">Nå!</span><span class="n">Black Friday</span><span class="w">Sjekk at prisen er en ekte lavpris før du slår til.</span></div>`);
     else cards.push(`<div class="hc cd"><span class="k"><i></i>Innspurt</span><span class="big num">${dd(end)}</span><span class="n">${dd(end)===1?"dag":"dager"} igjen av<br>Black Month</span><span class="w">Tilbudene varer til ${df(end)}.</span></div>`)}
-  const sz=[...st.sizes].sort((a,b)=>a-b);$("hero-sub").textContent=sz.length?`${sz.length>1?sz[0]+"–"+sz[sz.length-1]:sz[0]}" · på lager nå`:"";
+  const sz=[...st.sizes].sort((a,b)=>a-b);$("hero-sub").textContent=sz.length?`${sz.length>1?sz[0]+"–"+sz[sz.length-1]:sz[0]}" · på lager ${st.local?"i Bergensområdet":"nå"}`:"";
   $("hero").innerHTML=cards.join("");wrap.hidden=!used.size||$("tab-list").hidden;
 }
 // ---------- Detalj ----------
@@ -687,6 +689,7 @@ function detail(g){
     <div class="fact"><h5>Laveste pris før i dag</h5>${lows.length?`<table class="mini">${lows.map(([n,l])=>`<tr><td>${n}</td><td class="num">${fmt(l.price)} kr</td><td>${esc(l.shop||"")}${l.date?", "+dshort(l.date):""}</td></tr>`).join("")}</table>`:'<p>Ingen historikk ennå.</p>'}<p class="muted small">Hos noen butikk på Prisjakt. ${g.histDays?`Historikk: ${g.histDays>=365?"over ett år":g.histDays+" dager"}.`:""}</p></div>
     ${b?`<div class="fact"><h5>Sannsynlig Black Week-pris</h5><div class="big num">${bi.rng} kr</div><p>${bi.tag} Midtestimat <b class="num">${fmt(b.mid)} kr</b>${g.best!=null?` (${g.best<=b.mid?"dagens pris er på eller under":`dagens pris er ${Math.round((g.best-b.mid)/b.mid*100)} % over`})`:""}.</p><p class="small">Laveste kjente pris: <b class="num">${fmt(b.ref)} kr</b>. Gruppe: ${esc(b.group)} (${b.n} tilsvarende TV-er i fjor).${b.p_billigere!=null?` Sjanse for at noen butikk går minst 2 % under dagens pris: ${pct(b.p_billigere)}.`:""}</p></div>`:""}
     <div class="fact"><h5>TV-stativ (Eva Solo Carry)</h5><div>${standBadge(g)}</div><p>${g.vesa?`VESA <b>${esc(g.vesa)}</b>`:"VESA-mål ukjent"}${g.stand==="nei"&&!g.vesa?' / utenfor 40–65"':""}${g.vesaLow?" – usikker kilde, sjekk før kjøp":""}${g.stand==null?". Sjekk VESA-mål hos butikken":""}.</p><p class="small muted">${g.vesaNote?"Kilde: "+linkify(g.vesaNote):g.vesa?"Kilde: Prisjakt":""}</p>${g.standNote?`<p class="small"><b>${g.standNote.level==="ok"?"✓":"⚠"} ${esc(g.standNote.note)}</b>${g.standNote.mm?` Utstikk ca. ${esc(g.standNote.mm)} mm, ${esc(g.standNote.pos||"")}.`:""} <span class="muted">(${esc(g.standNote.conf||"")}; ${esc(g.standNote.source||"")})</span></p>`:g.stand==="ja"?`<p class="small muted">Underkanten er ikke sjekket – se etter knast/boks under kanten (IR, av/på) før kjøp.</p>`:""}</div>
+    ${localFact(g)}
     <div class="fact"><h5>Kvalitet</h5><div class="big">${g.quality??"–"} <span class="muted small" style="font-weight:500">av 100</span></div><p>${esc(g.qbasis||"")}</p><p class="small"><a href="#" data-qlink>Slik regnes scoren</a></p></div>
   </div>`;
   const r=st.range||"3m";
@@ -696,6 +699,14 @@ function detail(g){
     <div class="so t">${typeof p.id==="number"&&p.url?`<a href="${esc(p.url)}" target="_blank" rel="noopener">Se alle butikker på Prisjakt</a> · `:""}Laveste marked 60 d: ${fmt(p.low60&&p.low60.price)} · 90 d: ${fmt(p.low90&&p.low90.price)}${p.history_since?` · data fra ${esc(p.history_since)}`:""}${g.items.length>1?`<br>Kvalitet ${p.quality??"–"} – ${esc(p.quality_basis||"")}`:""}</div></div></div>`).join("");
   return `<div class="detail-in">${flagsHTML(g,true)}${facts}${chart}<div class="sec-h">${g.items.length>1?`Butikker og ${g.items.length} varianter`:"Butikker"}</div><div class="variants">${vs}</div></div>`;
 }
+
+// ---------- Butikklager i Bergensområdet ----------
+function localOf(ps){const m=new Map();for(const p of ps)for(const x of p.local||[]){const k=x.shop+"|"+x.store,o=m.get(k);if(!o||(parseInt(x.n)||0)>(parseInt(o.n)||0))m.set(k,{...x,pid:p.id})}return[...m.values()].sort((a,b)=>(parseInt(b.n)||0)-(parseInt(a.n)||0)||a.store.localeCompare(b.store,"nb"))}
+const localAge=()=>{const u=LOCAL&&LOCAL.updated&&LOCAL.updated["Elkjøp"];if(!u)return"";const h=(Date.now()-Date.parse(u))/36e5;return h>8?` (sist sjekket ${dshort(u)})`:""};
+function localBadge(g){if(!LOCAL||!g.local.length)return"";const n=g.local.length,t=g.local.map(x=>x.shop+" "+x.store+": "+x.n).join(", ");
+  return `<span class="badge b-good" title="På lager i butikk: ${esc(t)}">📍 ${n===1?esc(g.local[0].store):`Bergen: ${n} butikker`}</span>`}
+function localFact(g){if(!LOCAL)return"";const st0=(LOCAL.stores||{}),names=Object.entries(st0).map(([s,l])=>`${s} (${l.length})`).join(", ");
+  return `<div class="fact"><h5>På lager i Bergensområdet</h5>${g.local.length?`<table class="mini">${g.local.map(x=>`<tr><td>${esc(x.shop)} ${esc(x.store)}</td><td class="num">${esc(x.n)} stk</td><td class="muted small">${x.demo?"utstilt":""}</td></tr>`).join("")}</table>`:`<p>Ikke på lager i noen av butikkene i området nå.</p>`}<p class="small muted">Butikker som sjekkes: ${esc(names)}${localAge()}. Lageret kan endre seg raskt – ring eller reserver før du drar.</p></div>`}
 // ---------- Prisgraf ----------
 function mergeMin(list){ // én trinnserie per variant -> laveste gjeldende pris ved hvert endringspunkt
   const ts=[...new Set(list.flatMap(l=>l.map(x=>x[0])))].sort((a,b)=>a-b),idx=list.map(()=>-1),out=[];
@@ -766,7 +777,7 @@ function hideTip(){const t=tip();if(t.hidden)return;t.hidden=true;t.classList.re
 addEventListener("scroll",()=>{if(!tip().hidden)hideTip()},{passive:true});
 function gotoRow(key){open.add(key);document.querySelector('[data-tab=list]').click();
   const g=groups().find(x=>x.key===key);
-  if(g&&!(window.FILTERED||[]).some(x=>x.key===key)){const sz=Math.round(g.size);if(!st.sizes.includes(sz))st.sizes.push(sz);st.q="";st.brand="";st.panel="";for(const k of["low","hz100","old","dom","stock","stand","bwok"])st[k]=false;if(!st.shops.some(s=>g[s]))st.shops=[...SHOPS];save();build()}
+  if(g&&!(window.FILTERED||[]).some(x=>x.key===key)){const sz=Math.round(g.size);if(!st.sizes.includes(sz))st.sizes.push(sz);st.q="";st.brand="";st.panel="";for(const k of["low","hz100","old","dom","stock","local","stand","bwok"])st[k]=false;if(!st.shops.some(s=>g[s]))st.shops=[...SHOPS];save();build()}
   render();if(!HIST)loadHist();const el=document.getElementById(rowId(key));if(el){el.scrollIntoView({block:MOBILE.matches?"start":"center"});el.classList.add("flash");setTimeout(()=>{const x=document.getElementById(rowId(key));x&&x.classList.remove("flash")},1700)}}
 // nærmeste punkt: pekeren trenger bare å være nær, ikke midt på
 function bindPts(svg,W,pts){
@@ -903,7 +914,7 @@ let rsT=null,lastW=innerWidth;
 addEventListener("resize",()=>{if(innerWidth===lastW)return;lastW=innerWidth;clearTimeout(rsT);rsT=setTimeout(()=>{if(DATA.length){hideTip();render()}},150)});
 (async()=>{
   let d;try{d=await (await fetch("data/products.json")).json()}catch(e){$("age").textContent="Klarte ikke å laste prisdata";$("meta").textContent="Klarte ikke å laste prisdata. Prøv å laste siden på nytt.";return}
-  DATA=d.products||[];window.UPDATED=d.updated;SOURCES=d.sources||null;BW_ON=d.bw_active!=null?!!d.bw_active:DATA.some(p=>p.bw);
+  DATA=d.products||[];LOCAL=d.local||null;window.UPDATED=d.updated;SOURCES=d.sources||null;BW_ON=d.bw_active!=null?!!d.bw_active:DATA.some(p=>p.bw);
   document.body.classList.toggle("no-bw",!BW_ON);if(!BW_ON&&sortK==="bw"){sortK="verdict";sortDir=1}
   for(const p of DATA)if(p.img_url)IMGURL[p.id]=p.img_url;build();render();renderStatus();setInterval(renderStatus,6e4);
   try{$("guide").innerHTML=await (await fetch("guide.html")).text();renderGuide()}catch(e){}

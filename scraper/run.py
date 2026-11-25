@@ -16,6 +16,7 @@ import quality  # noqa: E402
 import bf_model  # noqa: E402
 import re  # noqa: E402
 import shops as shopsrc  # noqa: E402
+import local_stock  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
@@ -260,11 +261,44 @@ def main():
     for k in list(history):
         if k not in keep and history[k].get("seen", "0000") < cutoff:
             del history[k]
+    local_meta = local_stock_merge(products, prev, sources)
     save("history.json", history)
-    save("products.json", {"updated": NOW.isoformat(timespec="seconds"), "sources": sources,
+    save("products.json", {"updated": NOW.isoformat(timespec="seconds"), "sources": sources, "local": local_meta,
                            "bw_active": any(p.get("bw") for p in products), "products": products})
     print(f"Lagret {len(products)} produkter", flush=True)
     alerts(products, prev)
+
+
+def local_stock_merge(products, prev, sources):
+    """Legger p["local"] = [{"shop","store","n","demo"}] på produkter som er på lager i en butikk i området."""
+    cfg = CFG.get("local_stores") or {}
+    meta = {"area": cfg.get("area"), "stores": {s: list(v.values()) for s, v in cfg.items() if isinstance(v, dict)},
+            "updated": {}}
+    old_meta = (load("products.json", {}) or {}).get("local") or {}
+    stores = cfg.get("Elkjøp") or {}
+    if not stores:
+        return meta
+    try:
+        lc = os.environ.get("LOCAL_STOCK_CACHE")
+        stock = json.load(open(lc, encoding="utf-8")) if lc else local_stock.elkjop(stores)
+        for p in products:
+            sku = str((p["shops"].get("Elkjøp") or {}).get("sku") or "")
+            lst = [dict(x, shop="Elkjøp") for x in stock.get(sku, [])]
+            if lst:
+                p["local"] = lst
+        meta["updated"]["Elkjøp"] = NOW.isoformat(timespec="seconds")
+        sources["Elkjøp butikklager"] = {"ok": len(stock), "feil": 0}
+        print(f"Butikklager {cfg.get('area')}: {len(stock)} TV-er på lager hos Elkjøp, "
+              f"{sum(1 for p in products if p.get('local'))} koblet", flush=True)
+    except Exception as e:
+        # Behold forrige kjente lagerstatus, men merk den med gammelt tidspunkt
+        for p in products:
+            if prev.get(p["id"], {}).get("local"):
+                p["local"] = prev[p["id"]]["local"]
+        meta["updated"]["Elkjøp"] = (old_meta.get("updated") or {}).get("Elkjøp")
+        sources["Elkjøp butikklager"] = {"ok": 0, "feil": 1, "melding": str(e)[:200]}
+        print("Butikklager feilet:", e, flush=True)
+    return meta
 
 
 def stand_fit(p):
