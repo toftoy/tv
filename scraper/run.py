@@ -275,29 +275,41 @@ def local_stock_merge(products, prev, sources):
     meta = {"area": cfg.get("area"), "stores": {s: list(v.values()) for s, v in cfg.items() if isinstance(v, dict)},
             "updated": {}}
     old_meta = (load("products.json", {}) or {}).get("local") or {}
-    stores = cfg.get("Elkjøp") or {}
-    if not stores:
-        return meta
-    try:
-        lc = os.environ.get("LOCAL_STOCK_CACHE")
-        stock = json.load(open(lc, encoding="utf-8")) if lc else local_stock.elkjop(stores)
-        for p in products:
-            sku = str((p["shops"].get("Elkjøp") or {}).get("sku") or "")
-            lst = [dict(x, shop="Elkjøp") for x in stock.get(sku, [])]
-            if lst:
-                p["local"] = lst
-        meta["updated"]["Elkjøp"] = NOW.isoformat(timespec="seconds")
-        sources["Elkjøp butikklager"] = {"ok": len(stock), "feil": 0}
-        print(f"Butikklager {cfg.get('area')}: {len(stock)} TV-er på lager hos Elkjøp, "
-              f"{sum(1 for p in products if p.get('local'))} koblet", flush=True)
-    except Exception as e:
-        # Behold forrige kjente lagerstatus, men merk den med gammelt tidspunkt
-        for p in products:
-            if prev.get(p["id"], {}).get("local"):
-                p["local"] = prev[p["id"]]["local"]
-        meta["updated"]["Elkjøp"] = (old_meta.get("updated") or {}).get("Elkjøp")
-        sources["Elkjøp butikklager"] = {"ok": 0, "feil": 1, "melding": str(e)[:200]}
-        print("Butikklager feilet:", e, flush=True)
+    lc = os.environ.get("LOCAL_STOCK_CACHE")
+    cache = json.load(open(lc, encoding="utf-8")) if lc else None
+    for shop in ("Elkjøp", "Power"):
+        stores = cfg.get(shop) or {}
+        if not stores:
+            continue
+        try:
+            if cache is not None:
+                stock = cache.get(shop, {})
+            elif shop == "Elkjøp":
+                stock = local_stock.elkjop(stores)
+            else:
+                skus = sorted({str(o["sku"]) for p in products for s, o in p["shops"].items()
+                               if s == "Power" and o.get("sku")})  # også utsolgt på nett
+                stock, errs = local_stock.power(skus, stores)
+                if errs:
+                    print(f"Power butikklager: {errs} feil av {len(skus)}", flush=True)
+            n = 0
+            for p in products:
+                sku = str((p["shops"].get(shop) or {}).get("sku") or "")
+                if stock.get(sku):
+                    p["local"] = p.get("local", []) + [dict(x, shop=shop) for x in stock[sku]]
+                    n += 1
+            meta["updated"][shop] = NOW.isoformat(timespec="seconds")
+            sources[f"{shop} butikklager"] = {"ok": len(stock), "feil": 0}
+            print(f"Butikklager {cfg.get('area')}: {len(stock)} TV-er på lager hos {shop}, {n} koblet", flush=True)
+        except Exception as e:
+            # Behold forrige kjente lagerstatus for denne butikken, med gammelt tidspunkt
+            for p in products:
+                old = [x for x in prev.get(p["id"], {}).get("local") or [] if x.get("shop") == shop]
+                if old:
+                    p["local"] = p.get("local", []) + old
+            meta["updated"][shop] = (old_meta.get("updated") or {}).get(shop)
+            sources[f"{shop} butikklager"] = {"ok": 0, "feil": 1, "melding": str(e)[:200]}
+            print(f"Butikklager {shop} feilet:", e, flush=True)
     return meta
 
 

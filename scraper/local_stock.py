@@ -54,3 +54,28 @@ def elkjop(stores):
             break
         time.sleep(0.5)
     return out
+
+
+POWER_API = "https://www.power.no/api/v2/products/{}/stores?postalCode={}"
+
+
+def power(skus, stores, postal="5003", delay=0.7):
+    """Power: én forespørsel per produkt (samme som «Se tilgjengelighet i butikk» på produktsiden).
+    storeAvailability: 2 = på lager, 1 = ikke på lager, 4/5 = kan bestilles til butikk.
+    Returnerer ({varenr: [{"store", "n", "demo"}]}, antall feil)."""
+    out, errs = {}, 0
+    for sku in skus:
+        try:
+            data = _json(POWER_API.format(sku, postal), {"User-Agent": UA["User-Agent"], "Accept": "application/json"})
+        except Exception:
+            errs += 1
+            if errs >= 10 and errs > len(out):
+                raise RuntimeError(f"Power butikklager: {errs} feil")
+            continue
+        finally:
+            time.sleep(delay)
+        lst = [{"store": stores[str(s["storeId"])], "n": "", "demo": int(s.get("storeDisplayStock") or 0)}
+               for s in data if str(s.get("storeId")) in stores and s.get("storeAvailability") == 2]
+        if lst:
+            out[str(sku)] = lst
+    return out, errs
