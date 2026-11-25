@@ -79,3 +79,32 @@ def power(skus, stores, postal="5003", delay=0.7):
         if lst:
             out[str(sku)] = lst
     return out, errs
+
+
+ELON_API = "https://www.elon.no/integration/localstores/instocklocation"
+
+
+def elon(skus, stores, chunk=60):
+    """Elon: samme oppslag som «Er varen på lager?» på elon.no, mange varenr per kall, ett kall per butikk.
+    stores: {GLN: navn}. Returnerer {varenr: [{"store", "n", "demo"}]}."""
+    out = {}
+    skus = sorted({str(s) for s in skus if s})
+    for gln, name in stores.items():
+        for i in range(0, len(skus), chunk):
+            body = urllib.parse.urlencode({"gln": gln, "sku": ",".join(skus[i:i + chunk])}).encode()
+            req = urllib.request.Request(ELON_API, data=body, headers={
+                "User-Agent": UA["User-Agent"], "X-Requested-With": "XMLHttpRequest",
+                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"})
+            with urllib.request.urlopen(req, timeout=40) as r:
+                j = json.load(r)
+            if not j.get("success"):
+                raise RuntimeError("Elon: svar uten success")
+            for sku, qty in (j.get("data") or {}).items():
+                try:
+                    n = int(float(qty))
+                except (TypeError, ValueError):
+                    continue
+                if n > 0:
+                    out.setdefault(sku, []).append({"store": name, "n": str(n), "demo": 0})
+            time.sleep(1)
+    return out

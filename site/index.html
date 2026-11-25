@@ -17,7 +17,7 @@
   --accent:#1857c9;--accent-ink:#fff;--accent-soft:#e7eefb;
   --brand:#ffd43b;--brand-ink:#16181c;
   --good:#0f6b37;--goodbg:#dff3e4;--warn:#8a5700;--warnbg:#fdefc6;--bad:#b3261e;--badbg:#fde4e1;
-  --opt:#b4237a;--c1:#2a78d6;--c2:#eb6834;--c3:#1baf7a;--c4:#eda100;--c5:#e87ba4;--c6:#008300;--mk:#898781;
+  --opt:#b4237a;--c1:#2a78d6;--c2:#eb6834;--c3:#1baf7a;--c4:#eda100;--c5:#e87ba4;--c6:#008300;--c7:#7b4fd6;--mk:#898781;
   --grid:#e9e7e1;--axis:#c3c2b7;
   --shadow:0 1px 2px rgba(22,24,28,.05),0 4px 14px rgba(22,24,28,.05);
   --r:14px;--tabh:62px;
@@ -28,7 +28,7 @@
   --line:#2a2f38;--line2:#3b414c;--chip:#252a33;
   --accent:#84b3ff;--accent-ink:#0b1220;--accent-soft:#1a2842;
   --good:#62d38d;--goodbg:#143222;--warn:#f2c14e;--warnbg:#3a2f10;--bad:#ff8f85;--badbg:#3d1a17;
-  --opt:#f07ab8;--c1:#3987e5;--c2:#d95926;--c3:#199e70;--c4:#c98500;--c5:#d55181;--c6:#008300;--mk:#898781;
+  --opt:#f07ab8;--c1:#3987e5;--c2:#d95926;--c3:#199e70;--c4:#c98500;--c5:#d55181;--c6:#008300;--c7:#a585f0;--mk:#898781;
   --grid:#262a31;--axis:#3b414c;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25);
 }}
@@ -38,7 +38,7 @@
   --line:#2a2f38;--line2:#3b414c;--chip:#252a33;
   --accent:#84b3ff;--accent-ink:#0b1220;--accent-soft:#1a2842;
   --good:#62d38d;--goodbg:#143222;--warn:#f2c14e;--warnbg:#3a2f10;--bad:#ff8f85;--badbg:#3d1a17;
-  --opt:#f07ab8;--c1:#3987e5;--c2:#d95926;--c3:#199e70;--c4:#c98500;--c5:#d55181;--c6:#008300;--mk:#898781;
+  --opt:#f07ab8;--c1:#3987e5;--c2:#d95926;--c3:#199e70;--c4:#c98500;--c5:#d55181;--c6:#008300;--c7:#a585f0;--mk:#898781;
   --grid:#262a31;--axis:#3b414c;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25);
 }
@@ -373,7 +373,7 @@ body.no-bw .bwonly{display:none!important}
             <div>
               <div class="tgs">
                 <label class="tg"><input type="checkbox" id="f-stock"><b>Bare på lager</b><span>Minst én valgt butikk har den på lager nå.</span></label>
-                <label class="tg"><input type="checkbox" id="f-local"><b>På lager i Bergensområdet</b><span id="local-desc">På hyllen nå i en Elkjøp- eller Power-butikk i Bergen, Askøy, Øygarden (Straume), Bjørnafjorden (Os) eller Alver (Knarvik).</span></label>
+                <label class="tg"><input type="checkbox" id="f-local"><b>På lager i Bergensområdet</b><span id="local-desc">På hyllen nå i en Elkjøp-, Power- eller Elon-butikk i Bergen, Askøy, Øygarden (Straume), Bjørnafjorden (Os), Alver (Knarvik) eller Austrheim.</span></label>
                 <label class="tg"><input type="checkbox" id="f-low"><b>Bare ekte lavpris</b><span>Dagens pris er lik eller under laveste pris siste 60 dager.</span></label>
                 <label class="tg"><input type="checkbox" id="f-stand"><b>Passer TV-stativet</b><span>Eva Solo Carry: VESA 100/200/300, 40–65". Ukjent VESA vises også (merket ?).</span></label>
                 <label class="tg"><input type="checkbox" id="f-dom"><b>Skjul åpenbart dårlige kjøp</b><span>Skjuler TV-er der en annen i samme størrelse er både billigere og minst like god.</span></label>
@@ -396,7 +396,7 @@ body.no-bw .bwonly{display:none!important}
     <thead><tr>
       <th class="stk1"></th><th data-k="family" class="stk2">Modell</th><th data-k="quality" class="num" title="Kvalitetsscore 0–100 (skjønn basert på tester)">Kvalitet</th><th data-k="size" class="num">Tommer</th><th data-k="stand" title="Passer på TV-stativet (Eva Solo Carry, VESA 100/200/300)">Stativ</th>
       <th data-k="best" class="num" title="Laveste pris hos de valgte butikkene">Beste pris</th><th data-k="verdict" title="Dagens beste pris mot laveste pris siste 60 dager">Nå vs 60 d</th><th data-k="bw" class="num bwonly" title="Sannsynlig laveste pris i Black Week/Black Month">BW-pris</th>
-      <th data-k="Elkjøp" class="num">Elkjøp</th><th data-k="Power" class="num">Power</th><th data-k="Komplett" class="num">Komplett</th><th data-k="NetOnNet" class="num">NetOnNet</th><th data-k="Multicom" class="num">Multicom</th><th data-k="Samsung" class="num" title="Samsungs egen nettbutikk">Samsung</th>
+      <th data-k="Elkjøp" class="num">Elkjøp</th><th data-k="Power" class="num">Power</th><th data-k="Komplett" class="num">Komplett</th><th data-k="NetOnNet" class="num">NetOnNet</th><th data-k="Multicom" class="num">Multicom</th><th data-k="Samsung" class="num" title="Samsungs egen nettbutikk">Samsung</th><th data-k="Elon" class="num">Elon</th>
     </tr></thead>
     <tbody id="tb"></tbody>
   </table></div>
@@ -433,8 +433,8 @@ body.no-bw .bwonly{display:none!important}
 <h2>Slik leser du tabellen</h2>
 <ul>
 <li><b>Én rad / ett kort = én TV-familie</b>: samme serie, størrelse og årsmodell. Butikkvarianter med litt ulik kode (f.eks. LG OLED55C54LA / C55LA / C56LA, TCL C69K = C6K = MQLED75K) er slått sammen. Trykk på TV-en for å se prishistorikk, hver butikks produktnavn og varenummer.</li>
-<li><b>Beste pris og butikkprisene</b> er dagens pris hos Elkjøp, Power, Komplett, NetOnNet, Multicom og Samsung (butikkfilteret bestemmer hvilke som regnes med i «beste pris»). <s>Overstrøket</s> = butikkens oppgitte førpris. <span class="chip">M</span> = medlemspris (gratis kundeklubb).</li>
-<li><b>📍 Bergen</b>: TV-en er på lager i minst én butikk i Bergensområdet: Elkjøp Gullgruven Åsane, sentrum, Fyllingsdalen, Fana, Lagunen, Askøy, Straume, Os og Power sentrum, Åsane, Vestkanten, Lagunen, Askøy, Knarvik. Åpne TV-en for å se hvilke butikker (Elkjøp viser også antall). «utstilt» betyr at butikken også har en demo-modell oppe. Sjekkes hver 3. time.</li>
+<li><b>Beste pris og butikkprisene</b> er dagens pris hos Elkjøp, Power, Komplett, NetOnNet, Multicom, Samsung og Elon (butikkfilteret bestemmer hvilke som regnes med i «beste pris»). <s>Overstrøket</s> = butikkens oppgitte førpris. <span class="chip">M</span> = medlemspris (gratis kundeklubb).</li>
+<li><b>📍 Bergen</b>: TV-en er på lager i minst én butikk i Bergensområdet: Elkjøp Gullgruven Åsane, sentrum, Fyllingsdalen, Fana, Lagunen, Askøy, Straume, Os og Power sentrum, Åsane, Vestkanten, Lagunen, Askøy, Knarvik, og Elon Austrheim. Åpne TV-en for å se hvilke butikker (Elkjøp og Elon viser også antall). «utstilt» betyr at butikken også har en demo-modell oppe. Sjekkes hver 3. time.</li>
 <li><b>Nå vs 60 d</b>: <span class="badge b-good">Lavpris</span> dagens beste pris hos de valgte butikkene er lik/under laveste pris i hele markedet siste 60 dager. <span class="badge b-warn">+x %</span> under 10 % over. <span class="badge b-bad">+x %</span> mer enn 10 % over – da er «tilbudet» trolig ikke reelt. <span class="badge">kort historikk</span> = under 60 dager med prisdata.</li>
 <li><b>Laveste pris 30/60/90/365 d</b> ligger i detaljvisningen, med butikk og dato.</li>
 <li><b>Stativ</b>: om TV-en passer på Eva Solo Carry-stativet (VESA 100/200/300 mm, 40–65"). «? ukjent» betyr at Prisjakt ikke oppgir VESA-mål – sjekk hos butikken. VESA-mål og kilde står i detaljvisningen. VESA-målene stativet tar kan justeres i <code>config.json</code>. Mange TV-er har en knast/boks under nederkanten (av/på, IR-mottaker). «⚠ ikke sentrert» = bekreftet/ventet problem på stativet (Philips PQS9081). «knast midt/høyre x mm» = noe stikker ned (målt på produktbilder, ±1–2 mm) – sjekk om stativet har klaring der. «ingen boks» = ingen synlig knast. «kant ikke sjekket» = bare VESA er kontrollert. Kilder i <code>stand_notes.json</code>.</li>
@@ -448,8 +448,8 @@ body.no-bw .bwonly{display:none!important}
 </main>
 <div id="tip" hidden></div>
 <script>
-const SHOPS=["Elkjøp","Power","Komplett","NetOnNet","Multicom","Samsung"];
-const SHOPC={"Elkjøp":"var(--c1)","Power":"var(--c2)","Komplett":"var(--c3)","NetOnNet":"var(--c4)","Multicom":"var(--c5)","Samsung":"var(--c6)"};
+const SHOPS=["Elkjøp","Power","Komplett","NetOnNet","Multicom","Samsung","Elon"];
+const SHOPC={"Elkjøp":"var(--c1)","Power":"var(--c2)","Komplett":"var(--c3)","NetOnNet":"var(--c4)","Multicom":"var(--c5)","Samsung":"var(--c6)","Elon":"var(--c7)"};
 const TOGGLES=[["f-low","low"],["f-100","hz100"],["f-old","old"],["f-dom","dom"],["f-stock","stock"],["f-local","local"],["f-stand","stand"],["f-bw","bwok"]];
 const $=id=>document.getElementById(id);
 const MOBILE=matchMedia("(max-width:699px)");
@@ -625,7 +625,7 @@ function render(){
   window.FILTERED=gs;
   if(!$("tab-plots").hidden)drawPlots(gs);
   renderHero();
-  const mob=MOBILE.matches,cols=BW_ON?14:13;
+  const mob=MOBILE.matches,cols=BW_ON?15:14;
   const cards=$("cards"),tb=$("tb");
   if(mob){tb.innerHTML="";cards.innerHTML=gs.map(cardHTML).join("")||EMPTY}
   else{cards.innerHTML="";tb.innerHTML=gs.map(g=>rowHTML(g,cols)).join("")||`<tr><td colspan="${cols}" style="padding:16px">${EMPTY}</td></tr>`;

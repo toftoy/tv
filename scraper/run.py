@@ -277,7 +277,7 @@ def local_stock_merge(products, prev, sources):
     old_meta = (load("products.json", {}) or {}).get("local") or {}
     lc = os.environ.get("LOCAL_STOCK_CACHE")
     cache = json.load(open(lc, encoding="utf-8")) if lc else None
-    for shop in ("Elkjøp", "Power"):
+    for shop in ("Elkjøp", "Power", "Elon"):
         stores = cfg.get(shop) or {}
         if not stores:
             continue
@@ -286,6 +286,8 @@ def local_stock_merge(products, prev, sources):
                 stock = cache.get(shop, {})
             elif shop == "Elkjøp":
                 stock = local_stock.elkjop(stores)
+            elif shop == "Elon":
+                stock = local_stock.elon([o.get("sku") for p in products for s, o in p["shops"].items() if s == "Elon"], stores)
             else:
                 skus = sorted({str(o["sku"]) for p in products for s, o in p["shops"].items()
                                if s == "Power" and o.get("sku")})  # også utsolgt på nett
@@ -303,7 +305,7 @@ def local_stock_merge(products, prev, sources):
             print(f"Butikklager {cfg.get('area')}: {len(stock)} TV-er på lager hos {shop}, {n} koblet", flush=True)
         except Exception as e:
             # Reserve: lagerfil hentet utenfra GitHub (data/local_<butikk>.json), ellers forrige kjente status
-            fb = load({"Elkjøp": "local_elkjop.json", "Power": "local_power.json"}[shop], {})
+            fb = load({"Elkjøp": "local_elkjop.json", "Power": "local_power.json", "Elon": "local_elon.json"}[shop], {})
             old_t = (old_meta.get("updated") or {}).get(shop) or ""
             if fb.get("stock") and fb.get("updated", "") > old_t and fb["updated"] > (NOW - dt.timedelta(hours=36)).isoformat():
                 for p in products:
