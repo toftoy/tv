@@ -108,3 +108,42 @@ def elon(skus, stores, chunk=60):
                     out.setdefault(sku, []).append({"store": name, "n": str(n), "demo": 0})
             time.sleep(1)
     return out
+
+
+def hifiklubben(skus, stores, delay=1.0):
+    """Hi-Fi Klubben: produktsiden har butikklageret innebygd (samme som «Se alle butikker» på siden).
+    På lager i butikken = beskrivelsen «N stk på lager». /x/<varenr>/ fungerer uansett navnedel.
+    stores: {butikk-id: navn}. Returnerer {varenr: [{"store", "n", "demo"}]}."""
+    import re
+    out, errs = {}, 0
+    for sku in sorted({str(s) for s in skus if s}):
+        try:
+            req = urllib.request.Request(f"https://www.hifiklubben.no/x/{sku.lower()}/",
+                                         headers={"User-Agent": UA["User-Agent"]})
+            with urllib.request.urlopen(req, timeout=40) as r:
+                html = r.read().decode("utf-8", "replace").replace('\\"', '"').replace("\\\\", "\\")
+        except Exception:
+            errs += 1
+            if errs >= 8 and errs > len(out):
+                raise RuntimeError(f"Hi-Fi Klubben: {errs} feil")
+            continue
+        finally:
+            time.sleep(delay)
+        found = []
+        for sid, name in stores.items():
+            i = html.find('{"store":{"id":"%s"' % sid)
+            if i < 0:
+                continue
+            try:
+                o, _ = json.JSONDecoder().raw_decode(html[i:])
+            except ValueError:
+                continue
+            for p in o.get("products") or []:
+                if str(p.get("skuCode", "")).upper() != sku.upper():
+                    continue
+                m = re.search(r"(\d+)\s*stk på lager", p.get("description") or "")
+                if m and int(m.group(1)) > 0:
+                    found.append({"store": name, "n": m.group(1), "demo": 1 if p.get("isDemoProduct") else 0})
+        if found:
+            out[sku] = found
+    return out
