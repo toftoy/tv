@@ -13,12 +13,12 @@ TIERS = [
     (r"BRAVIA 8 II|XR8M2", 92, "Sony Bravia 8 II"),
     (r"LG (?:OLED )?[GM][5-9]\b", 92, "LG G/M-serie"),
     (r"PHILIPS OLED(\+)?9[15]", 90, "Philips OLED+ 9xx"),
-    (r"LG (?:OLED )?C[5-9]E\b", 88, "LG C Pro (C5E/C6E)"),
-    (r"LG (?:OLED )?C6H|LG OLED C6\b", 87, "LG C6"),
+    (r"LG (?:OLED )?C[5-9]E\b", 87, "LG C Pro (C5E/C6E)"),
+    (r"LG (?:OLED )?C6H|LG OLED C6\b", 86, "LG C6"),
     (r"SAMSUNG S90", 86, "Samsung S90"),
     (r"BRAVIA 8\b|XR80", 86, "Sony Bravia 8"),
     (r"LG (?:OLED )?C5\b", 85, "LG C5"),
-    (r"PHILIPS OLED8|PHILIPS OLED81", 84, "Philips OLED8xx"),
+    (r"PHILIPS OLED8|PHILIPS OLED81", 86, "Philips OLED8xx"),
     (r"LG (?:OLED )?C4\b", 82, "LG C4"),
     (r"LG (?:OLED )?B[6-9]E?\b", 80, "LG B6"),
     (r"SONY A80|BRAVIA 6\b|K\d+A65", 78, "Sony A80/Bravia 6"),
@@ -77,8 +77,26 @@ TIERS = [
 ]
 
 
+# Panel per størrelse (OLED): samme serie bruker ulike paneler i ulike størrelser.
+# (mønster mot familienavn, størrelser, justering, begrunnelse). Kilder: LG/Samsung/Philips-spesifikasjoner
+# og RTINGS (se research/oled_paneler_per_storrelse.md). Erstatter den generelle 42"-fratrekken når en regel treffer.
+SIZE_ADJ = [
+    (r"LG (?:OLED )?G5\b", (48,), -6, "48\": vanlig WOLED uten tandem/MLA, svakere Brightness Booster, 144 Hz"),
+    (r"LG (?:OLED )?G6\b", (48,), -4, "48\": Brightness Booster x2,1 mot x3,9 på 55\"+, enklere antirefleks"),
+    (r"SAMSUNG S9[59]", (48,), -5, "48\": WOLED fra LG Display, ikke QD-OLED (matt belegg beholdt)"),
+    (r"SAMSUNG S90\b.*2025|SAMSUNG S90F", (42, 48), -4, "42/48\": WOLED, ikke QD-OLED som 55\"+"),
+    (r"SAMSUNG S90\b", (42,), -2, "42\": lavere HDR-nivå («OLED HDR»)"),
+    (r"LG (?:OLED )?C5E?\b", (42, 48), -3, "42/48\": uten Brightness Booster"),
+    (r"LG (?:OLED )?C6(?:E|H)?\b", (48,), 1, "48\": tandem-panel med Brightness Booster (bedre enn 55\"; Samsung S90H 48\" har trolig samme panel)"),
+    (r"LG (?:OLED )?C6(?:E|H)?\b", (42,), -3, "42\": uten Brightness Booster"),
+    (r"PHILIPS OLED\+?9", (48,), -1, "48\": tandem-panel, trolig litt lavere lysstyrke"),
+    (r"PHILIPS OLED[78]", (48,), -2, "48\": lavere lysstyrke enn 55\"+"),
+]
+
+
 ADJUST = [
-    "42\" OLED: −4 (mangler lysforsterker, svakere lysstyrke enn 48\"+)",
+    "OLED per størrelse (panel): LG G5 48\" −6, Samsung S95 48\" −5 (WOLED, ikke QD-OLED), LG G6 48\" −4, Samsung S90 2025 42/48\" −4, LG C5 42/48\" −3, LG C6 42\" −3, Samsung S90 42\" −2, Philips OLED7/8 48\" −2, Philips OLED+9 48\" −1, LG C6 48\" +1 (tandem-panel)",
+    "Annen 42\" OLED: −4 (mangler lysforsterker, svakere lysstyrke enn 48\"+)",
     "50\" LCD: −4 (bruker ofte svakere panel enn 55\" i samme serie)",
     "43\" og mindre LCD: −6 (enklere panel, færre dimmesoner, ofte 60 Hz)",
     "Hotell-/bedrifts-TV: −6 (forenklet programvare og bilde)",
@@ -153,7 +171,10 @@ def score(p, profile=None):
     size = int(round(p.get("size") or 55))
     nm = (p.get("family_label", "") + " " + p.get("name", "") + " " + (p.get("panel") or "")).upper()
     is_oled = "OLED" in nm and "QNED" not in nm
-    if is_oled and size <= 42:
+    rule = next(((d, w) for pat, sizes, d, w in SIZE_ADJ if size in sizes and re.search(pat, label)), None) if is_oled else None
+    if rule:
+        sc += rule[0]; why += f", {rule[1]} {rule[0]:+d}"
+    elif is_oled and size <= 42:
         sc -= 4; why += ", 42\" svakere"
     elif not is_oled and size == 50:
         sc -= 4; why += ", 50\" ofte svakere panel"
