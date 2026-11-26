@@ -179,6 +179,20 @@ def vesa(html):
     return f"{d[0]}x{d[1]}" if len(d) >= 2 else None
 
 
+def shop_url(name, r):
+    """Direkte lenke til butikkens produktside der mønsteret er kjent og sjekket, ellers Prisjakts
+    videresending (ett klikk, går rett til butikken)."""
+    sku = str(r.get("shopOfferId") or "")
+    if sku and name == "Elkjøp" and sku.isdigit():
+        return f"https://www.elkjop.no/product/{sku}/{sku}"
+    if sku and name == "Hi-Fi Klubben":
+        return f"https://www.hifiklubben.no/x/{sku.lower()}/"
+    u = r.get("clickoutUrl") or ""
+    if u.startswith("/"):
+        u = "https://www.prisjakt.no" + u
+    return u or None
+
+
 def product(pid):
     html = fetch(f"/product.php?p={pid}")
     t = flight(html)
@@ -207,5 +221,5 @@ def product(pid):
             shops[name] = dict(price=p, before=op if op and op > p else None,
                                member=r.get("priceType") == "MemberPrice",
                                title=r.get("name"), sku=r.get("shopOfferId"),
-                               stock=r.get("stockStatus"))
+                               stock=r.get("stockStatus"), url=shop_url(name, r))
     return dict(history=history, shops=shops, market_now=market_now, vesa=vesa(html), specs=specs(html))

@@ -238,6 +238,8 @@ table.mini td:nth-child(2),table.main table.mini td:nth-child(2){text-align:righ
 .v h4{font-size:13.5px;line-height:1.3;overflow-wrap:anywhere}
 .so{padding:7px 0;border-top:1px solid var(--line);margin-top:7px}
 .so-h{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline}
+.buy{margin-left:auto;display:inline-flex;align-items:center;min-height:32px;padding:0 12px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-weight:650;font-size:13.5px;text-decoration:none;white-space:nowrap}.buy:active{opacity:.8}
+a.sp{text-decoration:none;padding:5px 9px}a.sp:active{opacity:.7}a.cl{color:inherit;text-decoration:underline dotted;text-underline-offset:3px}
 .so-h a.go{margin-left:auto;font-weight:650;font-size:13px;min-height:28px;display:inline-flex;align-items:center}
 .so .t{font-size:12.5px;color:var(--muted);overflow-wrap:anywhere}
 /* ---------- Tom tilstand ---------- */
@@ -578,7 +580,7 @@ function qBadge(g){return `<span class="q${g.quality==null||g.quality<55?" lo":"
 function shopCell(g,s){const o=g[s];if(!o)return'<span class="muted">–</span>';
   if(OUT(o))return `<span class="muted"><s>${fmt(o.price)}</s></span><br><span class="chip">utsolgt</span>`;
   const best=o.price===g.best?"cellbest":"";const t=stockTxt(o);
-  return `<span class="${best}">${fmt(o.price)}</span>${o.member?' <span class="chip" title="Medlemspris">M</span>':""}${o.before?`<br><s class="small">${fmt(o.before)}</s>`:""}${t&&t!=="på lager"?`<br><span class="chip" title="${t}">${SHORTST[t]}</span>`:""}`}
+  return `${o.url?`<a class="cl ${best}" href="${esc(o.url)}" target="_blank" rel="noopener" title="Til ${esc(s)}">${fmt(o.price)}</a>`:`<span class="${best}">${fmt(o.price)}</span>`}${o.member?' <span class="chip" title="Medlemspris">M</span>':""}${o.before?`<br><s class="small">${fmt(o.before)}</s>`:""}${t&&t!=="på lager"?`<br><span class="chip" title="${t}">${SHORTST[t]}</span>`:""}`}
 function flagsHTML(g,full){
   if(g.olderWorse)return full?`<div class="flag b-warn"><span>Nyere modell er billigere: <b>${esc(g.olderWorse.label)}</b> koster ${fmt(g.olderWorse.best)} kr.</span><a href="#" data-goto="${esc(g.olderWorse.key)}">Vis den</a></div>`:`<span class="badge b-warn">Nyere modell er billigere</span>`;
   if(g.dominatedBy)return full?`<div class="flag b-bad"><span>Finnes bedre og billigere: <b>${esc(g.dominatedBy.label)}</b> – ${fmt(g.dominatedBy.best)} kr hos ${esc(g.dominatedBy.bestShop||"")}${(g.dominatedBy[g.dominatedBy.bestShop]||{}).member?" (medlemspris)":""}, kvalitet ${g.dominatedBy.quality} mot ${g.quality}.</span><a href="#" data-goto="${esc(g.dominatedBy.key)}">Vis den</a></div>`:`<span class="badge b-bad">Finnes bedre og billigere</span>`;
@@ -594,10 +596,10 @@ function filtered(){
 function cardHTML(g){
   const o=g.bestShop?g[g.bestShop]:null,bw=bwInfo(g),isOpen=open.has(g.key);
   const any=SHOPS.map(s=>g[s]).filter(Boolean).sort((a,b)=>a.price-b.price)[0];
-  const price=o?`<span class="price">${fmt(o.price)} <small>kr</small></span><span class="muted">hos ${esc(g.bestShop)}</span>${o.member?'<span class="chip">medlemspris</span>':""}${o.before?`<s class="small">${fmt(o.before)}</s>`:""}${stockChip(o)}`
+  const price=o?`<span class="price">${fmt(o.price)} <small>kr</small></span><span class="muted">hos ${esc(g.bestShop)}</span>${o.member?'<span class="chip">medlemspris</span>':""}${o.before?`<s class="small">${fmt(o.before)}</s>`:""}${stockChip(o)}${o.url?`<a class="buy" href="${esc(o.url)}" target="_blank" rel="noopener">Til ${esc(g.bestShop)} →</a>`:""}`
     :`<span class="price muted">${any?`<s>${fmt(any.price)}</s>`:"–"} <small>kr</small></span><span class="badge b-bad">utsolgt hos valgte butikker</span>`;
   const shops=SHOPS.filter(s=>g[s]&&st.shops.includes(s)).sort((a,b)=>OUT(g[a])-OUT(g[b])||g[a].price-g[b].price);
-  const sl=shops.length>1?`<div class="c-shops">${shops.map(s=>{const x=g[s],out=OUT(x),t=stockTxt(x);return `<span class="sp${!out&&x.price===g.best?" best":""}${out?" out":""}">${esc(s)} <b>${out?`<s>${fmt(x.price)}</s>`:fmt(x.price)}</b>${x.member?" M":""}${out?" utsolgt":t&&t!=="på lager"?" · "+t:""}</span>`}).join("")}</div>`:"";
+  const sl=shops.length>1?`<div class="c-shops">${shops.map(s=>{const x=g[s],out=OUT(x),t=stockTxt(x);const tag=x.url?"a":"span",hr=x.url?` href="${esc(x.url)}" target="_blank" rel="noopener"`:"";return `<${tag} class="sp${!out&&x.price===g.best?" best":""}${out?" out":""}"${hr}>${esc(s)} <b>${out?`<s>${fmt(x.price)}</s>`:fmt(x.price)}</b>${x.member?" M":""}${out?" utsolgt":t&&t!=="på lager"?" · "+t:""}${x.url?" ↗":""}</${tag}>`}).join("")}</div>`:"";
   return `<article class="card${isOpen?" open":""}" id="${rowId(g.key)}" data-k="${esc(g.key)}">
   <div class="c-main" role="button" tabindex="0" aria-expanded="${isOpen}">
     <img class="c-img" loading="lazy" alt="" src="${esc(g.img_url||IMG(g.img))}" onerror="this.style.visibility='hidden'">
