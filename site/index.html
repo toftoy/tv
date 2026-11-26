@@ -80,7 +80,7 @@ code{background:var(--chip);padding:1px 5px;border-radius:5px;font-size:.92em}
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(5,1fr);
   background:color-mix(in srgb,var(--card) 92%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
   border-top:1px solid var(--line);padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px))}
-nav.tabs button{border:0;background:none;color:var(--muted);min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11.5px;font-weight:500;border-radius:12px;padding:2px;-webkit-tap-highlight-color:transparent;transition:color .15s,background .15s}
+nav.tabs button{border:0;background:none;color:var(--fg2);min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11.5px;font-weight:500;border-radius:12px;padding:2px;-webkit-tap-highlight-color:transparent;transition:color .15s,background .15s}
 nav.tabs button svg{width:22px;height:22px;transition:transform .2s}
 nav.tabs button.on{color:var(--accent);font-weight:650}
 nav.tabs button.on svg{transform:translateY(-1px) scale(1.08)}
@@ -125,6 +125,7 @@ button.hc:active{transform:scale(.98)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line2);background:var(--card);color:var(--fg);font-weight:600;font-size:14px;text-decoration:none;white-space:nowrap;transition:background .12s,transform .1s;-webkit-tap-highlight-color:transparent}
 .btn:hover{background:var(--raise)}.btn:active{transform:scale(.97)}
 .btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+@media (pointer:coarse){.btn.sm,.so-h a.go{min-height:44px}}
 .btn.sm{min-height:36px;padding:0 10px;font-size:13px;border-radius:10px}
 #fbtn .cnt{background:var(--accent);color:var(--accent-ink);border-radius:999px;min-width:20px;height:20px;padding:0 6px;font-size:12px;display:inline-grid;place-items:center}
 #fbtn[aria-expanded=true]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
@@ -331,7 +332,7 @@ a.sp{text-decoration:none;padding:5px 9px}a.sp:active{opacity:.7}a.cl{color:inhe
 }
 .tablewrap.scroll{overflow:auto;max-height:calc(100vh - 20px)}
 @media (min-width:700px) and (max-width:1100px){nav.tabs .l-long{display:none}nav.tabs .l-short{display:inline}}
-@media (max-width:480px){.brand h1{font-size:17px}.status .age-pre,.status summary .badge{display:none}}
+@media (max-width:480px){.brand h1{font-size:17px}.status .age-pre{display:none}.status summary .badge{font-size:11px;padding:1px 6px}}
 body.no-bw .bwonly{display:none!important}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
@@ -471,8 +472,9 @@ const pct=x=>x<0.05?"under 5 %":`${Math.round(x*100)} %`;
 let LOCAL=null,DATA=[],HIST=null,ALL=[],open=new Set();
 const NEWUSER=(()=>{try{return localStorage.getItem("tvf")===null}catch(e){return false}})();
 const st=(()=>{try{return JSON.parse(localStorage.getItem("tvf")||"{}")||{}}catch(e){return{}}})();
-if(NEWUSER)st.stock=true;
-if((st.v||0)<2){delete st.sizes;st.v=2;try{localStorage.setItem("tvf",JSON.stringify(st))}catch(e){}} // ny standard 43–50" (stativet)
+if(NEWUSER){st.stock=true;st.hz100=true}
+if((st.v||0)<3&&!NEWUSER){st.hz100=true;st.v=3;try{localStorage.setItem("tvf",JSON.stringify(st))}catch(e){}} // 100 Hz er viktigst (fotball)
+if((st.v||0)<2){delete st.sizes;st.v=NEWUSER?3:2;try{localStorage.setItem("tvf",JSON.stringify(st))}catch(e){}} // ny standard 43–50" (stativet)
 let [sortK,sortDir]=(()=>{const m=/^(.+):(-?1)$/.exec(st.sort||"");return m?[m[1],+m[2]]:["verdict",1]})();
 function save(){try{st.sort=sortK+":"+sortDir;localStorage.setItem("tvf",JSON.stringify(st))}catch(e){}}
 function panelType(p){const n=p.name,s=(p.panel||"")+" "+n;if(/mini.?led|micro rgb|rgb/i.test(n))return"Mini-LED";if(/QNED|QLED|Nano/i.test(n))return/mini/i.test(p.panel||"")?"Mini-LED":"QLED";if(/OLED/i.test(n))return"OLED";if(/OLED/i.test(s))return"OLED";if(/mini.?led/i.test(s))return"Mini-LED";if(/QLED|QNED|Nano/i.test(s))return"QLED";return"LED"}
@@ -531,7 +533,7 @@ function build(){
 }
 const DESC_FIRST=new Set(["quality"]);
 function setSort(k){if(sortK===k)sortDir=-sortDir;else{sortK=k;sortDir=DESC_FIRST.has(k)?-1:1}save();render()}
-function resetFilters(){st.q="";st.brand="";st.panel="";for(const [,k] of TOGGLES)st[k]=false;st.shops=[...SHOPS];save();build()}
+function resetFilters(){st.q="";st.brand="";st.panel="";for(const [,k] of TOGGLES)st[k]=false;st.stock=true;st.hz100=true;delete st.sizes;st.shops=[...SHOPS];save();build()} // tilbake til standard: på lager, 100 Hz+, 43–50"
 function activeFilters(){let n=0;for(const [,k] of TOGGLES)if(st[k]&&(k!=="bwok"||BW_ON))n++;if(st.panel)n++;if(st.brand)n++;if(st.shops&&st.shops.length<SHOPS.length)n++;return n}
 function togglePanel(on){const p=$("fpanel"),b=$("fbtn");const o=on??!p.classList.contains("open");p.classList.toggle("open",o);b.setAttribute("aria-expanded",o)}
 $("fbtn").onclick=()=>togglePanel();
@@ -551,15 +553,16 @@ function cmp(a,b){const x=val(a,sortK),y=val(b,sortK);
   if(x==null||y==null)return x==null&&y==null?0:x==null?1:-1;
   const c=typeof x==="string"?x.localeCompare(String(y),"nb"):x<y?-1:x>y?1:0;
   return c*sortDir||((a.best??1e9)-(b.best??1e9))}
+const bwLower=g=>BW_ON&&g.bw&&g.best!=null&&g.bw.mid<g.best*0.97;
 function verdict(g){
   if(g.best!=null&&g.histDays<60)return'<span class="badge">kort historikk</span>';
   if(g.best==null||!g.low60)return'';
-  const d=g.verdict;if(d<=0.001)return'<span class="badge b-good">✓ Lavpris</span>';
+  const d=g.verdict;if(d<=0.001)return bwLower(g)?'<span class="badge b-warn" title="Lik laveste pris siste 60 dager, men Black Week-modellen venter lavere pris">Lavpris 60 d – men vent</span>':'<span class="badge b-good">✓ Lavpris</span>';
   const t=`+${(d*100).toFixed(0)} % over lav 60 d`;return d<0.1?`<span class="badge b-warn">${t}</span>`:`<span class="badge b-bad">${t}</span>`}
 function verdictShort(g){
   if(g.best!=null&&g.histDays<60)return'<span class="badge">kort historikk</span>';
   if(g.best==null||!g.low60)return'<span class="muted">–</span>';
-  const d=g.verdict;if(d<=0.001)return'<span class="badge b-good">✓ Lavpris</span>';
+  const d=g.verdict;if(d<=0.001)return bwLower(g)?'<span class="badge b-warn">Lavpris · vent</span>':'<span class="badge b-good">✓ Lavpris</span>';
   const t=`+${(d*100).toFixed(0)} %`;return d<0.1?`<span class="badge b-warn">${t}</span>`:`<span class="badge b-bad">${t}</span>`}
 function bwInfo(g){const b=g.bw;if(!b)return null;
   const rng=Math.abs(b.high-b.low)<b.mid*0.01?`ca. ${fmt(b.mid)}`:`${fmt(b.low)}–${fmt(b.high)}`;
@@ -653,7 +656,7 @@ document.addEventListener("pointerdown",e=>{lastPtr=e.pointerType||"mouse"},true
 // ---------- Dagens beste kjøp ----------
 function blackFriday(y){const d=new Date(y,10,1);const thu=1+((4-d.getDay()+7)%7);return new Date(y,10,thu+22)}
 function renderHero(){
-  const wrap=$("hero-wrap"),c=ALL.filter(g=>st.sizes.includes(Math.round(g.size))&&g.best!=null&&g.inStock&&(!st.local||g.local.length)&&g.stand!=="nei"&&!(g.standNote&&g.standNote.level==="warn"));
+  const wrap=$("hero-wrap"),c=ALL.filter(g=>st.sizes.includes(Math.round(g.size))&&g.best!=null&&g.inStock&&(!st.local||g.local.length)&&(!st.hz100||/1[0-9]{2}\s*Hz/.test(g.hz||""))&&g.stand!=="nei"&&!(g.standNote&&g.standNote.level==="warn"));
   const used=new Set(),cards=[];
   const add=(k,g,why)=>{if(!g||used.has(g.key))return;used.add(g.key);cards.push(`<button class="hc" data-goto="${esc(g.key)}"><span class="k"><i></i>${k}</span><span class="n">${esc(g.label.replace(/\s+20\d\d$/,""))}</span><img loading="lazy" alt="" src="${esc(g.img_url||IMG(g.img))}" onerror="this.style.visibility='hidden'"><span class="p num">${fmt(g.best)} <small>kr · ${esc(g.bestShop)}</small></span><span class="w">${why}</span></button>`)};
   // 1: beste TV (på «mest for pengene»-linjen) som er på ekte lavpris
@@ -703,12 +706,13 @@ function detail(g){
 }
 
 // ---------- Butikklager i Bergensområdet ----------
-function localOf(ps){const m=new Map();for(const p of ps)for(const x of p.local||[]){const k=x.shop+"|"+x.store,o=m.get(k);if(!o||(parseInt(x.n)||0)>(parseInt(o.n)||0))m.set(k,{...x,pid:p.id})}return[...m.values()].sort((a,b)=>(parseInt(b.n)||0)-(parseInt(a.n)||0)||a.store.localeCompare(b.store,"nb"))}
+function localOf(ps){const m=new Map();for(const p of ps)for(const x of p.local||[]){const k=x.shop+"|"+x.store,o=m.get(k),pr=(p.shops[x.shop]||{}).price;if(!o||(o.price!=null&&pr!=null&&pr<o.price))m.set(k,{...x,pid:p.id,price:pr,url:(p.shops[x.shop]||{}).url})}return[...m.values()].sort((a,b)=>(parseInt(b.n)||0)-(parseInt(a.n)||0)||a.store.localeCompare(b.store,"nb"))}
 const localAge=()=>{const u=LOCAL&&LOCAL.updated&&Object.values(LOCAL.updated).filter(Boolean).sort()[0];if(!u)return"";const h=(Date.now()-Date.parse(u))/36e5;return h>8?` (sist sjekket ${dshort(u)})`:""};
 function localBadge(g){if(!LOCAL||!g.local.length)return"";const n=g.local.length,t=g.local.map(x=>x.shop+" "+x.store+(x.n?": "+x.n:"")).join(", ");
-  return `<span class="badge b-good" title="På lager i butikk: ${esc(t)}">📍 ${n===1?esc(g.local[0].store):`Bergen: ${n} butikker`}</span>`}
+  const lp=Math.min(...g.local.map(x=>x.price??Infinity)),dp=isFinite(lp)&&g.best!=null&&lp>g.best*1.02;
+  return `<span class="badge ${dp?"b-warn":"b-good"}" title="På lager i butikk: ${esc(t)}${dp?". Varianten på lager koster "+fmt(lp)+" kr":""}">📍 ${n===1?esc(g.local[0].store):`Bergen: ${n} butikker`}${dp?` · ${fmt(lp)} kr`:""}</span>`}
 function localFact(g){if(!LOCAL)return"";const st0=(LOCAL.stores||{}),names=Object.entries(st0).map(([s,l])=>`${s} (${l.length})`).join(", ");
-  return `<div class="fact"><h5>På lager i Bergensområdet</h5>${g.local.length?`<table class="mini">${g.local.map(x=>`<tr><td>${esc(x.shop)} ${esc(x.store)}</td><td class="num">${x.n?esc(x.n)+" stk":"på lager"}</td><td class="muted small">${x.demo?"utstilt":""}</td></tr>`).join("")}</table>`:`<p>Ikke på lager i noen av butikkene i området nå.</p>`}<p class="small muted">Butikker som sjekkes: ${esc(names)}${localAge()}. Lageret kan endre seg raskt – ring eller reserver før du drar.</p></div>`}
+  return `<div class="fact"><h5>På lager i Bergensområdet</h5>${g.local.length?`<table class="mini">${g.local.map(x=>`<tr><td>${esc(x.shop)} ${esc(x.store)}</td><td class="num">${x.n?esc(x.n)+" stk":"på lager"}</td><td class="num">${x.price!=null?(x.url?`<a href="${esc(x.url)}" target="_blank" rel="noopener">${fmt(x.price)} kr</a>`:fmt(x.price)+" kr"):""}</td><td class="muted small">${x.demo?"utstilt":""}</td></tr>`).join("")}</table>`:`<p>Ikke på lager i noen av butikkene i området nå.</p>`}<p class="small muted">Butikker som sjekkes: ${esc(names)}${localAge()}. Lageret kan endre seg raskt – ring eller reserver før du drar.</p></div>`}
 // ---------- Prisgraf ----------
 function mergeMin(list){ // én trinnserie per variant -> laveste gjeldende pris ved hvert endringspunkt
   const ts=[...new Set(list.flatMap(l=>l.map(x=>x[0])))].sort((a,b)=>a-b),idx=list.map(()=>-1),out=[];
