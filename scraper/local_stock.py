@@ -147,3 +147,44 @@ def hifiklubben(skus, stores, delay=1.0):
         if found:
             out[sku] = found
     return out
+
+
+def netonnet(skus, stores, delay=1.0):
+    """NetOnNet: produktsiden har lagerbeholdning per Lagershop innebygd (samme som «Se åpningstider og
+    hylleplass»). Produktadressen finnes i sitemapen (/art/...). stores: {lagershop-id: navn}."""
+    import re
+    ua = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                        "Chrome/130.0 Safari/537.36 tv-prisvakt (privat bruk)"}
+    want = {str(s) for s in skus if s}
+    if not want:
+        return {}
+    req = urllib.request.Request("https://www.netonnet.no/art/sitemap.xml", headers=ua)
+    with urllib.request.urlopen(req, timeout=60) as r:
+        sm = r.read().decode("utf-8", "replace")
+    urls = {}
+    for u in re.findall(r"<loc>([^<]+)</loc>", sm):
+        m = re.search(r"/(\d+)\.\d+/?$", u)
+        if m and m.group(1) in want:
+            urls[m.group(1)] = u
+    out, errs = {}, 0
+    for sku, url in sorted(urls.items()):
+        try:
+            with urllib.request.urlopen(urllib.request.Request(url, headers=ua), timeout=40) as r:
+                html = r.read().decode("utf-8", "replace")
+        except Exception:
+            errs += 1
+            if errs >= 8 and errs > len(out):
+                raise RuntimeError(f"NetOnNet: {errs} feil")
+            continue
+        finally:
+            time.sleep(delay)
+        html = html.replace('\\\\\\"', '"').replace('\\"', '"')
+        found = []
+        for ids, lvl in re.findall(r'"warehouseShopIds":\[([\d,]*)\],"warehouseShopName":"[^"]*",'
+                                   r'"location":\[.*?\],"stockLevel":(\d+)', html):
+            for sid in ids.split(","):
+                if sid in stores and int(lvl) > 0 and not any(f["store"] == stores[sid] for f in found):
+                    found.append({"store": stores[sid], "n": lvl, "demo": 0})
+        if found:
+            out[sku] = found
+    return out
