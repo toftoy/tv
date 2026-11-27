@@ -17,5 +17,5 @@ for (const [name, c] of Object.entries(C.CHORDS)) {
   c.frets.forEach((f, i) => assert.strictEqual(f === 0, c.fingers[i] === 0, `${name}: finger og bånd stemmer ikke`));
   assert.ok(Math.max(...c.frets) <= 4, name);
 }
-assert.deepStrictEqual(C.songChords(C.SONGS.find(s => s.id === "bae-bae")), ["C", "F", "G7"]);
+assert.deepStrictEqual(C.songChords(C.SONGS.find(s => s.id === "bae-bae")), ["C", "G7", "F", "A", "Dm"]);
 console.log("Alle tester OK");

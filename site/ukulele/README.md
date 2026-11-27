@@ -14,7 +14,7 @@ slack key (GCEG) og B-stemning (F#BD#G#).
 ## Grep og sanger
 
 Fanen **Grep** viser 14 vanlige grep for GCEA-stemning med fingersetting. Fanen **Sanger** har
-tradisjonelle barnesanger med akkordene over teksten. Grep og sanger ligger i `chords.js`; nye sanger
+barnesanger med akkordene over teksten (akkordene er hentet fra sangboken.no og nortabs.net). Grep og sanger ligger i `chords.js`; nye sanger
 legges til med `[Akkord]` foran stavelsen der grepet skiftes. Trykk på et grep for å høre det.
 
 ## Adresse

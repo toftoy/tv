@@ -27,91 +27,67 @@
     { name: "Litt vanskeligere", chords: ["D", "D7", "A", "E7", "Bb"] }
   ];
 
-  // Tradisjonelle barnesanger. [Akkord] står foran stavelsen der den skiftes.
+  // Barnesanger. [Akkord] står foran stavelsen der grepet skiftes.
+  // Akkordene er hentet fra sangboken.no og nortabs.net og transponert til C der det trengs.
   var SONGS = [
     {
       id: "fader-jakob", title: "Fader Jakob", note: "Bare ett grep – perfekt å starte med.",
       verses: [[
-        "[C]Fader Jakob, fader Jakob,",
-        "sover du? Sover du?",
-        "Hører du ei klokka? Hører du ei klokka?",
-        "Ding, dang, dong. Ding, dang, dong."
+        "[C]Fader Jakob, Fader Jakob,",
+        "sover du, sover du?",
+        "Hører du ei klokken, hører du ei klokken:",
+        "Ding – dang – dong, ding – dang – dong."
       ]]
     },
     {
-      id: "hjulene-pa-bussen", title: "Hjulene på bussen", note: "To grep: C og G7.",
+      id: "hjulene-pa-bussen", title: "Hjulene på bussen", note: "To grep: C og G.",
       verses: [[
-        "[C]Hjulene på bussen går rundt og rundt,",
-        "[G7]rundt og rundt, [C]rundt og rundt.",
-        "Hjulene på bussen går rundt og rundt",
-        "[G7]hele dagen [C]lang."
+        "[C]Hjulene på bussen de går rundt og rundt,",
+        "[G]rundt og rundt, [C]rundt og rundt.",
+        "[C]Hjulene på bussen de går rundt og rundt,",
+        "[G]gjennom hele [C]byen."
+      ]]
+    },
+    {
+      id: "ro-ro", title: "Ro, ro til fiskeskjær", note: "C, G7 og F.",
+      verses: [[
+        "[C]Ro, ro til [G7]fiskeskjær,",
+        "[G7]hvor mange fisker [C]får vi der?",
+        "[C]Én til far og [F]én til mor,",
+        "[C]én til søster [G7]og til [C]bror."
       ], [
-        "[C]Vindusviskerne går svisj, svisj, svisj,",
-        "[G7]svisj, svisj, svisj, [C]svisj, svisj, svisj.",
-        "Vindusviskerne går svisj, svisj, svisj",
-        "[G7]hele dagen [C]lang."
-      ], [
-        "[C]Hornet på bussen sier tut, tut, tut,",
-        "[G7]tut, tut, tut, [C]tut, tut, tut.",
-        "Hornet på bussen sier tut, tut, tut",
-        "[G7]hele dagen [C]lang."
+        "[C]Ro, ro til [G7]fiskeskjær,",
+        "[G7]hvor mange fisker [C]får vi der?",
+        "[C]Én til bestefar og [F]bestemor,",
+        "[C]én til den [G7]lille [C]bror."
       ]]
     },
     {
-      id: "hode-skulder", title: "Hode, skulder, kne og tå", note: "C, F og G7.",
+      id: "bae-bae", title: "Bæ, bæ, lille lam", note: "C, G7, F, A og Dm.",
       verses: [[
-        "[C]Hode, skulder, kne og [G7]tå, kne og [C]tå,",
-        "hode, skulder, kne og [G7]tå, kne og [C]tå,",
-        "øyne, ører, [F]kinn å klappe [C]på,",
-        "hode, skulder, [G7]kne og tå, kne og [C]tå."
+        "[C]Bæ, bæ, lille lam, [G7]har du noe [C]ull?",
+        "Ja, ja, kjære barn, [G7]jeg har kroppen [C]full.",
+        "[F]Søndagsklær til [C]far",
+        "[G7]og søndagsklær til [C]mor",
+        "og [F]to par [C]strøm[A]per til [Dm]bitte[G7]lille[C]bror."
       ]]
     },
     {
-      id: "ro-ro", title: "Ro, ro til fiskeskjær", note: "C og G7. Bytt ut «deg» med navnet til barnet.",
+      id: "hode-skulder", title: "Hode, skulder, kne og tå", note: "C, G, C7, F, Dm og G7.",
       verses: [[
-        "[C]Ro, ro til fiskeskjær,",
-        "[G7]mange fisker får vi [C]der.",
-        "Én til far og én til mor,",
-        "[G7]én til søster, én til [C]bror,",
-        "én til den som fisken dro,",
-        "[G7]og det var vesle [C]deg!"
+        "[C]Hode, skulder, kne og tå, kne og tå.",
+        "[C]Hode, skulder, kne og [G]tå, kne og tå.",
+        "[C]Øyne, [C7]ører, [F]kinn å klappe [Dm]på.",
+        "[G]Hode, [G7]skulder, kne og [C]tå, kne og tå."
       ]]
     },
     {
-      id: "bae-bae", title: "Bæ, bæ, lille lam", note: "C, F og G7.",
+      id: "lille-petter", title: "Lille Petter Edderkopp", note: "C, Am, G, Em og F.",
       verses: [[
-        "[C]Bæ, bæ, lille lam, [F]har du [C]noe ull?",
-        "[F]Ja, ja, kjære [C]barn, [G7]jeg har kroppen [C]full.",
-        "Søndagsklær til [G7]far og [C]søndagsklær til [G7]mor,",
-        "[C]og til lille [F]søster, [C]og til [G7]lille [C]bror."
-      ]]
-    },
-    {
-      id: "lille-petter", title: "Lille Petter Edderkopp", note: "C, F og G7.",
-      verses: [[
-        "[C]Lille Petter Edderkopp han [G7]klatret opp på [C]taket.",
-        "Så kom [F]regnet og [C]skylte Petter [G7]ned. [C]",
-        "Så kom [F]sola og [C]tørket opp alt [G7]regnet, [C]",
-        "og lille Petter Edderkopp han [G7]klatret opp i[C]gjen."
-      ]]
-    },
-    {
-      id: "se-min-kjole", title: "Se min kjole", note: "C, F og G7.",
-      verses: [[
-        "[C]Se min kjole, den er [G7]grønn som gresset,",
-        "alt hva jeg eier, det er [C]grønt som den.",
-        "Det er fordi jeg [F]elsker alt det [C]grønne,",
-        "og fordi en [G7]jeger er min [C]venn."
-      ], [
-        "[C]Se min kjole, den er [G7]blå som havet,",
-        "alt hva jeg eier, det er [C]blått som den.",
-        "Det er fordi jeg [F]elsker alt det [C]blå,",
-        "og fordi en [G7]sjømann er min [C]venn."
-      ], [
-        "[C]Se min kjole, den er [G7]svart som kullet,",
-        "alt hva jeg eier, det er [C]svart som den.",
-        "Det er fordi jeg [F]elsker alt det [C]svarte,",
-        "og fordi en [G7]feier er min [C]venn."
+        "[C]Lille Petter [Am]edderkopp han [G]klatret på min [C]hatt.",
+        "[C]Så begynte det å [Em]regne og [G]Petter ned han [C]datt.",
+        "[C]Så kom [Em]solen og [F]skinte på min [C]hatt.",
+        "[C]Da ble det liv i [Am]edderkopp som [G]klatret på min [C]hatt."
       ]]
     }
   ];
